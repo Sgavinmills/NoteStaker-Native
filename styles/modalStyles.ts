@@ -1,36 +1,36 @@
-import { StyleSheet } from 'react-native'
-import theme from './constants'
+import { StyleSheet } from "react-native";
+import theme from "./constants";
 
 const modalStyles = StyleSheet.create({
     modalContainer: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
         backgroundColor: theme.colors.modalOverlayBackground,
-        width:'100%',
-        height: '100%',
+        width: "100%",
+        height: "100%",
     },
 
     modalTextInputContainer: {
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },  
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+    },
 
     newCategoryModalIconText: {
         fontSize: 50,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         color: theme.colors.categoryText,
-        textAlign: 'right',
-        marginRight: '8%',
+        textAlign: "right",
+        marginRight: "8%",
     },
 
     modalCloseCategoryIconContainer: {
-        width: "100%"
+        width: "100%",
     },
 
     modalInput: {
-        width: '65%',
+        width: "65%",
         marginBottom: 20,
         marginTop: 40,
         padding: 10,
@@ -39,9 +39,8 @@ const modalStyles = StyleSheet.create({
     },
 
     modalButtonContainer: {
-        width: '65%',
+        width: "65%",
     },
-  
-})
+});
 
 export default modalStyles;

@@ -1,10 +1,10 @@
 // reducers.ts
-import { combineReducers } from '@reduxjs/toolkit';
-import notesReducer from '../slice';
+import { combineReducers } from "@reduxjs/toolkit";
+import notesReducer from "../slice";
 
 const rootReducer = combineReducers({
-  memory: notesReducer,
-  // Add other reducers here if needed
+    memory: notesReducer,
+    // Add other reducers here if needed
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

@@ -1,29 +1,29 @@
-import { StyleSheet } from 'react-native'
-import theme from './constants'
+import { StyleSheet } from "react-native";
+import theme from "./constants";
 
 const noteStyles = StyleSheet.create({
     noteContainer: {
         borderWidth: 1,
         borderColor: theme.colors.tileBorder,
-      },
+    },
 
     noteTile: {
         backgroundColor: theme.colors.tileBackground,
-        textAlign: 'left',
+        textAlign: "left",
         padding: 10,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
     },
 
     noteText: {
         fontSize: 18,
         color: theme.colors.noteText,
-      },
+    },
 
-      tileIconsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center'
+    tileIconsContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
     },
 
     icons: {
@@ -31,8 +31,8 @@ const noteStyles = StyleSheet.create({
     },
 
     noteEllipsis: {
-        paddingTop: 13
+        paddingTop: 13,
     },
-})
+});
 
 export default noteStyles;

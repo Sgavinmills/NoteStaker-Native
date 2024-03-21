@@ -1,23 +1,12 @@
-import { StyleSheet, StatusBar } from 'react-native'
-import theme from './constants'
+import { StyleSheet, StatusBar } from "react-native";
+import theme from "./constants";
 
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
         paddingTop: StatusBar.currentHeight,
-        backgroundColor: theme.colors.blackBackground
+        backgroundColor: theme.colors.blackBackground,
     },
+});
 
-    
-
-
-
-
-
-    
-
-    
-
-  });
-  
-  export default styles;
+export default styles;
