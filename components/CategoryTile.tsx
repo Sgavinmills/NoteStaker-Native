@@ -2,7 +2,7 @@ import { Text, View, FlatList, TouchableWithoutFeedback } from 'react-native';
 import { useState } from 'react';
 import styles from '../styles'
 import { FontAwesome } from '@expo/vector-icons';
-import SubCategoryTile from './subCategoryTile';
+import SubCategoryTile from './SubCategoryTile';
 import { Category } from '../types';
 
 interface TileProps {

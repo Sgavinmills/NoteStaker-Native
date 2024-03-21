@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux';
 import store from './redux/store/store';
-import HomeScreen from './components/homeScreen';
+import HomeScreen from './components/HomeScreen';
 
 
 const App: React.FC = () => {

@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useState } from 'react';
 import { RootState } from '../redux/reducers/reducers'
 import { useSelector } from 'react-redux';
-import NoteTile from './noteTile';
+import NoteTile from './NoteTile';
 import { Note } from '../types';
 import { hasCategory } from '../utilFuncs/utilFuncs';
 
