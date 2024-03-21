@@ -1,7 +1,7 @@
 // slice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { getMockMemory } from '../memoryfunctions/memoryfunctions';
 import { Category, Note } from '../types';
+import mockMemory from '../mockMemory.json'
 
 interface AppState {
   notes: Note[],
@@ -9,7 +9,7 @@ interface AppState {
 
 }
 
-const memory = getMockMemory();
+const memory = mockMemory
 
 const initialState: AppState = {
   notes: memory.notes,
@@ -23,10 +23,13 @@ const notesSlice = createSlice({
     addNote(state, action: PayloadAction<Note>) {
       state.notes.push(action.payload);
     },
+    addCategory(state, action: PayloadAction<Category>){
+        state.categories.push(action.payload)
+    }
     // Define other reducers here if needed
   },
 });
 
-export const { addNote } = notesSlice.actions;
+export const { addNote, addCategory } = notesSlice.actions;
 
 export default notesSlice.reducer;

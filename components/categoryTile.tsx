@@ -7,10 +7,11 @@ import { Category } from '../types';
 
 interface TileProps {
     category: Category
+    index: number
   }
 
 
-const CategoryTile: React.FC<TileProps> = ({category}) => {
+const CategoryTile: React.FC<TileProps> = ({category, index}) => {
 
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -25,7 +26,7 @@ const CategoryTile: React.FC<TileProps> = ({category}) => {
   return (
     <>
     <TouchableWithoutFeedback onPress={toggleExpansion}>
-      <View style={styles.categoryTile}>
+      <View style={[styles.categoryTile, index === 0 && styles.categoryTileFirst]}>
         <Text style={styles.categoryText}>{category.name}</Text>
         <View style={styles.tileIconsContainer}>
             <FontAwesome name="plus" style={[styles.categoryText, styles.icons]} />
