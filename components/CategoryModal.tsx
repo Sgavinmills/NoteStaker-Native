@@ -1,11 +1,4 @@
-import {
-    Button,
-    Modal,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Button, Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
 import modalStyles from "../styles/modalStyles";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -18,13 +11,8 @@ interface TileProps {
     newCatModalVisible: boolean;
 }
 
-const CategoryModal: React.FC<TileProps> = ({
-    setNewCatModalVisible,
-    newCatModalVisible,
-}) => {
-    const categories = useSelector(
-        (state: RootState) => state.memory.categories
-    );
+const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModalVisible }) => {
+    const categories = useSelector((state: RootState) => state.memory.categories);
 
     const [newCategoryName, setNewCategoryName] = useState("");
     const [error, setError] = useState(false);
@@ -72,16 +60,11 @@ const CategoryModal: React.FC<TileProps> = ({
                         setError(false);
                     }}
                 >
-                    <Text style={modalStyles.newCategoryModalIconText}>
-                        &minus;
-                    </Text>
+                    <Text style={modalStyles.newCategoryModalIconText}>&minus;</Text>
                 </TouchableOpacity>
                 <View style={modalStyles.modalTextInputContainer}>
                     <TextInput
-                        style={[
-                            modalStyles.modalInput,
-                            error && modalStyles.modalInputError,
-                        ]}
+                        style={[modalStyles.modalInput, error && modalStyles.modalInputError]}
                         placeholder="Enter category name"
                         onChangeText={(text) => handleChange(text)}
                         value={newCategoryName}

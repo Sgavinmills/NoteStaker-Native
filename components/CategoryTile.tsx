@@ -18,47 +18,22 @@ const CategoryTile: React.FC<TileProps> = ({ category, index }) => {
     };
 
     const renderSubCategory = ({ item }: { item: string }) => (
-        <SubCategoryTile
-            subCategoryName={item}
-            parentCategoryName={category.name}
-        />
+        <SubCategoryTile subCategoryName={item} parentCategoryName={category.name} />
     );
 
     // TODO: - Long category names need to wrap or truncate.
     return (
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
-                <View
-                    style={[
-                        categoryStyles.categoryTile,
-                        index === 0 && categoryStyles.categoryTileFirst,
-                    ]}
-                >
-                    <Text style={categoryStyles.categoryText}>
-                        {category.name}
-                    </Text>
+                <View style={[categoryStyles.categoryTile, index === 0 && categoryStyles.categoryTileFirst]}>
+                    <Text style={categoryStyles.categoryText}>{category.name}</Text>
                     <View style={categoryStyles.tileIconsContainer}>
-                        <FontAwesome
-                            name="plus"
-                            style={[
-                                categoryStyles.categoryText,
-                                categoryStyles.icons,
-                            ]}
-                        />
+                        <FontAwesome name="plus" style={[categoryStyles.categoryText, categoryStyles.icons]} />
                         <FontAwesome
                             name={isExpanded ? "caret-up" : "caret-down"}
-                            style={[
-                                categoryStyles.categoryText,
-                                categoryStyles.icons,
-                            ]}
+                            style={[categoryStyles.categoryText, categoryStyles.icons]}
                         />
-                        <FontAwesome
-                            name="ellipsis-v"
-                            style={[
-                                categoryStyles.categoryText,
-                                categoryStyles.icons,
-                            ]}
-                        />
+                        <FontAwesome name="ellipsis-v" style={[categoryStyles.categoryText, categoryStyles.icons]} />
                     </View>
                 </View>
             </TouchableWithoutFeedback>

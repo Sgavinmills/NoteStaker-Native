@@ -1,10 +1,4 @@
-import {
-    FlatList,
-    TouchableOpacity,
-    Text,
-    View,
-    StatusBar,
-} from "react-native";
+import { FlatList, TouchableOpacity, Text, View, StatusBar } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
@@ -19,13 +13,9 @@ const HomeScreen: React.FC = () => {
 
     const [newCatModalVisible, setNewCatModalVisible] = useState(false);
 
-    const renderCategory = ({
-        item,
-        index,
-    }: {
-        item: Category;
-        index: number;
-    }) => <CategoryTile category={item} index={index} />;
+    const renderCategory = ({ item, index }: { item: Category; index: number }) => (
+        <CategoryTile category={item} index={index} />
+    );
 
     return (
         <View style={styles.mainContainer}>

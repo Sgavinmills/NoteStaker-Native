@@ -14,10 +14,7 @@ interface TileProps {
     parentCategoryName: string;
 }
 
-const SubCategoryTile: React.FC<TileProps> = ({
-    subCategoryName,
-    parentCategoryName,
-}) => {
+const SubCategoryTile: React.FC<TileProps> = ({ subCategoryName, parentCategoryName }) => {
     const memory = useSelector((state: RootState) => state.memory);
     const notes = memory.notes;
 
@@ -33,31 +30,11 @@ const SubCategoryTile: React.FC<TileProps> = ({
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
                 <View style={categoryStyles.subCategoryTile}>
-                    <Text style={categoryStyles.subCategoryText}>
-                        ↳ {subCategoryName}
-                    </Text>
+                    <Text style={categoryStyles.subCategoryText}>↳ {subCategoryName}</Text>
                     <View style={categoryStyles.tileIconsContainer}>
-                        <FontAwesome
-                            name="plus"
-                            style={[
-                                categoryStyles.categoryText,
-                                categoryStyles.icons,
-                            ]}
-                        />
-                        <FontAwesome
-                            name="caret-down"
-                            style={[
-                                categoryStyles.categoryText,
-                                categoryStyles.icons,
-                            ]}
-                        />
-                        <FontAwesome
-                            name="ellipsis-v"
-                            style={[
-                                categoryStyles.categoryText,
-                                categoryStyles.icons,
-                            ]}
-                        />
+                        <FontAwesome name="plus" style={[categoryStyles.categoryText, categoryStyles.icons]} />
+                        <FontAwesome name="caret-down" style={[categoryStyles.categoryText, categoryStyles.icons]} />
+                        <FontAwesome name="ellipsis-v" style={[categoryStyles.categoryText, categoryStyles.icons]} />
                     </View>
                 </View>
             </TouchableWithoutFeedback>
@@ -65,11 +42,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
                 <FlatList
                     style={noteStyles.noteContainer}
                     data={notes.filter((note) => {
-                        return hasCategory(
-                            note,
-                            parentCategoryName,
-                            subCategoryName
-                        );
+                        return hasCategory(note, parentCategoryName, subCategoryName);
                     })}
                     renderItem={renderNote}
                     keyExtractor={(note) => note.id}
