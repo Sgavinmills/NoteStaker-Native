@@ -1,5 +1,5 @@
 import { Button, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import styles from '../styles'
+import styles from '../styles/styles'
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { addNewCategory } from '../memoryfunctions/memoryfunctions';

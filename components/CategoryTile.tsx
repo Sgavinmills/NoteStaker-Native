@@ -1,6 +1,6 @@
 import { Text, View, FlatList, TouchableWithoutFeedback } from 'react-native';
 import { useState } from 'react';
-import styles from '../styles'
+import styles from '../styles/styles'
 import { FontAwesome } from '@expo/vector-icons';
 import SubCategoryTile from './SubCategoryTile';
 import { Category } from '../types';

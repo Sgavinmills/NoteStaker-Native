@@ -1,10 +1,11 @@
 import { StyleSheet, StatusBar } from 'react-native'
+import theme from './constants'
 
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
         paddingTop: StatusBar.currentHeight,
-        backgroundColor: '#010101',
+        backgroundColor: theme.colors.blackBackground
     },
 
     categoryListContainer: {
@@ -17,13 +18,13 @@ const styles = StyleSheet.create({
 
     noteContainer: {
       borderWidth: 1,
-      borderColor: '#464646',
+      borderColor: theme.colors.tileBorder,
     },
   
     categoryTile: {
       borderWidth: 1,
-      borderColor: '#464646',
-      backgroundColor: '#1e1e1e',
+      borderColor: theme.colors.tileBorder,
+      backgroundColor: theme.colors.tileBackground,
       textAlign: 'left',
       padding: 10,
       marginTop: 20,
@@ -38,8 +39,8 @@ const styles = StyleSheet.create({
 
     subCategoryTile: {
         borderWidth: 1,
-        borderColor: '#464646',
-        backgroundColor: '#1e1e1e',
+        borderColor: theme.colors.tileBorder,
+        backgroundColor: theme.colors.tileBackground,
         textAlign: 'left',
         padding: 10,
         flexDirection: 'row',
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
       },
 
     noteTile: {
-        backgroundColor: '#1e1e1e',
+        backgroundColor: theme.colors.tileBackground,
         textAlign: 'left',
         padding: 10,
         flexDirection: 'row',
@@ -58,18 +59,18 @@ const styles = StyleSheet.create({
   
     categoryText: {
       fontSize: 24,
-      color: "#c6d6f0",
+      color: theme.colors.categoryText,
       fontWeight: 'bold',
     },
 
     subCategoryText: {
       fontSize: 20,
-      color: "#c6d6f0"
+      color: theme.colors.categoryText
     },
 
     noteText: {
         fontSize: 18,
-        color: "#b4b4b4",
+        color: theme.colors.noteText,
       },
 
     tileIconsContainer: {
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
     newCategoryText: {
         fontSize: 30,
         fontWeight: 'bold',
-        color: "#c6d6f0",
+        color: theme.colors.categoryText,
         textAlign: 'right',
         marginRight: "8%",
         paddingTop: 5,
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        backgroundColor: theme.colors.modalOverlayBackground,
         width:'100%',
         height: '100%',
     },
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     newCategoryModalIconText: {
         fontSize: 50,
         fontWeight: 'bold',
-        color: "#c6d6f0",
+        color: theme.colors.categoryText,
         textAlign: 'right',
         marginRight: '8%',
     },
@@ -127,7 +128,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         marginTop: 40,
         padding: 10,
-        backgroundColor: 'white',
+        backgroundColor: theme.colors.modalTextInputBackgroundColor,
         borderRadius: 5,
     },
 

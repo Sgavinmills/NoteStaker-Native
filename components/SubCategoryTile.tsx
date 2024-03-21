@@ -1,5 +1,5 @@
 import { Text, View, TouchableWithoutFeedback, FlatList} from 'react-native';
-import styles from '../styles'
+import styles from '../styles/styles'
 import { FontAwesome } from '@expo/vector-icons';
 import { useState } from 'react';
 import { RootState } from '../redux/reducers/reducers'

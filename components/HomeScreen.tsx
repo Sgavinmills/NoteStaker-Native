@@ -6,7 +6,7 @@ import {
   StatusBar,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-import styles from "../styles";
+import styles from "../styles/styles";
 import { RootState } from "../redux/reducers/reducers";
 import CategoryTile from "./CategoryTile";
 import { Category } from "../types";

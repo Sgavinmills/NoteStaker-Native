@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import styles from '../styles'
+import styles from '../styles/styles'
 import { FontAwesome } from '@expo/vector-icons';
 import { Note } from '../types';
 
