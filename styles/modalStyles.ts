@@ -38,6 +38,11 @@ const modalStyles = StyleSheet.create({
         borderRadius: 5,
     },
 
+    modalInputError: {
+        borderWidth: 1,
+        borderColor: "red",
+    },
+
     modalButtonContainer: {
         width: "65%",
     },

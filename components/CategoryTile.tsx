@@ -24,6 +24,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index }) => {
         />
     );
 
+    // TODO: - Long category names need to wrap or truncate.
     return (
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
