@@ -6,15 +6,13 @@ import { useState } from "react";
 import { RootState } from "../redux/reducers/reducers";
 import { useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
-import { Note } from "../types";
-import { hasCategory } from "../utilFuncs/utilFuncs";
+import { Note, SubCategory } from "../types";
 
 interface TileProps {
-    subCategoryName: string;
-    parentCategoryName: string;
+    subCategory: SubCategory;
 }
 
-const SubCategoryTile: React.FC<TileProps> = ({ subCategoryName, parentCategoryName }) => {
+const SubCategoryTile: React.FC<TileProps> = ({ subCategory }) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
 
     const [isExpanded, setIsExpanded] = useState(false);
@@ -29,7 +27,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategoryName, parentCategoryN
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
                 <View style={categoryStyles.subCategoryTile}>
-                    <Text style={categoryStyles.subCategoryText}>↳ {subCategoryName}</Text>
+                    <Text style={categoryStyles.subCategoryText}>↳ {subCategory.name}</Text>
                     <View style={categoryStyles.tileIconsContainer}>
                         <FontAwesome name="plus" style={[categoryStyles.categoryText, categoryStyles.icons]} />
                         <FontAwesome name="caret-down" style={[categoryStyles.categoryText, categoryStyles.icons]} />
@@ -41,7 +39,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategoryName, parentCategoryN
                 <FlatList
                     style={noteStyles.noteContainer}
                     data={notes.filter((note) => {
-                        return hasCategory(note, parentCategoryName, subCategoryName);
+                        return note.subCategories.includes(subCategory.id);
                     })}
                     renderItem={renderNote}
                     keyExtractor={(note) => note.id}

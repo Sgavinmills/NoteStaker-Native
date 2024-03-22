@@ -32,7 +32,7 @@ const HomeScreen: React.FC = () => {
                 style={categoryStyles.categoryListContainer}
                 data={memory.categories}
                 renderItem={renderCategory}
-                keyExtractor={(cat) => cat.name}
+                keyExtractor={(cat) => cat.id}
             />
         </View>
     );

@@ -1,18 +1,17 @@
 // slice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Category, Note } from "../types";
-import mockMemory from "../mockMemory.json";
-
+import { Category, Note, SubCategory } from "../types";
+import { memory } from "../mockMemory";
 interface AppState {
     notes: Note[];
     categories: Category[];
+    subCategories: SubCategory[];
 }
-
-const memory = mockMemory;
 
 const initialState: AppState = {
     notes: memory.notes,
     categories: memory.categories,
+    subCategories: memory.subCategories,
 };
 
 const notesSlice = createSlice({
@@ -20,12 +19,15 @@ const notesSlice = createSlice({
     initialState,
     reducers: {
         addNote(state, action: PayloadAction<Note>) {
+            // dont forget to gve an id etc... obvs.
             state.notes.push(action.payload);
         },
         addCategory(state, action: PayloadAction<Category>) {
+            // todo - ADD DATE STAMPS
             state.categories.push(action.payload);
         },
         updateNote(state, action: PayloadAction<Note>) {
+            // todo - ADD DATE STAMPS
             const updatedNote = action.payload;
             const existingNoteIndex = state.notes.findIndex((note) => note.id === updatedNote.id);
             if (existingNoteIndex !== -1) {

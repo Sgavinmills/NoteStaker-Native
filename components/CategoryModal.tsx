@@ -2,9 +2,11 @@ import { Button, Modal, Text, TextInput, TouchableOpacity, View } from "react-na
 import modalStyles from "../styles/modalStyles";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { addNewCategory } from "../memoryfunctions/memoryfunctions";
+import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
+import { addCategory } from "../redux/slice";
+import { Category } from "../types";
 
 interface TileProps {
     setNewCatModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -38,7 +40,15 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
                 return cat.name === newCategoryName;
             })
         ) {
-            addNewCategory(dispatch, newCategoryName);
+            const newCategory: Category = {
+                id: getRandomID(),
+                name: newCategoryName,
+                subCategories: [],
+                dateAdded: "",
+                dateUpdated: "",
+            };
+
+            dispatch(addCategory(newCategory));
             setNewCatModalVisible(false);
             setNewCategoryName("");
         } else {

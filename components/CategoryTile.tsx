@@ -3,24 +3,24 @@ import { useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { Category } from "../types";
+import { Category, SubCategory } from "../types";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/reducers/reducers";
 
 interface TileProps {
     category: Category;
     index: number;
 }
 
-// TDOD - Need to assign category IDs to notes instead of name, also give subcategories IDs.
 const CategoryTile: React.FC<TileProps> = ({ category, index }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
 
     const toggleExpansion = () => {
         setIsExpanded(!isExpanded);
     };
 
-    const renderSubCategory = ({ item }: { item: string }) => (
-        <SubCategoryTile subCategoryName={item} parentCategoryName={category.name} />
-    );
+    const renderSubCategory = ({ item }: { item: SubCategory }) => <SubCategoryTile subCategory={item} />;
 
     // TODO: - Long category names need to wrap or truncate.
     return (
@@ -41,9 +41,11 @@ const CategoryTile: React.FC<TileProps> = ({ category, index }) => {
             {isExpanded && (
                 <FlatList
                     style={categoryStyles.subCategoryContainer}
-                    data={category.subCategories}
+                    data={subCategories.filter((subCategory) => {
+                        return subCategory.parentCategory === category.id;
+                    })}
                     renderItem={renderSubCategory}
-                    keyExtractor={(cat) => cat}
+                    keyExtractor={(cat) => cat.id}
                 />
             )}
         </>

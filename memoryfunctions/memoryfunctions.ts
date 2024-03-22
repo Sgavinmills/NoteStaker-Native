@@ -2,11 +2,9 @@ import { Dispatch } from "react";
 import { addCategory } from "../redux/slice";
 import { Category } from "../types";
 
-export function addNewCategory(dispatch: Dispatch<any>, categoryName: string) {
-    const newCategory: Category = {
-        name: categoryName,
-        subCategories: [],
-    };
+export function getRandomID() {
+    const randomNumber = Math.random().toString(36).slice(2, 9);
+    const timeStamp = new Date().getTime();
 
-    dispatch(addCategory(newCategory));
+    return String(timeStamp) + randomNumber;
 }
