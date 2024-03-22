@@ -2,10 +2,7 @@ import { StyleSheet } from "react-native";
 import theme from "./constants";
 
 const noteStyles = StyleSheet.create({
-    noteContainer: {
-        borderWidth: 1,
-        borderColor: theme.colors.tileBorder,
-    },
+    noteContainer: {},
 
     noteTile: {
         backgroundColor: theme.colors.tileBackground,
@@ -14,6 +11,8 @@ const noteStyles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
+        borderWidth: 1,
+        borderColor: theme.colors.tileBorder,
     },
 
     noteText: {
@@ -36,6 +35,10 @@ const noteStyles = StyleSheet.create({
 
     noteEllipsis: {
         paddingTop: 13,
+    },
+
+    lastMargin: {
+        marginBottom: 500,
     },
 });
 

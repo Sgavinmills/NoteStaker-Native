@@ -10,6 +10,10 @@ const catStyles = StyleSheet.create({
         padding: 0,
     },
 
+    lastMargin: {
+        marginBottom: 500,
+    },
+
     categoryTile: {
         borderWidth: 1,
         borderColor: theme.colors.tileBorder,

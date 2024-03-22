@@ -4,13 +4,20 @@ import { FontAwesome } from "@expo/vector-icons";
 import { Note } from "../types";
 import { useDispatch } from "react-redux";
 import { deleteNote, updateNote } from "../redux/slice";
+import { useRef } from "react";
 
 interface TileProps {
     note: Note;
+    isLastCategory: boolean;
+    isLastNote: boolean;
 }
 
-const NoteTile: React.FC<TileProps> = ({ note }) => {
+// TODO: Border n dots thingy on new note
+// - longer notes need box to expand.
+
+const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isLastNote }) => {
     const dispatch = useDispatch();
+    const textInputRef = useRef<TextInput>(null);
 
     const handleNoteChange = (text: string) => {
         dispatch(updateNote({ ...note, note: text }));
@@ -23,13 +30,18 @@ const NoteTile: React.FC<TileProps> = ({ note }) => {
         }
     };
 
+    if (note.note === "" && textInputRef.current) {
+        textInputRef.current.focus();
+    }
+
     return (
-        <View style={noteStyles.noteTile}>
+        <View style={[noteStyles.noteTile, isLastCategory && isLastNote && noteStyles.lastMargin]}>
             <TextInput
                 style={noteStyles.noteText}
                 onChangeText={handleNoteChange}
                 onBlur={handleNoteBlur}
                 value={note.note}
+                ref={textInputRef}
             />
             <View style={noteStyles.tileIconsContainer}>
                 {note.completed && <Text style={noteStyles.icons}>&#x2705;</Text>}

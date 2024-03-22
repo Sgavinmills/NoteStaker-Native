@@ -14,7 +14,11 @@ const HomeScreen: React.FC = () => {
     const [newCatModalVisible, setNewCatModalVisible] = useState(false);
 
     const renderCategory = ({ item, index }: { item: Category; index: number }) => (
-        <CategoryTile category={item} index={index} />
+        <CategoryTile
+            category={item}
+            index={index}
+            isLastCategory={index === memory.categories.length - 1 ? true : false}
+        />
     );
 
     return (
@@ -29,6 +33,7 @@ const HomeScreen: React.FC = () => {
             </TouchableOpacity>
 
             <FlatList
+                removeClippedSubviews={false}
                 style={categoryStyles.categoryListContainer}
                 data={memory.categories}
                 renderItem={renderCategory}

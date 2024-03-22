@@ -20,7 +20,7 @@ const notesSlice = createSlice({
     reducers: {
         addNote(state, action: PayloadAction<Note>) {
             // dont forget to gve an id etc... obvs.
-            state.notes.push(action.payload);
+            state.notes.unshift(action.payload);
         },
         addCategory(state, action: PayloadAction<Category>) {
             // todo - ADD DATE STAMPS
