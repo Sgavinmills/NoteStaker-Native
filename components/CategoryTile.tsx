@@ -10,6 +10,7 @@ interface TileProps {
     index: number;
 }
 
+// TDOD - Need to assign category IDs to notes instead of name, also give subcategories IDs.
 const CategoryTile: React.FC<TileProps> = ({ category, index }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 

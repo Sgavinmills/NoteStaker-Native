@@ -43,6 +43,18 @@ const modalStyles = StyleSheet.create({
         borderColor: "red",
     },
 
+    errorTextContainer: {
+        position: "relative",
+        width: "100%",
+        alignItems: "center",
+    },
+
+    errorText: {
+        color: theme.colors.categoryText,
+        position: "absolute",
+        top: 10,
+    },
+
     modalButtonContainer: {
         width: "65%",
     },

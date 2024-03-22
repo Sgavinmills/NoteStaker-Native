@@ -16,6 +16,7 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
 
     const [newCategoryName, setNewCategoryName] = useState("");
     const [error, setError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const dispatch = useDispatch();
 
     const handleChange = (text: string) => {
@@ -26,6 +27,12 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
     };
 
     const handleAddCategory = () => {
+        if (!newCategoryName) {
+            setError(true);
+            setErrorMessage("");
+            return;
+        }
+
         if (
             !categories.some((cat) => {
                 return cat.name === newCategoryName;
@@ -36,7 +43,7 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
             setNewCategoryName("");
         } else {
             setError(true);
-            // Todo: Add a nice error message when error is true.
+            setErrorMessage("Category name must be unique");
         }
     };
 
@@ -73,6 +80,11 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
                 <View style={modalStyles.modalButtonContainer}>
                     <Button title="Submit" onPress={handleAddCategory} />
                 </View>
+                {error && (
+                    <View style={modalStyles.errorTextContainer}>
+                        <Text style={modalStyles.errorText}>{errorMessage}</Text>
+                    </View>
+                )}
             </View>
         </Modal>
     );
