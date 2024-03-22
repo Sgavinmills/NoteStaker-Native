@@ -15,8 +15,7 @@ interface TileProps {
 }
 
 const SubCategoryTile: React.FC<TileProps> = ({ subCategoryName, parentCategoryName }) => {
-    const memory = useSelector((state: RootState) => state.memory);
-    const notes = memory.notes;
+    const notes = useSelector((state: RootState) => state.memory.notes);
 
     const [isExpanded, setIsExpanded] = useState(false);
 

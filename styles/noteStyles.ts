@@ -18,16 +18,20 @@ const noteStyles = StyleSheet.create({
 
     noteText: {
         fontSize: 18,
+        flex: 1,
         color: theme.colors.noteText,
     },
 
     tileIconsContainer: {
         flexDirection: "row",
         justifyContent: "center",
+        alignItems: "center",
     },
 
     icons: {
         padding: 10,
+        fontSize: 18,
+        color: theme.colors.noteText,
     },
 
     noteEllipsis: {
