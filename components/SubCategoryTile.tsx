@@ -9,7 +9,7 @@ import NoteTile from "./NoteTile";
 import { Note, SubCategory } from "../types";
 import NewNoteTile from "./NewNoteTile";
 import { isEmptySubCategory } from "../utilFuncs/utilFuncs";
-
+import DraggableFlatList from "react-native-draggable-flatlist"; // Import DraggableFlatList
 interface TileProps {
     subCategory: SubCategory;
     isLastCategory: boolean;
@@ -20,6 +20,9 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
+    const notesForThisSubCat = notes.filter((note) => {
+        return note.subCategories.includes(subCategory.id);
+    });
 
     const toggleExpansion = () => {
         setIsExpanded(!isExpanded);
@@ -45,20 +48,13 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
         return false;
     };
 
-    // might extract, but should prob find a better way to do this data cos atm am filtering then reducing for no good reason.
+    // CHECK THERE ARE NO ISSUES WITH THIS REFACTOR.
+    // IF THERE ARE COULD ALWAYS CALL A FUNC TO MAKE THE ARRAY BASED ON LATEST STATE AND USE THAT LENGTH
+    // COS THIS DOES FEEL LIKE IT SHOULDNT UPDATE IN LINE WITH THE STATE... ALTHO FOR NOW IT DOS SEEM TO.
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
             note={item}
-            // extract and/or comment this
-            isLastNote={
-                index ===
-                notes.reduce((acc, note) => {
-                    return note.subCategories.includes(subCategory.id) ? acc + 1 : acc;
-                }, 0) -
-                    1
-                    ? true
-                    : false
-            }
+            isLastNote={index === notesForThisSubCat.length - 1}
             isLastCategory={isLastCategory}
             isLastSubCategory={isLastSubCategory}
             isInSubCategory={true}
@@ -100,9 +96,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
             {isExpanded && (
                 <FlatList
                     style={noteStyles.noteContainer}
-                    data={notes.filter((note) => {
-                        return note.subCategories.includes(subCategory.id);
-                    })}
+                    data={notesForThisSubCat}
                     renderItem={renderNote}
                     keyExtractor={(note) => note.id}
                 />

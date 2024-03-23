@@ -27,43 +27,28 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         <NoteTile
             note={item}
             isLastCategory={isLastCategory}
-            isLastNote={
-                index ===
-                notes.reduce((acc, note) => {
-                    return note.categories.includes(category.id) ? acc + 1 : acc;
-                }, 0) -
-                    1
-                    ? true
-                    : false
-            }
+            isLastNote={index === notesForThisCat.length - 1}
             isInSubCategory={false}
         />
     );
+
+    const subCatsForThisCat = subCategories.filter((subCategory) => {
+        return subCategory.parentCategory === category.id;
+    });
 
     const toggleExpansion = () => {
         setIsExpanded(!isExpanded);
     };
 
-    // to know if subcategory is the last subcategory... need to know how many subcategories there are then its when index = that (-1)
-    // to know how many sub categories there are...
-    // need to count the numb of sub cats where parentcategory is category.id
-    // we will implement that, and it will amtch the note way
-    // but maybe we do something better so we're not filtering and reducing the same array.
-    const renderSubCategory = (
-        { item, index }: { item: SubCategory; index: number } // check what its using islast for, should it be getting told if its the last subcat as well as main cat?
-    ) => (
+    const notesForThisCat = notes.filter((note) => {
+        return note.categories.includes(category.id);
+    });
+
+    const renderSubCategory = ({ item, index }: { item: SubCategory; index: number }) => (
         <SubCategoryTile
             isLastCategory={isLastCategory}
             subCategory={item}
-            isLastSubCategory={
-                index ===
-                subCategories.reduce((acc, subCategory) => {
-                    return subCategory.parentCategory === category.id ? acc + 1 : acc;
-                }, 0) -
-                    1
-                    ? true
-                    : false
-            }
+            isLastSubCategory={index === subCatsForThisCat.length - 1}
         />
     );
 
@@ -126,9 +111,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                 <FlatList
                     removeClippedSubviews={false}
                     style={categoryStyles.subCategoryContainer}
-                    data={subCategories.filter((subCategory) => {
-                        return subCategory.parentCategory === category.id;
-                    })}
+                    data={subCatsForThisCat}
                     renderItem={renderSubCategory}
                     keyExtractor={(cat) => cat.id}
                 />
@@ -140,9 +123,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                 <FlatList
                     removeClippedSubviews={false}
                     style={noteStyles.noteContainer}
-                    data={notes.filter((note) => {
-                        return note.categories.includes(category.id);
-                    })}
+                    data={notesForThisCat}
                     renderItem={renderNote}
                     keyExtractor={(note) => note.id}
                 />
