@@ -14,10 +14,17 @@ interface TileProps {
     subCategory?: SubCategory;
     category?: Category;
     isLastCategory: boolean;
+    isLastSubCategory?: boolean;
     setAddingNewNote: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const NewNoteTile: React.FC<TileProps> = ({ subCategory, setAddingNewNote, category, isLastCategory }) => {
+const NewNoteTile: React.FC<TileProps> = ({
+    subCategory,
+    setAddingNewNote,
+    category,
+    isLastCategory,
+    isLastSubCategory,
+}) => {
     const dispatch = useDispatch();
     const textInputRef = useRef<TextInput>(null);
     const [newNote, setNewNote] = useState("");
@@ -32,6 +39,10 @@ const NewNoteTile: React.FC<TileProps> = ({ subCategory, setAddingNewNote, categ
 
     const addBottomTileMargin = () => {
         if (!isLastCategory) {
+            return false;
+        }
+
+        if (subCategory && !isLastSubCategory) {
             return false;
         }
 

@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import NoteTile from "./NoteTile";
 import NewNoteTile from "./NewNoteTile";
+import { isEmptyCategory } from "../utilFuncs/utilFuncs";
 
 interface TileProps {
     category: Category;
@@ -35,6 +36,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                     ? true
                     : false
             }
+            isInSubCategory={false}
         />
     );
 
@@ -42,8 +44,27 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         setIsExpanded(!isExpanded);
     };
 
-    const renderSubCategory = ({ item }: { item: SubCategory }) => (
-        <SubCategoryTile isLastCategory={isLastCategory} subCategory={item} />
+    // to know if subcategory is the last subcategory... need to know how many subcategories there are then its when index = that (-1)
+    // to know how many sub categories there are...
+    // need to count the numb of sub cats where parentcategory is category.id
+    // we will implement that, and it will amtch the note way
+    // but maybe we do something better so we're not filtering and reducing the same array.
+    const renderSubCategory = (
+        { item, index }: { item: SubCategory; index: number } // check what its using islast for, should it be getting told if its the last subcat as well as main cat?
+    ) => (
+        <SubCategoryTile
+            isLastCategory={isLastCategory}
+            subCategory={item}
+            isLastSubCategory={
+                index ===
+                subCategories.reduce((acc, subCategory) => {
+                    return subCategory.parentCategory === category.id ? acc + 1 : acc;
+                }, 0) -
+                    1
+                    ? true
+                    : false
+            }
+        />
     );
 
     const handleAddNote = () => {
@@ -53,16 +74,30 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         }
     };
 
-    // TODO: - Long category names need to wrap or truncate.
+    const addBottomTileMartin = () => {
+        if (!isLastCategory) {
+            return false;
+        }
+
+        if (!isExpanded) {
+            return true;
+        }
+
+        const isEmpty = isEmptyCategory(category, notes);
+        if (isEmpty && !isAddingNewNote) {
+            return true;
+        }
+        return false;
+    };
+
     return (
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
                 <View
-                    // extract the lastmargin checks into a addExtraMargin func pls.
                     style={[
                         categoryStyles.categoryTile,
                         index === 0 && categoryStyles.categoryTileFirst,
-                        isLastCategory && !isAddingNewNote && !isExpanded && categoryStyles.lastMargin,
+                        addBottomTileMartin() && categoryStyles.lastMargin,
                     ]}
                 >
                     <View style={categoryStyles.categoryTextContainer}>

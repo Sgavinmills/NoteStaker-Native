@@ -9,13 +9,15 @@ import { useRef } from "react";
 interface TileProps {
     note: Note;
     isLastCategory: boolean;
+    isLastSubCategory?: boolean;
     isLastNote: boolean;
+    isInSubCategory: boolean;
 }
 
 // TODO: Border n dots thingy on new note
 // - longer notes need box to expand.
 
-const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isLastNote }) => {
+const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, isLastNote, isLastSubCategory }) => {
     const dispatch = useDispatch();
     const textInputRef = useRef<TextInput>(null);
 
@@ -34,11 +36,23 @@ const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isLastNote }) => 
         textInputRef.current.focus();
     }
 
+    const addBottomTileMargin = () => {
+        if (!isLastCategory) {
+            return false;
+        }
+
+        if (!isInSubCategory) {
+            return isLastNote;
+        }
+
+        return isLastSubCategory && isLastNote;
+    };
+
     return (
         <View
             style={[
                 noteStyles.noteTile,
-                isLastCategory && isLastNote && noteStyles.lastMargin,
+                addBottomTileMargin() && noteStyles.lastMargin,
                 isLastNote && noteStyles.bottomBorder,
             ]}
         >

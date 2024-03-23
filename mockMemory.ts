@@ -103,25 +103,32 @@ export const memory: Memory = {
         {
             id: "randomcatidgggggggggg3",
             name: "test cat 3 - no subeeeeeees",
-            subCategories: ["randomsubcatidyello"],
+            subCategories: ["newsubby11", "othernewsubby22"],
             dateAdded: "",
             dateUpdated: "",
         },
     ],
     subCategories: [
         {
+            id: "newsubby11",
+            name: "Televsion",
+            dateAdded: "",
+            dateUpdated: "",
+            parentCategory: "randomcatidgggggggggg3",
+        },
+        {
+            id: "othernewsubby22",
+            name: "Books",
+            dateAdded: "",
+            dateUpdated: "",
+            parentCategory: "randomcatidgggggggggg3",
+        },
+        {
             id: "randomsubcatid1",
             name: "sub cat 1",
             dateAdded: "",
             dateUpdated: "",
             parentCategory: "randomcatid1",
-        },
-        {
-            id: "randomsubcatidyello",
-            name: "sub cat 1",
-            dateAdded: "",
-            dateUpdated: "",
-            parentCategory: "randomcatidgggggggggg3",
         },
         {
             id: "randomsubcatid2",

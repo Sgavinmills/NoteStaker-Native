@@ -13,9 +13,10 @@ import { isEmptySubCategory } from "../utilFuncs/utilFuncs";
 interface TileProps {
     subCategory: SubCategory;
     isLastCategory: boolean;
+    isLastSubCategory: boolean;
 }
 
-const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory }) => {
+const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isLastSubCategory }) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
@@ -29,10 +30,13 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory }) =
             return false;
         }
 
+        if (!isLastSubCategory) {
+            return false;
+        }
+
         if (!isExpanded) {
             return true;
         }
-
         const isEmpty = isEmptySubCategory(subCategory, notes);
         if (isEmpty && !isAddingNewNote) {
             return true;
@@ -41,6 +45,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory }) =
         return false;
     };
 
+    // might extract, but should prob find a better way to do this data cos atm am filtering then reducing for no good reason.
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
             note={item}
@@ -55,6 +60,8 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory }) =
                     : false
             }
             isLastCategory={isLastCategory}
+            isLastSubCategory={isLastSubCategory}
+            isInSubCategory={true}
         />
     );
 
@@ -86,6 +93,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory }) =
                 <NewNoteTile
                     isLastCategory={isLastCategory}
                     subCategory={subCategory}
+                    isLastSubCategory={isLastSubCategory}
                     setAddingNewNote={setAddingNewNote}
                 />
             )}

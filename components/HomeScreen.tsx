@@ -1,5 +1,5 @@
 import { FlatList, TouchableOpacity, Text, View, StatusBar } from "react-native";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
 import { RootState } from "../redux/reducers/reducers";

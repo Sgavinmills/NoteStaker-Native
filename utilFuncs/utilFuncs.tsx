@@ -1,6 +1,10 @@
 import { Category, Note, SubCategory } from "../types";
 
 export const isEmptyCategory = (category: Category, notes: Note[]) => {
+    if (category.subCategories.length !== 0) {
+        return false;
+    }
+
     return !notes.some((note) => note.categories.includes(category.id));
 };
 
