@@ -1,4 +1,4 @@
-import { FlatList, TouchableOpacity, Text, View, StatusBar } from "react-native";
+import { TouchableOpacity, Text, View, StatusBar } from "react-native";
 import { useSelector } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
@@ -7,18 +7,38 @@ import CategoryTile from "./CategoryTile";
 import { Category } from "../types";
 import { useState } from "react";
 import CategoryModal from "./CategoryModal";
-
+import { NestableScrollContainer, NestableDraggableFlatList } from "react-native-draggable-flatlist";
+import { useDispatch } from "react-redux";
+import { updateCategories } from "../redux/slice";
+import { ScaleDecorator } from "react-native-draggable-flatlist";
 const HomeScreen: React.FC = () => {
     const memory = useSelector((state: RootState) => state.memory);
-
     const [newCatModalVisible, setNewCatModalVisible] = useState(false);
+    const dispatch = useDispatch();
+    const onDragEnd = ({ data: newData }: { data: Category[] }) => {
+        dispatch(updateCategories(newData));
+    };
 
-    const renderCategory = ({ item, index }: { item: Category; index: number }) => (
-        <CategoryTile
-            category={item}
-            index={index}
-            isLastCategory={index === memory.categories.length - 1 ? true : false}
-        />
+    const renderCategory = ({
+        item,
+        getIndex,
+        drag,
+        isActive,
+    }: {
+        item: Category;
+        getIndex: () => number | undefined;
+        drag: () => void;
+        isActive: boolean;
+    }) => (
+        <ScaleDecorator>
+            <CategoryTile
+                category={item}
+                index={getIndex()}
+                isLastCategory={getIndex() === memory.categories.length - 1 ? true : false}
+                drag={drag}
+                isActive={isActive}
+            />
+        </ScaleDecorator>
     );
 
     return (
@@ -31,14 +51,16 @@ const HomeScreen: React.FC = () => {
             <TouchableOpacity onPress={() => setNewCatModalVisible(true)}>
                 <Text style={categoryStyles.newCategoryText}>+</Text>
             </TouchableOpacity>
-
-            <FlatList
-                removeClippedSubviews={false}
-                style={categoryStyles.categoryListContainer}
-                data={memory.categories}
-                renderItem={renderCategory}
-                keyExtractor={(cat) => cat.id}
-            />
+            <NestableScrollContainer>
+                <NestableDraggableFlatList
+                    removeClippedSubviews={false}
+                    style={categoryStyles.categoryListContainer}
+                    data={memory.categories}
+                    onDragEnd={onDragEnd}
+                    renderItem={renderCategory}
+                    keyExtractor={(cat) => cat.id}
+                />
+            </NestableScrollContainer>
         </View>
     );
 };

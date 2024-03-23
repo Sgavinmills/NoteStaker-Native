@@ -12,12 +12,22 @@ interface TileProps {
     isLastSubCategory?: boolean;
     isLastNote: boolean;
     isInSubCategory: boolean;
+    drag: () => void;
+    isActive: boolean;
 }
 
 // TODO: Border n dots thingy on new note
 // - longer notes need box to expand.
 
-const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, isLastNote, isLastSubCategory }) => {
+const NoteTile: React.FC<TileProps> = ({
+    drag,
+    isActive,
+    note,
+    isLastCategory,
+    isInSubCategory,
+    isLastNote,
+    isLastSubCategory,
+}) => {
     const dispatch = useDispatch();
     const textInputRef = useRef<TextInput>(null);
 
@@ -49,27 +59,31 @@ const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, 
     };
 
     return (
-        <View
-            style={[
-                noteStyles.noteTile,
-                addBottomTileMargin() && noteStyles.lastMargin,
-                isLastNote && noteStyles.bottomBorder,
-            ]}
-        >
-            <TextInput
-                multiline
-                style={noteStyles.noteText}
-                onChangeText={handleNoteChange}
-                onBlur={handleNoteBlur}
-                value={note.note}
-                ref={textInputRef}
-            />
-            <View style={noteStyles.tileIconsContainer}>
-                {note.completed && <Text style={noteStyles.icons}>&#x2705;</Text>}
-                {!note.completed && <Text style={noteStyles.icons}>&#x26AA;</Text>}
-                <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
-            </View>
-        </View>
+        <>
+            <TouchableWithoutFeedback disabled={isActive} onLongPress={drag}>
+                <View
+                    style={[
+                        noteStyles.noteTile,
+                        addBottomTileMargin() && noteStyles.lastMargin,
+                        isLastNote && noteStyles.bottomBorder,
+                    ]}
+                >
+                    <TextInput
+                        multiline
+                        style={noteStyles.noteText}
+                        onChangeText={handleNoteChange}
+                        onBlur={handleNoteBlur}
+                        value={note.note}
+                        ref={textInputRef}
+                    />
+                    <View style={noteStyles.tileIconsContainer}>
+                        {note.completed && <Text style={noteStyles.icons}>&#x2705;</Text>}
+                        {!note.completed && <Text style={noteStyles.icons}>&#x26AA;</Text>}
+                        <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
+                    </View>
+                </View>
+            </TouchableWithoutFeedback>
+        </>
     );
 };
 

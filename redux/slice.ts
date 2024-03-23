@@ -20,14 +20,20 @@ const notesSlice = createSlice({
     reducers: {
         addNote(state, action: PayloadAction<Note>) {
             // dont forget to gve an id etc... obvs.
+            // dont mutate state. see updateCategories for proper solutions
+
             state.notes.unshift(action.payload);
         },
         addCategory(state, action: PayloadAction<Category>) {
             // todo - ADD DATE STAMPS
+            // dont mutate state. see updateCategories for proper solutions
+
             state.categories.push(action.payload);
         },
         updateNote(state, action: PayloadAction<Note>) {
             // todo - ADD DATE STAMPS
+            // dont mutate state. see updateCategories for proper solutions
+
             const updatedNote = action.payload;
             const existingNoteIndex = state.notes.findIndex((note) => note.id === updatedNote.id);
             if (existingNoteIndex !== -1) {
@@ -36,16 +42,31 @@ const notesSlice = createSlice({
             }
         },
         deleteNote(state, action: PayloadAction<string>) {
+            // dont mutate state. see updateCategories for proper solutions
             const noteIdToDelete = action.payload;
             const noteIndex = state.notes.findIndex((note) => note.id === noteIdToDelete);
             if (noteIndex !== -1) {
                 state.notes.splice(noteIndex, 1);
             }
         },
+        updateCategories(state, action: PayloadAction<Category[]>) {
+            const newCategories = action.payload;
+            return { ...state, categories: newCategories };
+        },
+        updateSubCategories(state, action: PayloadAction<SubCategory[]>) {
+            const newSubCategories = action.payload;
+            return { ...state, subCategories: newSubCategories };
+        },
+        updateNotes(state, action: PayloadAction<Note[]>) {
+            const newNotes = action.payload;
+            return { ...state, notes: newNotes };
+        },
+
         // Define other reducers here if needed
     },
 });
 
-export const { addNote, addCategory, updateNote, deleteNote } = notesSlice.actions;
+export const { updateSubCategories, addNote, addCategory, updateNote, deleteNote, updateCategories, updateNotes } =
+    notesSlice.actions;
 
 export default notesSlice.reducer;

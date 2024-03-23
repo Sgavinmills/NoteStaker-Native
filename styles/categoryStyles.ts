@@ -3,7 +3,7 @@ import theme from "./constants";
 
 const catStyles = StyleSheet.create({
     categoryListContainer: {
-        flex: 1,
+        // flex: 1, // Leaving here for now cos if we remove the draggablelists then this goes back
     },
 
     subCategoryContainer: {

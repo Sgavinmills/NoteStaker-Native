@@ -9,17 +9,24 @@ import NoteTile from "./NoteTile";
 import { Note, SubCategory } from "../types";
 import NewNoteTile from "./NewNoteTile";
 import { isEmptySubCategory } from "../utilFuncs/utilFuncs";
-import DraggableFlatList from "react-native-draggable-flatlist"; // Import DraggableFlatList
+import { ScaleDecorator } from "react-native-draggable-flatlist";
+import { NestableDraggableFlatList } from "react-native-draggable-flatlist";
+import { updateNotes } from "../redux/slice";
+
 interface TileProps {
     subCategory: SubCategory;
     isLastCategory: boolean;
     isLastSubCategory: boolean;
+    drag: () => void;
+    isActive: boolean;
 }
 
-const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isLastSubCategory }) => {
+const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isLastSubCategory, drag, isActive }) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
+    const dispatch = useDispatch();
+
     const notesForThisSubCat = notes.filter((note) => {
         return note.subCategories.includes(subCategory.id);
     });
@@ -48,17 +55,32 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
         return false;
     };
 
-    // CHECK THERE ARE NO ISSUES WITH THIS REFACTOR.
-    // IF THERE ARE COULD ALWAYS CALL A FUNC TO MAKE THE ARRAY BASED ON LATEST STATE AND USE THAT LENGTH
-    // COS THIS DOES FEEL LIKE IT SHOULDNT UPDATE IN LINE WITH THE STATE... ALTHO FOR NOW IT DOS SEEM TO.
-    const renderNote = ({ item, index }: { item: Note; index: Number }) => (
-        <NoteTile
-            note={item}
-            isLastNote={index === notesForThisSubCat.length - 1}
-            isLastCategory={isLastCategory}
-            isLastSubCategory={isLastSubCategory}
-            isInSubCategory={true}
-        />
+    const onNoteDragEnd = ({ data: newData }: { data: Note[] }) => {
+        dispatch(updateNotes(newData));
+    };
+
+    const renderNote = ({
+        item,
+        getIndex,
+        drag,
+        isActive,
+    }: {
+        item: Note;
+        getIndex: () => number | undefined;
+        drag: () => void;
+        isActive: boolean;
+    }) => (
+        <ScaleDecorator>
+            <NoteTile
+                note={item}
+                isLastNote={getIndex() === notesForThisSubCat.length - 1}
+                isLastCategory={isLastCategory}
+                isLastSubCategory={isLastSubCategory}
+                isInSubCategory={true}
+                drag={drag}
+                isActive={isActive}
+            />
+        </ScaleDecorator>
     );
 
     const handleAddNote = () => {
@@ -70,7 +92,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
 
     return (
         <>
-            <TouchableWithoutFeedback onPress={toggleExpansion}>
+            <TouchableWithoutFeedback onPress={toggleExpansion} disabled={isActive} onLongPress={drag}>
                 <View style={[categoryStyles.subCategoryTile, addBottomTileMargin() && categoryStyles.lastMargin]}>
                     <Text style={categoryStyles.subCategoryText}>↳ {subCategory.name}</Text>
                     <View style={categoryStyles.tileIconsContainer}>
@@ -94,10 +116,12 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
                 />
             )}
             {isExpanded && (
-                <FlatList
+                <NestableDraggableFlatList
+                    removeClippedSubviews={false}
                     style={noteStyles.noteContainer}
                     data={notesForThisSubCat}
                     renderItem={renderNote}
+                    onDragEnd={onNoteDragEnd}
                     keyExtractor={(note) => note.id}
                 />
             )}
