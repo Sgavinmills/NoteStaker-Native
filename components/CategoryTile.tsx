@@ -58,24 +58,32 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
                 <View
+                    // extract the lastmargin checks into a addExtraMargin func pls.
                     style={[
                         categoryStyles.categoryTile,
                         index === 0 && categoryStyles.categoryTileFirst,
                         isLastCategory && !isAddingNewNote && !isExpanded && categoryStyles.lastMargin,
                     ]}
                 >
-                    <Text style={categoryStyles.categoryText}>{category.name}</Text>
+                    <View style={categoryStyles.categoryTextContainer}>
+                        <Text style={categoryStyles.categoryText} adjustsFontSizeToFit={true} numberOfLines={1}>
+                            {category.name}
+                        </Text>
+                    </View>
                     <View style={categoryStyles.tileIconsContainer}>
                         {category.subCategories.length === 0 && (
                             <TouchableOpacity onPress={handleAddNote}>
-                                <FontAwesome name="plus" style={[categoryStyles.categoryText, categoryStyles.icons]} />
+                                <FontAwesome name="plus" style={[categoryStyles.plusIconText, categoryStyles.icons]} />
                             </TouchableOpacity>
                         )}
                         <FontAwesome
                             name={isExpanded ? "caret-up" : "caret-down"}
-                            style={[categoryStyles.categoryText, categoryStyles.icons]}
+                            style={[categoryStyles.caretIconText, categoryStyles.icons]}
                         />
-                        <FontAwesome name="ellipsis-v" style={[categoryStyles.categoryText, categoryStyles.icons]} />
+                        <FontAwesome
+                            name="ellipsis-v"
+                            style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
+                        />
                     </View>
                 </View>
             </TouchableWithoutFeedback>

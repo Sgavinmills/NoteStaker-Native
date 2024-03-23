@@ -4,7 +4,7 @@ export const memory: Memory = {
     notes: [
         {
             id: "1682188137607ngw9drt",
-            note: "This is a fart",
+            note: "This is a fart. A really long fart that will have to go across several lines, hopefully. ",
             categories: ["randomcatid1", "randomcatid2", "randefewgryhrtjhomcatid3"],
             subCategories: ["randomsubcatid21", "randomsubcatid1", "randomsubcatid2"],
             additionalInfo: "",
@@ -88,7 +88,7 @@ export const memory: Memory = {
         },
         {
             id: "randomcfsegsaxcsafgerhratid3",
-            name: "test cadrsfgsdfgsdgsdgdsgdst 3 - no subs",
+            name: "test cadrsfg j fedfwef wefewdf kk kk kk kk kk kk",
             subCategories: [],
             dateAdded: "",
             dateUpdated: "",
@@ -102,8 +102,8 @@ export const memory: Memory = {
         },
         {
             id: "randomcatidgggggggggg3",
-            name: "test cat 3 - no subeeeeeeees",
-            subCategories: [],
+            name: "test cat 3 - no subeeeeeees",
+            subCategories: ["randomsubcatidyello"],
             dateAdded: "",
             dateUpdated: "",
         },
@@ -115,6 +115,13 @@ export const memory: Memory = {
             dateAdded: "",
             dateUpdated: "",
             parentCategory: "randomcatid1",
+        },
+        {
+            id: "randomsubcatidyello",
+            name: "sub cat 1",
+            dateAdded: "",
+            dateUpdated: "",
+            parentCategory: "randomcatidgggggggggg3",
         },
         {
             id: "randomsubcatid2",

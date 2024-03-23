@@ -35,8 +35,15 @@ const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isLastNote }) => 
     }
 
     return (
-        <View style={[noteStyles.noteTile, isLastCategory && isLastNote && noteStyles.lastMargin]}>
+        <View
+            style={[
+                noteStyles.noteTile,
+                isLastCategory && isLastNote && noteStyles.lastMargin,
+                isLastNote && noteStyles.bottomBorder,
+            ]}
+        >
             <TextInput
+                multiline
                 style={noteStyles.noteText}
                 onChangeText={handleNoteChange}
                 onBlur={handleNoteBlur}

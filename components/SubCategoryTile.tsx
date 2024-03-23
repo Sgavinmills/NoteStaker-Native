@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
 import { Note, SubCategory } from "../types";
 import NewNoteTile from "./NewNoteTile";
+import { isEmptySubCategory } from "../utilFuncs/utilFuncs";
 
 interface TileProps {
     subCategory: SubCategory;
@@ -21,6 +22,23 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory }) =
 
     const toggleExpansion = () => {
         setIsExpanded(!isExpanded);
+    };
+
+    const addBottomTileMargin = () => {
+        if (!isLastCategory) {
+            return false;
+        }
+
+        if (!isExpanded) {
+            return true;
+        }
+
+        const isEmpty = isEmptySubCategory(subCategory, notes);
+        if (isEmpty && !isAddingNewNote) {
+            return true;
+        }
+
+        return false;
     };
 
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
@@ -50,13 +68,16 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory }) =
     return (
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
-                <View style={[categoryStyles.subCategoryTile, isLastCategory && categoryStyles.lastMargin]}>
+                <View style={[categoryStyles.subCategoryTile, addBottomTileMargin() && categoryStyles.lastMargin]}>
                     <Text style={categoryStyles.subCategoryText}>↳ {subCategory.name}</Text>
                     <View style={categoryStyles.tileIconsContainer}>
                         <TouchableOpacity onPress={handleAddNote}>
                             <FontAwesome name="plus" style={[categoryStyles.categoryText, categoryStyles.icons]} />
                         </TouchableOpacity>
-                        <FontAwesome name="caret-down" style={[categoryStyles.categoryText, categoryStyles.icons]} />
+                        <FontAwesome
+                            name={isExpanded ? "caret-up" : "caret-down"}
+                            style={[categoryStyles.categoryText, categoryStyles.icons]}
+                        />
                         <FontAwesome name="ellipsis-v" style={[categoryStyles.categoryText, categoryStyles.icons]} />
                     </View>
                 </View>

@@ -19,7 +19,10 @@ const catStyles = StyleSheet.create({
         borderColor: theme.colors.tileBorder,
         backgroundColor: theme.colors.tileBackground,
         textAlign: "left",
-        padding: 10,
+        paddingRight: 10,
+        paddingLeft: 15,
+        paddingTop: 20,
+        paddingBottom: 10,
         marginTop: 20,
         flexDirection: "row",
         alignItems: "center",
@@ -42,9 +45,28 @@ const catStyles = StyleSheet.create({
     },
 
     categoryText: {
-        fontSize: 24,
+        fontSize: 20,
         color: theme.colors.categoryText,
         fontWeight: "bold",
+    },
+
+    categoryTextContainer: {
+        flex: 1,
+    },
+
+    plusIconText: {
+        fontSize: 20,
+        color: theme.colors.categoryText,
+    },
+
+    caretIconText: {
+        fontSize: 33,
+        color: theme.colors.categoryText,
+    },
+
+    ellipsisIconText: {
+        fontSize: 24,
+        color: theme.colors.noteText,
     },
 
     subCategoryText: {
@@ -65,10 +87,12 @@ const catStyles = StyleSheet.create({
     tileIconsContainer: {
         flexDirection: "row",
         justifyContent: "center",
+        alignItems: "center",
     },
 
     icons: {
-        padding: 10,
+        paddingLeft: 10,
+        paddingRight: 10,
     },
 });
 

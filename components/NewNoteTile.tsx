@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
+import { isEmptyCategory, isEmptySubCategory } from "../utilFuncs/utilFuncs";
 
 interface TileProps {
     subCategory?: SubCategory;
@@ -21,10 +22,21 @@ const NewNoteTile: React.FC<TileProps> = ({ subCategory, setAddingNewNote, categ
     const textInputRef = useRef<TextInput>(null);
     const [newNote, setNewNote] = useState("");
     const notes = useSelector((state: RootState) => state.memory.notes);
-    let addMargin = false;
-    if (isLastCategory && category) {
-        addMargin = !notes.some((note) => note.categories.includes(category.id));
+    let emptyCategory = false;
+    if (category) {
+        emptyCategory = isEmptyCategory(category, notes);
     }
+    if (subCategory) {
+        emptyCategory = isEmptySubCategory(subCategory, notes);
+    }
+
+    const addBottomTileMargin = () => {
+        if (!isLastCategory) {
+            return false;
+        }
+
+        return emptyCategory;
+    };
 
     const handleChange = (text: string) => {
         setNewNote(text);
@@ -76,8 +88,15 @@ const NewNoteTile: React.FC<TileProps> = ({ subCategory, setAddingNewNote, categ
     }, []);
 
     return (
-        <View style={[noteStyles.noteTile, addMargin && noteStyles.lastMargin]}>
+        <View
+            style={[
+                noteStyles.noteTile,
+                addBottomTileMargin() && noteStyles.lastMargin,
+                emptyCategory && noteStyles.bottomBorder,
+            ]}
+        >
             <TextInput
+                multiline
                 style={[noteStyles.noteText]}
                 onChangeText={(text) => handleChange(text)}
                 onBlur={handleBlur}

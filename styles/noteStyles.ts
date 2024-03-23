@@ -11,8 +11,13 @@ const noteStyles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        borderWidth: 1,
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
         borderColor: theme.colors.tileBorder,
+    },
+
+    bottomBorder: {
+        borderBottomWidth: 1,
     },
 
     noteText: {
