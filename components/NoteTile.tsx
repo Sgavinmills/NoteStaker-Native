@@ -7,6 +7,7 @@ import { deleteNote, updateNote } from "../redux/slice";
 import { useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import NoteIcons from "./NoteIcons";
+import IconsModal from "./IconsModal";
 
 interface TileProps {
     note: Note;

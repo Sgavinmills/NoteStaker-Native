@@ -60,10 +60,8 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
     );
 
     const handleAddNote = () => {
+        setIsExpanded(true);
         setAddingNewNote(true);
-        if (!isExpanded) {
-            toggleExpansion();
-        }
     };
 
     return (
@@ -93,7 +91,6 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
             )}
             {isExpanded && (
                 <FlatList
-                    keyboardShouldPersistTaps="handled"
                     style={noteStyles.noteContainer}
                     data={notesForThisSubCat}
                     renderItem={renderNote}

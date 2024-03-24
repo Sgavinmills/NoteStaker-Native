@@ -71,6 +71,7 @@ const NewNoteTile: React.FC<TileProps> = ({
                 dateUpdated: "",
                 priority: "normal",
                 completed: false,
+                imageURI: "",
             };
             dispatch(addNote(noteToAdd));
         }
@@ -86,6 +87,7 @@ const NewNoteTile: React.FC<TileProps> = ({
                 dateUpdated: "",
                 priority: "normal",
                 completed: false,
+                imageURI: "",
             };
             dispatch(addNote(noteToAdd));
         }
