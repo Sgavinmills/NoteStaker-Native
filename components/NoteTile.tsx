@@ -17,6 +17,8 @@ interface TileProps {
 // TODO: Border n dots thingy on new note
 // - longer notes need box to expand.
 
+// Add button to print current state to console.
+
 const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, isLastNote, isLastSubCategory }) => {
     const dispatch = useDispatch();
     const textInputRef = useRef<TextInput>(null);

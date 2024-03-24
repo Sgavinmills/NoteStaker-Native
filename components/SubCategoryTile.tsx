@@ -21,6 +21,10 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
 
+    const notesForThisSubCat = notes.filter((note) => {
+        return note.subCategories.includes(subCategory.id);
+    });
+
     const toggleExpansion = () => {
         setIsExpanded(!isExpanded);
     };
@@ -45,20 +49,10 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
         return false;
     };
 
-    // might extract, but should prob find a better way to do this data cos atm am filtering then reducing for no good reason.
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
             note={item}
-            // extract and/or comment this
-            isLastNote={
-                index ===
-                notes.reduce((acc, note) => {
-                    return note.subCategories.includes(subCategory.id) ? acc + 1 : acc;
-                }, 0) -
-                    1
-                    ? true
-                    : false
-            }
+            isLastNote={index === notesForThisSubCat.length - 1}
             isLastCategory={isLastCategory}
             isLastSubCategory={isLastSubCategory}
             isInSubCategory={true}
@@ -100,9 +94,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
             {isExpanded && (
                 <FlatList
                     style={noteStyles.noteContainer}
-                    data={notes.filter((note) => {
-                        return note.subCategories.includes(subCategory.id);
-                    })}
+                    data={notesForThisSubCat}
                     renderItem={renderNote}
                     keyExtractor={(note) => note.id}
                 />
