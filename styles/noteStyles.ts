@@ -2,8 +2,6 @@ import { StyleSheet } from "react-native";
 import theme from "./constants";
 
 const noteStyles = StyleSheet.create({
-    noteContainer: {},
-
     noteTile: {
         backgroundColor: theme.colors.tileBackground,
         textAlign: "left",
@@ -16,14 +14,25 @@ const noteStyles = StyleSheet.create({
         borderColor: theme.colors.tileBorder,
     },
 
+    noteContainer: {
+        flex: 1,
+    },
+
     bottomBorder: {
         borderBottomWidth: 1,
     },
 
     noteText: {
-        fontSize: 18,
-        flex: 1,
+        fontSize: 16,
         color: theme.colors.noteText,
+        paddingBottom: 8,
+        paddingTop: 8,
+    },
+
+    noteTextFocused: {
+        borderBottomWidth: 1,
+        borderStyle: "dashed",
+        borderBottomColor: theme.colors.tileBorder,
     },
 
     tileIconsContainer: {
@@ -38,12 +47,35 @@ const noteStyles = StyleSheet.create({
         color: theme.colors.noteText,
     },
 
+    completedCheckbox: {
+        fontSize: 14,
+    },
+
+    notCompletedCheckbox: {
+        fontSize: 14,
+        opacity: 0.4,
+    },
+
     noteEllipsis: {
         paddingTop: 13,
     },
 
     lastMargin: {
         marginBottom: 500,
+    },
+
+    noteIconContainer: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+    },
+    noteIconText: {
+        color: theme.colors.noteText,
+        paddingRight: 20,
+        fontSize: 20,
+    },
+    noteIconTextCross: {
+        fontSize: 22,
+        color: "red",
     },
 });
 

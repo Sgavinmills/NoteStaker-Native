@@ -106,14 +106,16 @@ const NewNoteTile: React.FC<TileProps> = ({
                 emptyCategory && noteStyles.bottomBorder,
             ]}
         >
-            <TextInput
-                multiline
-                style={[noteStyles.noteText]}
-                onChangeText={(text) => handleChange(text)}
-                onBlur={handleBlur}
-                value={newNote}
-                ref={textInputRef}
-            />
+            <View style={noteStyles.noteContainer}>
+                <TextInput
+                    multiline
+                    style={[noteStyles.noteText]}
+                    onChangeText={(text) => handleChange(text)}
+                    onBlur={handleBlur}
+                    value={newNote}
+                    ref={textInputRef}
+                />
+            </View>
             <View style={noteStyles.tileIconsContainer}>
                 <Text style={noteStyles.icons}>&#x26AA;</Text>
                 <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />

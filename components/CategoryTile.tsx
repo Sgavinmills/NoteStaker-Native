@@ -112,6 +112,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
             </TouchableWithoutFeedback>
             {isExpanded && category.subCategories.length > 0 && (
                 <FlatList
+                    keyboardShouldPersistTaps="handled"
                     removeClippedSubviews={false}
                     style={categoryStyles.subCategoryContainer}
                     data={subCatsForThisCat}
@@ -124,8 +125,8 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
             )}
             {isExpanded && category.subCategories.length == 0 && (
                 <FlatList
+                    keyboardShouldPersistTaps="handled"
                     removeClippedSubviews={false}
-                    style={noteStyles.noteContainer}
                     data={notesForThisCat}
                     renderItem={renderNote}
                     keyExtractor={(note) => note.id}

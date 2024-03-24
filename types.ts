@@ -30,4 +30,5 @@ export interface Note {
     dateUpdated: string;
     priority: string;
     completed: boolean;
+    imageURI: string;
 }

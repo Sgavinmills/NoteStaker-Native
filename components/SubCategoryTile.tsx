@@ -93,6 +93,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
             )}
             {isExpanded && (
                 <FlatList
+                    keyboardShouldPersistTaps="handled"
                     style={noteStyles.noteContainer}
                     data={notesForThisSubCat}
                     renderItem={renderNote}

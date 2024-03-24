@@ -33,6 +33,7 @@ const HomeScreen: React.FC = () => {
             </TouchableOpacity>
 
             <FlatList
+                keyboardShouldPersistTaps="handled"
                 removeClippedSubviews={false}
                 style={categoryStyles.categoryListContainer}
                 data={memory.categories}

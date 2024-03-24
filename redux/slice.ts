@@ -32,10 +32,14 @@ const notesSlice = createSlice({
             // todo - ADD DATE STAMPS
             // dont mutate state. see updateCategories for proper implementation
             const updatedNote = action.payload;
+            updatedNote.dateUpdated = new Date().toISOString();
             const existingNoteIndex = state.notes.findIndex((note) => note.id === updatedNote.id);
+
             if (existingNoteIndex !== -1) {
-                state.notes[existingNoteIndex].note = updatedNote.note;
-                state.notes[existingNoteIndex].dateUpdated = new Date().toISOString();
+                const updatedNotes = [...state.notes];
+                updatedNotes[existingNoteIndex] = updatedNote;
+
+                state.notes = updatedNotes;
             }
         },
         deleteNote(state, action: PayloadAction<string>) {

@@ -12,6 +12,7 @@ export const memory: Memory = {
             dateUpdated: "",
             priority: "normal",
             completed: true,
+            imageURI: "",
         },
         {
             id: "16821881dfsdg37607ngw9drtxxxxxxxx",
@@ -23,6 +24,7 @@ export const memory: Memory = {
             dateUpdated: "",
             priority: "normal",
             completed: false,
+            imageURI: "",
         },
         {
             id: "1682188rgerghre1dfsdg37607ngw9drtxxxxxxxx",
@@ -34,6 +36,7 @@ export const memory: Memory = {
             dateUpdated: "",
             priority: "normal",
             completed: false,
+            imageURI: "",
         },
     ],
     categories: [
