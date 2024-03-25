@@ -7,6 +7,7 @@ import { deleteNote, updateNote } from "../redux/slice";
 import { useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import NoteMenu from "./NoteMenu";
+import ImageModal from "./ImageModal";
 
 interface TileProps {
     note: Note;
@@ -17,7 +18,6 @@ interface TileProps {
 }
 
 // TODO: Border n dots thingy on new note
-// - longer notes need box to expand.
 
 // Add button to print current state to console.
 
@@ -25,7 +25,7 @@ const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, 
     const dispatch = useDispatch();
     const textInputRef = useRef<TextInput>(null);
     const [image, setImage] = useState<string | null>(null);
-    const [isFullImageVisible, setIsFullImageVisible] = useState(false);
+    const [isShowingImage, setIsShowingImage] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
     const [isShowingNoteMenu, setIsShowingNoteMenu] = useState(false);
     const [xCoordNoteMenu, setXCoordNoteMenu] = useState(0);
@@ -33,7 +33,6 @@ const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, 
     const handleNoteChange = (text: string) => {
         dispatch(updateNote({ ...note, note: text }));
     };
-    console.log(note.imageURI);
 
     const handleNoteBlur = () => {
         if (note.note === "") {
@@ -51,6 +50,10 @@ const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, 
         setIsShowingNoteMenu(true);
         setXCoordNoteMenu(event.nativeEvent.pageX);
         setYCoordNoteMenu(event.nativeEvent.pageY);
+    };
+
+    const handleImagePress = () => {
+        setIsShowingImage(true);
     };
 
     if (note.note === "" && textInputRef.current) {
@@ -79,7 +82,9 @@ const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, 
                 ]}
             >
                 <View style={noteStyles.noteContainer}>
-                    {note.imageURI && <Image source={{ uri: note.imageURI }} style={{ height: 200, width: 200 }} />}
+                    <TouchableOpacity onPress={handleImagePress}>
+                        {note.imageURI && <Image source={{ uri: note.imageURI }} style={{ height: 150, width: 150 }} />}
+                    </TouchableOpacity>
                     <TextInput
                         multiline
                         style={[noteStyles.noteText, (isFocused || isShowingNoteMenu) && noteStyles.noteTextFocused]}
@@ -109,6 +114,15 @@ const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, 
                     )}
                 </View>
             </View>
+            {isShowingImage && (
+                <ImageModal
+                    height={100}
+                    width={100}
+                    isShowingImage={isShowingImage}
+                    setIsShowingImage={setIsShowingImage}
+                    imageURI={note.imageURI}
+                />
+            )}
         </View>
     );
 };

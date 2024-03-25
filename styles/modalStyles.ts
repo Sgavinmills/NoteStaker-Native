@@ -58,6 +58,24 @@ const modalStyles = StyleSheet.create({
     modalButtonContainer: {
         width: "65%",
     },
+
+    imageContainer: {
+        backgroundColor: "black",
+    },
+
+    closeButton: {
+        position: "absolute",
+        top: 10,
+        right: 10,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        padding: 10,
+        borderRadius: 20,
+    },
+
+    buttonContainer: {
+        position: "absolute",
+        bottom: 10,
+    },
 });
 
 export default modalStyles;

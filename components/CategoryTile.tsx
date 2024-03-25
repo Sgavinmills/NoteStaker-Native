@@ -35,6 +35,18 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         />
     );
 
+    // when doing moving categories.
+    // if we change this to be a map over tje parentcat.subcats and the returned array
+    // is then in the order of cats, then reordering gets much simpler.
+
+    // longer process. instead of looping over subcats once and prducing an array O(1)
+    // we have to loop over notes for each subcat, so O(n).
+    // also, bu then... would notes/subcats even need yto be an array? could be a map and just
+    // check the map for note existence and return when/if found...
+
+    // the main problem ithis solves is allowing reordering in individual categories... which is fairly
+    // important tbj
+    // defo worth exploring, unfortunately.
     const subCatsForThisCat = subCategories.filter((subCategory) => {
         return subCategory.parentCategory === category.id;
     });
