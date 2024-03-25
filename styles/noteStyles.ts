@@ -64,17 +64,33 @@ const noteStyles = StyleSheet.create({
         marginBottom: 500,
     },
 
+    noteMenuContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.3)",
+        width: "100%",
+        height: "100%",
+    },
+
     noteIconContainer: {
+        position: "absolute",
+        borderWidth: 3,
+        borderColor: theme.colors.noteMenuBorder,
         flexDirection: "row",
-        justifyContent: "flex-end",
+        width: "70%",
+        backgroundColor: theme.colors.noteMenuBackground,
+        padding: 3,
     },
+
     noteIconText: {
-        color: theme.colors.noteText,
+        color: theme.colors.tileBackground,
         paddingRight: 20,
-        fontSize: 20,
+        fontSize: 32,
     },
+
     noteIconTextCross: {
-        fontSize: 22,
+        fontSize: 33,
         color: "red",
     },
 });

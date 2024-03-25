@@ -47,7 +47,9 @@ const notesSlice = createSlice({
             const noteIdToDelete = action.payload;
             const noteIndex = state.notes.findIndex((note) => note.id === noteIdToDelete);
             if (noteIndex !== -1) {
-                state.notes.splice(noteIndex, 1);
+                const newNotes = [...state.notes];
+                newNotes.splice(noteIndex, 1);
+                return { ...state, notes: newNotes };
             }
         },
         updateSubCategories(state, action: PayloadAction<SubCategory[]>) {
