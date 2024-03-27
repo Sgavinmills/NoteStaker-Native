@@ -13,9 +13,17 @@ interface TileProps {
     subCategory: SubCategory;
     isLastCategory: boolean;
     isLastSubCategory: boolean;
+    isNoteInputActive: boolean;
+    setIsNoteInputActive: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isLastSubCategory }) => {
+const SubCategoryTile: React.FC<TileProps> = ({
+    subCategory,
+    isLastCategory,
+    isLastSubCategory,
+    isNoteInputActive,
+    setIsNoteInputActive,
+}) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
@@ -57,6 +65,8 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
             isLastCategory={isLastCategory}
             isLastSubCategory={isLastSubCategory}
             isInSubCategory={true}
+            isNoteInputActive={isNoteInputActive}
+            setIsNoteInputActive={setIsNoteInputActive}
         />
     );
 

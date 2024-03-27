@@ -1,4 +1,13 @@
-import { Text, View, TextInput, Image, TouchableOpacity, GestureResponderEvent } from "react-native";
+import {
+    Text,
+    View,
+    TextInput,
+    Image,
+    TouchableOpacity,
+    GestureResponderEvent,
+    NativeSyntheticEvent,
+    TextInputFocusEventData,
+} from "react-native";
 import noteStyles from "../styles/noteStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { Note } from "../types";
@@ -17,6 +26,8 @@ interface TileProps {
     isInSubCategory: boolean; // prob dont need this as well as ID, but leaving for now
     subCategoryID?: string;
     categoryID?: string;
+    isNoteInputActive: boolean;
+    setIsNoteInputActive: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // Add button to print current state to console.
@@ -32,6 +43,8 @@ const NoteTile: React.FC<TileProps> = ({
     isLastSubCategory,
     categoryID,
     subCategoryID,
+    isNoteInputActive,
+    setIsNoteInputActive,
 }) => {
     const dispatch = useDispatch();
     const textInputRef = useRef<TextInput>(null);
@@ -46,10 +59,10 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleNoteBlur = () => {
+        setIsNoteInputActive(false);
         if (note.note === "") {
             const id = note.id;
             dispatch(deleteNoteFromAllCategories(id));
-
             // should give option to delete from just the category or sub category
             //   " you are about to remove note from all cats and sub cats, would you prefer to just delete from this one?"
         }
@@ -58,6 +71,15 @@ const NoteTile: React.FC<TileProps> = ({
 
     const handleNoteFocus = () => {
         setIsFocused(true);
+        setIsNoteInputActive(true);
+    };
+
+    const isEdittable = () => {
+        if (isFocused) {
+            return true;
+        }
+
+        return !isNoteInputActive;
     };
 
     const handleMenuPress = (event: GestureResponderEvent) => {
@@ -103,6 +125,7 @@ const NoteTile: React.FC<TileProps> = ({
                         onFocus={handleNoteFocus}
                         value={note.note}
                         ref={textInputRef}
+                        editable={isEdittable()}
                     />
                 </View>
                 <View style={noteStyles.tileIconsContainer}>

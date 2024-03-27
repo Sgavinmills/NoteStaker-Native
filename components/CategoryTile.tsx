@@ -16,11 +16,10 @@ interface TileProps {
     isLastCategory: boolean;
 }
 
-// once done testing delete this comment and push up, the pull request can then be ignored
-// but hopefyully branch withd raggable working will be tehr so hould keep that pr for later.
-
 const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) => {
+    const [isNoteInputActive, setIsNoteInputActive] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
+
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
@@ -32,6 +31,8 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
             isLastCategory={isLastCategory}
             isLastNote={index === notesForThisCat.length - 1}
             isInSubCategory={false}
+            isNoteInputActive={isNoteInputActive}
+            setIsNoteInputActive={setIsNoteInputActive}
         />
     );
 
@@ -54,6 +55,8 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
             isLastCategory={isLastCategory}
             subCategory={item}
             isLastSubCategory={index === subCatsForThisCat.length - 1}
+            isNoteInputActive={isNoteInputActive}
+            setIsNoteInputActive={setIsNoteInputActive}
         />
     );
 

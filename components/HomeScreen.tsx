@@ -10,7 +10,6 @@ import CategoryModal from "./CategoryModal";
 
 const HomeScreen: React.FC = () => {
     const memory = useSelector((state: RootState) => state.memory);
-
     const [newCatModalVisible, setNewCatModalVisible] = useState(false);
 
     const catsForHomeScreen: Category[] = [];
