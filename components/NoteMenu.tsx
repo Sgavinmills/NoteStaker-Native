@@ -3,7 +3,7 @@ import noteStyles from "../styles/noteStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { Note } from "../types";
 import { useDispatch } from "react-redux";
-import { deleteNote, updateNote } from "../redux/slice";
+import { deleteNoteFromAllCategories, updateNote } from "../redux/slice";
 import * as ImagePicker from "expo-image-picker";
 import { Dimensions } from "react-native";
 
@@ -50,7 +50,7 @@ const NoteMenu: React.FC<TileProps> = ({
     const handleDelete = () => {
         // TODO : Add confirmation check before deleting.
         const id = note.id;
-        dispatch(deleteNote(id));
+        dispatch(deleteNoteFromAllCategories(id));
     };
 
     return (

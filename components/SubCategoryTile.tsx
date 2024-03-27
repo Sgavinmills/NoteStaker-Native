@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
 import { Note, SubCategory } from "../types";
 import NewNoteTile from "./NewNoteTile";
-import { isEmptySubCategory } from "../utilFuncs/utilFuncs";
 
 interface TileProps {
     subCategory: SubCategory;
@@ -21,8 +20,8 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
 
-    const notesForThisSubCat = notes.filter((note) => {
-        return note.subCategories.includes(subCategory.id);
+    const notesForThisSubCat = subCategory.notes.map((note) => {
+        return notes[note];
     });
 
     const toggleExpansion = () => {
@@ -41,7 +40,8 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
         if (!isExpanded) {
             return true;
         }
-        const isEmpty = isEmptySubCategory(subCategory, notes);
+
+        const isEmpty = subCategory.notes.length === 0;
         if (isEmpty && !isAddingNewNote) {
             return true;
         }
@@ -51,6 +51,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
 
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
+            subCategoryID={subCategory.id}
             note={item}
             isLastNote={index === notesForThisSubCat.length - 1}
             isLastCategory={isLastCategory}

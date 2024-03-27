@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import { addCategory } from "../redux/slice";
 import { Category } from "../types";
-
+import { AppDispatch } from "../redux/store/store";
 interface TileProps {
     setNewCatModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
     newCatModalVisible: boolean;
@@ -19,7 +19,7 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
     const [newCategoryName, setNewCategoryName] = useState("");
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
 
     const handleChange = (text: string) => {
         if (error) {
@@ -36,7 +36,7 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
         }
 
         if (
-            !categories.some((cat) => {
+            !Object.values(categories).some((cat) => {
                 return cat.name === newCategoryName;
             })
         ) {
@@ -44,6 +44,7 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
                 id: getRandomID(),
                 name: newCategoryName,
                 subCategories: [],
+                notes: [],
                 dateAdded: "",
                 dateUpdated: "",
             };

@@ -3,7 +3,7 @@ import noteStyles from "../styles/noteStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { Note } from "../types";
 import { useDispatch } from "react-redux";
-import { deleteNote, updateNote } from "../redux/slice";
+import { deleteNoteFromAllCategories, updateNote } from "../redux/slice";
 import { useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import NoteMenu from "./NoteMenu";
@@ -14,14 +14,25 @@ interface TileProps {
     isLastCategory: boolean;
     isLastSubCategory?: boolean;
     isLastNote: boolean;
-    isInSubCategory: boolean;
+    isInSubCategory: boolean; // prob dont need this as well as ID, but leaving for now
+    subCategoryID?: string;
+    categoryID?: string;
 }
-
-// TODO: Border n dots thingy on new note
 
 // Add button to print current state to console.
 
-const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, isLastNote, isLastSubCategory }) => {
+// Add 'add note to bottom' of cat functionality. Might be nice with a small subtle downarrow at the bottom of the last note in cat
+// which then adds a addnotetile .
+
+const NoteTile: React.FC<TileProps> = ({
+    note,
+    isLastCategory,
+    isInSubCategory, //p prob wont need with passing the IDs too
+    isLastNote,
+    isLastSubCategory,
+    categoryID,
+    subCategoryID,
+}) => {
     const dispatch = useDispatch();
     const textInputRef = useRef<TextInput>(null);
     const [image, setImage] = useState<string | null>(null);
@@ -37,7 +48,10 @@ const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, 
     const handleNoteBlur = () => {
         if (note.note === "") {
             const id = note.id;
-            dispatch(deleteNote(id));
+            dispatch(deleteNoteFromAllCategories(id));
+
+            // should give option to delete from just the category or sub category
+            //   " you are about to remove note from all cats and sub cats, would you prefer to just delete from this one?"
         }
         setIsFocused(false);
     };
@@ -55,10 +69,6 @@ const NoteTile: React.FC<TileProps> = ({ note, isLastCategory, isInSubCategory, 
     const handleImagePress = () => {
         setIsShowingImage(true);
     };
-
-    if (note.note === "" && textInputRef.current) {
-        textInputRef.current.focus();
-    }
 
     const addBottomTileMargin = () => {
         if (!isLastCategory) {

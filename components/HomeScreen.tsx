@@ -13,14 +13,20 @@ const HomeScreen: React.FC = () => {
 
     const [newCatModalVisible, setNewCatModalVisible] = useState(false);
 
+    const catsForHomeScreen: Category[] = [];
+    memory.categoryList.forEach((cat) => {
+        if (memory.categories[cat]) {
+            catsForHomeScreen.push(memory.categories[cat]);
+        }
+    });
+
     const renderCategory = ({ item, index }: { item: Category; index: number }) => (
         <CategoryTile
             category={item}
             index={index}
-            isLastCategory={index === memory.categories.length - 1 ? true : false}
+            isLastCategory={index === catsForHomeScreen.length - 1 ? true : false}
         />
     );
-
     return (
         <View style={styles.mainContainer}>
             <StatusBar translucent={true} />
@@ -35,7 +41,7 @@ const HomeScreen: React.FC = () => {
             <FlatList
                 removeClippedSubviews={false}
                 style={categoryStyles.categoryListContainer}
-                data={memory.categories}
+                data={catsForHomeScreen}
                 renderItem={renderCategory}
                 keyExtractor={(cat) => cat.id}
             />
