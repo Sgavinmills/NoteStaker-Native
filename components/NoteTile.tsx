@@ -1,22 +1,17 @@
-import {
-    Text,
-    View,
-    TextInput,
-    Image,
-    TouchableOpacity,
-    GestureResponderEvent,
-    NativeSyntheticEvent,
-    TextInputFocusEventData,
-} from "react-native";
+import { Text, View, TextInput, Image, TouchableOpacity, GestureResponderEvent } from "react-native";
 import noteStyles from "../styles/noteStyles";
 import { FontAwesome } from "@expo/vector-icons";
-import { Note } from "../types";
+import { MenuOverlay, Note } from "../types";
 import { useDispatch } from "react-redux";
-import { deleteNoteFromAllCategories, updateNote } from "../redux/slice";
-import { useRef, useState } from "react";
+import { deleteNoteFromAllCategories, updateMenuOverlay, updateNote } from "../redux/slice";
+import { useEffect, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import NoteMenu from "./NoteMenu";
 import ImageModal from "./ImageModal";
+import { AppDispatch } from "../redux/store/store";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/reducers/reducers";
+import { emptyOverlay } from "../utilFuncs/utilFuncs";
 
 interface TileProps {
     note: Note;
@@ -41,12 +36,14 @@ const NoteTile: React.FC<TileProps> = ({
     isInSubCategory, //p prob wont need with passing the IDs too
     isLastNote,
     isLastSubCategory,
-    categoryID,
+    categoryID, // might as well just pass full category and subcategory rather than just IDs...
     subCategoryID,
     isNoteInputActive,
     setIsNoteInputActive,
 }) => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
+    const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
+
     const textInputRef = useRef<TextInput>(null);
     const [image, setImage] = useState<string | null>(null);
     const [isShowingImage, setIsShowingImage] = useState(false);
@@ -57,6 +54,30 @@ const NoteTile: React.FC<TileProps> = ({
     const handleNoteChange = (text: string) => {
         dispatch(updateNote({ ...note, note: text }));
     };
+
+    const menuOverlayRef = useRef(menuOverlay);
+
+    // allows cleanup method to access current state
+    useEffect(() => {
+        menuOverlayRef.current = menuOverlay;
+    }, [menuOverlay]);
+
+    // cleanup method so when notetile is disposed of (think category closed) the menu is turned off
+    useEffect(() => {
+        return () => {
+            // cleanup method. Turns off arrow overlay if connected to this note
+            if (menuOverlayRef.current && menuOverlayRef.current.menuData.noteID === note.id) {
+                if (
+                    menuOverlayRef.current.menuData.categoryID === categoryID ||
+                    menuOverlayRef.current.menuData.subCategoryID === subCategoryID
+                ) {
+                    // need a util func to get empty overlay
+
+                    dispatch(updateMenuOverlay(emptyOverlay())); // or actually, make turnoffmeuoverlay reducer that just sets all menu data to empty
+                }
+            }
+        };
+    }, []);
 
     const handleNoteBlur = () => {
         setIsNoteInputActive(false);
@@ -79,13 +100,19 @@ const NoteTile: React.FC<TileProps> = ({
             return true;
         }
 
+        if (menuOverlay.isShowing) {
+            return false;
+        }
+
         return !isNoteInputActive;
     };
 
     const handleMenuPress = (event: GestureResponderEvent) => {
-        setIsShowingNoteMenu(true);
-        setXCoordNoteMenu(event.nativeEvent.pageX);
-        setYCoordNoteMenu(event.nativeEvent.pageY);
+        if (!menuOverlay.isShowing) {
+            setIsShowingNoteMenu(true);
+            setXCoordNoteMenu(event.nativeEvent.pageX);
+            setYCoordNoteMenu(event.nativeEvent.pageY);
+        }
     };
 
     const handleImagePress = () => {
@@ -143,6 +170,8 @@ const NoteTile: React.FC<TileProps> = ({
                             note={note}
                             isShowingNoteMenu={isShowingNoteMenu}
                             setIsShowingNoteMenu={setIsShowingNoteMenu}
+                            subCategoryID={subCategoryID}
+                            categoryID={categoryID}
                         />
                     )}
                 </View>

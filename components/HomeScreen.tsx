@@ -7,6 +7,7 @@ import CategoryTile from "./CategoryTile";
 import { Category } from "../types";
 import { useState } from "react";
 import CategoryModal from "./CategoryModal";
+import MenuDisplay from "./MenuDisplay";
 
 const HomeScreen: React.FC = () => {
     const memory = useSelector((state: RootState) => state.memory);
@@ -44,6 +45,7 @@ const HomeScreen: React.FC = () => {
                 renderItem={renderCategory}
                 keyExtractor={(cat) => cat.id}
             />
+            {memory.menuOverlay.isShowing && <MenuDisplay overlay={memory.menuOverlay} />}
         </View>
     );
 };

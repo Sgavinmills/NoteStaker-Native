@@ -5,18 +5,21 @@ import { useDispatch } from "react-redux";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
-import { addCategory } from "../redux/slice";
-import { Category } from "../types";
+import { addCategory, updateMenuOverlay } from "../redux/slice";
+import { Category, MenuOverlay } from "../types";
 import { AppDispatch } from "../redux/store/store";
+import { updateCategory } from "../redux/slice";
 interface TileProps {
     setNewCatModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
     newCatModalVisible: boolean;
+    categoryID?: string;
 }
 
-const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModalVisible }) => {
+const CategoryModal: React.FC<TileProps> = ({ categoryID, setNewCatModalVisible, newCatModalVisible }) => {
     const categories = useSelector((state: RootState) => state.memory.categories);
+    const category = categoryID ? categories[categoryID] : ({} as Category);
 
-    const [newCategoryName, setNewCategoryName] = useState("");
+    const [newCategoryName, setNewCategoryName] = useState(category.name);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const dispatch = useDispatch<AppDispatch>();
@@ -26,6 +29,20 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
             setError(false);
         }
         setNewCategoryName(text);
+    };
+
+    const closeMenuOverlay = () => {
+        const overlay: MenuOverlay = {
+            isShowing: false,
+            menuType: "",
+            menuData: {
+                noteID: "",
+                categoryID: "",
+                subCategoryID: "",
+            },
+        };
+
+        dispatch(updateMenuOverlay(overlay));
     };
 
     const handleAddCategory = () => {
@@ -40,18 +57,24 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
                 return cat.name === newCategoryName;
             })
         ) {
-            const newCategory: Category = {
-                id: getRandomID(),
-                name: newCategoryName,
-                subCategories: [],
-                notes: [],
-                dateAdded: "",
-                dateUpdated: "",
-            };
+            if (categoryID) {
+                dispatch(updateCategory({ ...category, name: newCategoryName }));
+            } else {
+                const newCategory: Category = {
+                    id: getRandomID(),
+                    name: newCategoryName,
+                    subCategories: [],
+                    notes: [],
+                    dateAdded: "",
+                    dateUpdated: "",
+                };
 
-            dispatch(addCategory(newCategory));
+                dispatch(addCategory(newCategory));
+            }
+
             setNewCatModalVisible(false);
             setNewCategoryName("");
+            closeMenuOverlay();
         } else {
             setError(true);
             setErrorMessage("Category name must be unique");

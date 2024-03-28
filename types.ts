@@ -33,3 +33,15 @@ export interface SubCategory {
     dateAdded: string;
     dateUpdated: string;
 }
+
+export interface MenuOverlay {
+    isShowing: boolean;
+    menuType: "category" | "subCategory" | "note" | ""; // might be able to restrict this to specific menu types later?
+    menuData: MenuData;
+}
+
+export interface MenuData {
+    noteID: string;
+    categoryID: string;
+    subCategoryID: string;
+}

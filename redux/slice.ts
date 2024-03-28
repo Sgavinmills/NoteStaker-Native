@@ -1,12 +1,14 @@
 // slice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Category, Note, SubCategory } from "../types";
+import { Category, Note, SubCategory, MenuOverlay } from "../types";
 import { memory } from "../mockMemory";
 interface AppState {
     notes: { [id: string]: Note };
     categories: { [id: string]: Category };
     subCategories: { [id: string]: SubCategory };
     categoryList: string[];
+
+    menuOverlay: MenuOverlay;
 }
 
 const initialState: AppState = {
@@ -14,12 +16,31 @@ const initialState: AppState = {
     categories: memory.categories,
     subCategories: memory.subCategories,
     categoryList: memory.categoryList,
+    menuOverlay: {
+        isShowing: false,
+        menuType: "",
+        menuData: {
+            noteID: "",
+            categoryID: "",
+            subCategoryID: "",
+        },
+    },
 };
 
 const notesSlice = createSlice({
     name: "notes",
     initialState,
     reducers: {
+        updateMenuOverlay(state, action: PayloadAction<MenuOverlay>) {
+            const newOverlay = { ...action.payload };
+
+            // check if we need to copy state here, might be unnecessary processing. - can we separate and have two states? one for memory/data one for menu?
+            return { ...state, menuOverlay: newOverlay };
+        },
+        updateCategoryList(state, action: PayloadAction<string[]>) {
+            return { ...state, categoryList: action.payload };
+        },
+
         // new notes all need to be added to a category. This is handled separately for now.
         addNewNoteToNotes(state, action: PayloadAction<Note>) {
             const newNote = action.payload;
@@ -125,12 +146,14 @@ const notesSlice = createSlice({
     },
 });
 export const {
+    updateCategoryList,
     deleteNoteFromAllCategories,
     addNewNoteToNotes,
     addCategory,
     updateNote,
     updateCategory,
     updateSubCategory,
+    updateMenuOverlay,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

@@ -1,14 +1,16 @@
 import { Text, View, FlatList, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
 import { useRef, useState } from "react";
-import noteStyles from "../styles/noteStyles";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { Category, SubCategory, Note } from "../types";
+import { Category, SubCategory, Note, MenuOverlay } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import NoteTile from "./NoteTile";
 import NewNoteTile from "./NewNoteTile";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../redux/store/store";
+import { updateMenuOverlay } from "../redux/slice";
 
 interface TileProps {
     category: Category;
@@ -23,6 +25,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
+    const dispatch = useDispatch<AppDispatch>();
 
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
@@ -67,6 +70,19 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         }
     };
 
+    const handleMenuPress = () => {
+        const overlay: MenuOverlay = {
+            isShowing: true,
+            menuType: "category",
+            menuData: {
+                noteID: "",
+                categoryID: category.id,
+                subCategoryID: "",
+            },
+        };
+        dispatch(updateMenuOverlay(overlay));
+    };
+
     const addBottomTileMartin = () => {
         if (!isLastCategory) {
             return false;
@@ -108,10 +124,12 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                             name={isExpanded ? "caret-up" : "caret-down"}
                             style={[categoryStyles.caretIconText, categoryStyles.icons]}
                         />
-                        <FontAwesome
-                            name="ellipsis-v"
-                            style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
-                        />
+                        <TouchableOpacity onPress={handleMenuPress}>
+                            <FontAwesome
+                                name="ellipsis-v"
+                                style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
             </TouchableWithoutFeedback>

@@ -1,13 +1,15 @@
-import { Category, Note, SubCategory } from "../types";
+import { MenuOverlay } from "../types";
 
-// export const isEmptyCategory = (category: Category, notes: Note[]) => {
-//     if (category.subCategories.length !== 0) {
-//         return false;
-//     }
+export const emptyOverlay = () => {
+    const overlay: MenuOverlay = {
+        isShowing: false,
+        menuType: "",
+        menuData: {
+            noteID: "",
+            categoryID: "",
+            subCategoryID: "",
+        },
+    };
 
-//     return !notes.some((note) => note.categories.includes(category.id));
-// };
-
-// export const isEmptySubCategory = (category: SubCategory, notes: Note[]) => {
-//     return !notes.some((note) => note.subCategories.includes(category.id));
-// };
+    return overlay;
+};

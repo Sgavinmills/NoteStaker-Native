@@ -1,11 +1,12 @@
 import { View, GestureResponderEvent, TouchableWithoutFeedback, Modal } from "react-native";
 import noteStyles from "../styles/noteStyles";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Entypo } from "@expo/vector-icons";
 import { Note } from "../types";
-import { useDispatch } from "react-redux";
-import { deleteNoteFromAllCategories, updateNote } from "../redux/slice";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteNoteFromAllCategories, updateNote, setArrows, updateMenuOverlay } from "../redux/slice";
 import * as ImagePicker from "expo-image-picker";
 import { Dimensions } from "react-native";
+import { AppDispatch } from "../redux/store/store";
 
 interface TileProps {
     note: Note;
@@ -13,6 +14,8 @@ interface TileProps {
     isShowingNoteMenu: boolean;
     xCoordNoteMenu: number;
     yCoordNoteMenu: number;
+    subCategoryID?: string;
+    categoryID?: string;
 }
 
 const NoteMenu: React.FC<TileProps> = ({
@@ -21,8 +24,10 @@ const NoteMenu: React.FC<TileProps> = ({
     setIsShowingNoteMenu,
     xCoordNoteMenu,
     yCoordNoteMenu,
+    subCategoryID,
+    categoryID,
 }) => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
 
     const handleOutsidePress = () => {
         setIsShowingNoteMenu(false);
@@ -53,6 +58,11 @@ const NoteMenu: React.FC<TileProps> = ({
         dispatch(deleteNoteFromAllCategories(id));
     };
 
+    const handleArrowsPress = () => {
+        // dispatch(updateMenuOverlay(true));
+        // setIsShowingNoteMenu(false);
+    };
+
     return (
         <Modal
             animationType="fade"
@@ -75,6 +85,9 @@ const NoteMenu: React.FC<TileProps> = ({
                         </TouchableWithoutFeedback>
                         <TouchableWithoutFeedback onPress={handleDelete}>
                             <FontAwesome name="times" style={[noteStyles.noteIconText, noteStyles.noteIconTextCross]} />
+                        </TouchableWithoutFeedback>
+                        <TouchableWithoutFeedback onPress={handleArrowsPress}>
+                            <Entypo name="select-arrows" style={[noteStyles.noteIconText]} />
                         </TouchableWithoutFeedback>
                     </View>
                 </View>
