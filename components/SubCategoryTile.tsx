@@ -6,26 +6,45 @@ import { useState } from "react";
 import { RootState } from "../redux/reducers/reducers";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
-import { Note, SubCategory } from "../types";
+import { Note, SubCategory, MenuOverlay } from "../types";
 import NewNoteTile from "./NewNoteTile";
-import { isEmptySubCategory } from "../utilFuncs/utilFuncs";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { updateMenuOverlay } from "../redux/slice";
+import { AppDispatch } from "../redux/store/store";
 
 interface TileProps {
     subCategory: SubCategory;
     isLastCategory: boolean;
     isLastSubCategory: boolean;
+    isNoteInputActive: boolean;
+    setIsNoteInputActive: React.Dispatch<React.SetStateAction<boolean>>;
+    parentCategoryID: string;
 }
 
-const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isLastSubCategory }) => {
+const SubCategoryTile: React.FC<TileProps> = ({
+    subCategory,
+    isLastCategory,
+    isLastSubCategory,
+    isNoteInputActive,
+    setIsNoteInputActive,
+    parentCategoryID,
+}) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
+    const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const dispatch = useDispatch<AppDispatch>();
 
-    const notesForThisSubCat = notes.filter((note) => {
-        return note.subCategories.includes(subCategory.id);
+    const notesForThisSubCat = subCategory.notes.map((note) => {
+        return notes[note];
     });
 
     const toggleExpansion = () => {
+        if (overlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+
         setIsExpanded(!isExpanded);
     };
 
@@ -41,7 +60,8 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
         if (!isExpanded) {
             return true;
         }
-        const isEmpty = isEmptySubCategory(subCategory, notes);
+
+        const isEmpty = subCategory.notes.length === 0;
         if (isEmpty && !isAddingNewNote) {
             return true;
         }
@@ -49,13 +69,34 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
         return false;
     };
 
+    const handleMenuPress = () => {
+        if (overlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+
+        const newOverlay: MenuOverlay = {
+            isShowing: true,
+            menuType: "subCategory",
+            menuData: {
+                noteID: "",
+                categoryID: parentCategoryID,
+                subCategoryID: subCategory.id,
+            },
+        };
+        dispatch(updateMenuOverlay(newOverlay));
+    };
+
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
+            subCategoryID={subCategory.id}
             note={item}
             isLastNote={index === notesForThisSubCat.length - 1}
             isLastCategory={isLastCategory}
             isLastSubCategory={isLastSubCategory}
             isInSubCategory={true}
+            isNoteInputActive={isNoteInputActive}
+            setIsNoteInputActive={setIsNoteInputActive}
         />
     );
 
@@ -77,7 +118,12 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
                             name={isExpanded ? "caret-up" : "caret-down"}
                             style={[categoryStyles.categoryText, categoryStyles.icons]}
                         />
-                        <FontAwesome name="ellipsis-v" style={[categoryStyles.categoryText, categoryStyles.icons]} />
+                        <TouchableOpacity onPress={handleMenuPress}>
+                            <FontAwesome
+                                name="ellipsis-v"
+                                style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
             </TouchableWithoutFeedback>

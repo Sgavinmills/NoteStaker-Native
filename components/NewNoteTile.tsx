@@ -1,15 +1,17 @@
-import { Text, View, TextInput, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
+import { GestureResponderEvent, Text, View, TextInput, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import noteStyles from "../styles/noteStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { Note, SubCategory, Category } from "../types";
 import { useDispatch } from "react-redux";
-import { addNote, deleteNote, updateNote } from "../redux/slice";
+import { addNewNoteToNotes, updateNote, updateCategory, updateSubCategory } from "../redux/slice";
 import { useEffect, useRef, useState } from "react";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
-import { isEmptyCategory, isEmptySubCategory } from "../utilFuncs/utilFuncs";
+import { AppDispatch } from "../redux/store/store";
 
+// TODO: COMBINE NETNOTETIL AND NOTETILE AS THEYRE BASICALLY THE SAME THING.
+/// just need a prop to say isNewNoteTile for the diff behaviour
 interface TileProps {
     subCategory?: SubCategory;
     category?: Category;
@@ -25,16 +27,17 @@ const NewNoteTile: React.FC<TileProps> = ({
     isLastCategory,
     isLastSubCategory,
 }) => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
     const textInputRef = useRef<TextInput>(null);
+    const [isFocused, setIsFocused] = useState(false);
     const [newNote, setNewNote] = useState("");
     const notes = useSelector((state: RootState) => state.memory.notes);
     let emptyCategory = false;
     if (category) {
-        emptyCategory = isEmptyCategory(category, notes);
+        emptyCategory = category.subCategories.length === 0 && category.notes.length === 0;
     }
     if (subCategory) {
-        emptyCategory = isEmptySubCategory(subCategory, notes);
+        emptyCategory = subCategory.notes.length === 0;
     }
 
     const addBottomTileMargin = () => {
@@ -54,44 +57,43 @@ const NewNoteTile: React.FC<TileProps> = ({
     };
 
     const handleBlur = () => {
+        setIsFocused(false);
+
         if (newNote === "") {
             setAddingNewNote(false);
 
             return;
         }
 
+        const noteToAdd: Note = {
+            id: getRandomID(),
+            note: newNote,
+            additionalInfo: "",
+            dateAdded: "",
+            dateUpdated: "",
+            priority: "normal",
+            completed: false,
+            imageURI: "",
+        };
+        dispatch(addNewNoteToNotes(noteToAdd));
+
         if (category) {
-            const noteToAdd: Note = {
-                id: getRandomID(),
-                note: newNote,
-                categories: [category.id],
-                subCategories: [],
-                additionalInfo: "",
-                dateAdded: "",
-                dateUpdated: "",
-                priority: "normal",
-                completed: false,
-                imageURI: "",
-            };
-            dispatch(addNote(noteToAdd));
+            const categoryNotes = [...category.notes];
+            categoryNotes.unshift(noteToAdd.id);
+            dispatch(updateCategory({ ...category, notes: categoryNotes }));
         }
 
         if (subCategory) {
-            const noteToAdd: Note = {
-                id: getRandomID(),
-                note: newNote,
-                categories: [subCategory.parentCategory],
-                subCategories: [subCategory.id],
-                additionalInfo: "",
-                dateAdded: "",
-                dateUpdated: "",
-                priority: "normal",
-                completed: false,
-                imageURI: "",
-            };
-            dispatch(addNote(noteToAdd));
+            const subCategoryNotes = [...subCategory.notes];
+            subCategoryNotes.unshift(noteToAdd.id);
+            dispatch(updateSubCategory({ ...subCategory, notes: subCategoryNotes }));
         }
+
         setAddingNewNote(false);
+    };
+
+    const handleNoteFocus = () => {
+        setIsFocused(true);
     };
 
     useEffect(() => {
@@ -111,7 +113,8 @@ const NewNoteTile: React.FC<TileProps> = ({
             <View style={noteStyles.noteContainer}>
                 <TextInput
                     multiline
-                    style={[noteStyles.noteText]}
+                    style={[noteStyles.noteText, isFocused && noteStyles.noteTextFocused]}
+                    onFocus={handleNoteFocus}
                     onChangeText={(text) => handleChange(text)}
                     onBlur={handleBlur}
                     value={newNote}

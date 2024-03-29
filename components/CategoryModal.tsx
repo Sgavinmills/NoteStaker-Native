@@ -5,27 +5,79 @@ import { useDispatch } from "react-redux";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
-import { addCategory } from "../redux/slice";
-import { Category } from "../types";
-
+import { addCategory, addSubCategory, updateMenuOverlay, updateSubCategory } from "../redux/slice";
+import { Category, MenuOverlay, SubCategory } from "../types";
+import { AppDispatch } from "../redux/store/store";
+import { updateCategory } from "../redux/slice";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 interface TileProps {
     setNewCatModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
     newCatModalVisible: boolean;
+    catInfo: {
+        currentName: string;
+        parentCat: string;
+    };
 }
 
-const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModalVisible }) => {
+const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModalVisible, catInfo }) => {
     const categories = useSelector((state: RootState) => state.memory.categories);
-
-    const [newCategoryName, setNewCategoryName] = useState("");
+    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
+    const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const parentCatHasNotes = catInfo.parentCat ? categories[catInfo.parentCat].notes.length > 0 : false;
+    const [newCategoryName, setNewCategoryName] = useState(catInfo.currentName);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
 
     const handleChange = (text: string) => {
         if (error) {
             setError(false);
         }
         setNewCategoryName(text);
+    };
+
+    const closeMenuOverlay = () => {
+        dispatch(updateMenuOverlay(getEmptyOverlay()));
+    };
+
+    const updateCurrentCategory = () => {
+        if (catInfo.parentCat) {
+            updateSubCategory({ ...subCategories[overlay.menuData.subCategoryID], name: newCategoryName });
+            return;
+        }
+
+        dispatch(updateCategory({ ...categories[overlay.menuData.categoryID], name: newCategoryName }));
+    };
+
+    const addNewCategory = () => {
+        if (catInfo.parentCat) {
+            dispatch(addSubCategory({ subCatName: newCategoryName, parentCatID: overlay.menuData.categoryID }));
+            return;
+        }
+
+        const newCategory: Category = {
+            id: getRandomID(),
+            name: newCategoryName,
+            subCategories: [],
+            notes: [],
+            dateAdded: "",
+            dateUpdated: "",
+        };
+
+        dispatch(addCategory(newCategory));
+    };
+
+    const validCatName = () => {
+        if (overlay.menuType === "category") {
+            const currentSubCats = categories[catInfo.parentCat].subCategories;
+            return !currentSubCats.some((subCatID) => {
+                return subCategories[subCatID].name === newCategoryName;
+            });
+        }
+
+        return !Object.values(categories).some((cat) => {
+            return cat.name === newCategoryName;
+        });
     };
 
     const handleAddCategory = () => {
@@ -35,22 +87,16 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
             return;
         }
 
-        if (
-            !categories.some((cat) => {
-                return cat.name === newCategoryName;
-            })
-        ) {
-            const newCategory: Category = {
-                id: getRandomID(),
-                name: newCategoryName,
-                subCategories: [],
-                dateAdded: "",
-                dateUpdated: "",
-            };
+        if (validCatName()) {
+            if (catInfo.currentName) {
+                updateCurrentCategory();
+            } else {
+                addNewCategory();
+            }
 
-            dispatch(addCategory(newCategory));
             setNewCatModalVisible(false);
             setNewCategoryName("");
+            closeMenuOverlay();
         } else {
             setError(true);
             setErrorMessage("Category name must be unique");
@@ -86,9 +132,17 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
                         onChangeText={(text) => handleChange(text)}
                         value={newCategoryName}
                     />
-                </View>
-                <View style={modalStyles.modalButtonContainer}>
-                    <Button title="Submit" onPress={handleAddCategory} />
+                    <View style={modalStyles.modalButtonContainer}>
+                        <Button title="Submit" onPress={handleAddCategory} />
+                    </View>
+                    {parentCatHasNotes && (
+                        <View style={modalStyles.errorTextContainer}>
+                            <Text style={modalStyles.errorText}>
+                                This category already contains notes. If you create a sub-category they will all be
+                                moved inside the new sub-category.
+                            </Text>
+                        </View>
+                    )}
                 </View>
                 {error && (
                     <View style={modalStyles.errorTextContainer}>
