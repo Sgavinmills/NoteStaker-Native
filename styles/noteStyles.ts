@@ -7,7 +7,7 @@ const noteStyles = StyleSheet.create({
         textAlign: "left",
         padding: 10,
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "space-between",
         borderLeftWidth: 1,
         borderRightWidth: 1,

@@ -169,17 +169,6 @@ const NoteTile: React.FC<TileProps> = ({
                     <TouchableOpacity onPress={handleMenuPress}>
                         <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
                     </TouchableOpacity>
-                    {/* {isShowingNoteMenu && (
-                        <NoteMenu
-                            xCoordNoteMenu={xCoordNoteMenu}
-                            yCoordNoteMenu={yCoordNoteMenu}
-                            note={note}
-                            isShowingNoteMenu={isShowingNoteMenu}
-                            setIsShowingNoteMenu={setIsShowingNoteMenu}
-                            subCategoryID={subCategoryID}
-                            categoryID={categoryID}
-                        />
-                    )} */}
                 </View>
             </View>
             {isShowingImage && (
