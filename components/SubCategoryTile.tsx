@@ -6,7 +6,7 @@ import { useState } from "react";
 import { RootState } from "../redux/reducers/reducers";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
-import { Note, SubCategory } from "../types";
+import { Note, SubCategory, MenuOverlay } from "../types";
 import NewNoteTile from "./NewNoteTile";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { updateMenuOverlay } from "../redux/slice";
@@ -67,6 +67,24 @@ const SubCategoryTile: React.FC<TileProps> = ({
         return false;
     };
 
+    const handleMenuPress = () => {
+        if (overlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+
+        const newOverlay: MenuOverlay = {
+            isShowing: true,
+            menuType: "subCategory",
+            menuData: {
+                noteID: "",
+                categoryID: "",
+                subCategoryID: subCategory.id,
+            },
+        };
+        dispatch(updateMenuOverlay(newOverlay));
+    };
+
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
             subCategoryID={subCategory.id}
@@ -98,7 +116,12 @@ const SubCategoryTile: React.FC<TileProps> = ({
                             name={isExpanded ? "caret-up" : "caret-down"}
                             style={[categoryStyles.categoryText, categoryStyles.icons]}
                         />
-                        <FontAwesome name="ellipsis-v" style={[categoryStyles.categoryText, categoryStyles.icons]} />
+                        <TouchableOpacity onPress={handleMenuPress}>
+                            <FontAwesome
+                                name="ellipsis-v"
+                                style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
             </TouchableWithoutFeedback>

@@ -42,6 +42,7 @@ const notesSlice = createSlice({
         },
 
         // new notes all need to be added to a category. This is handled separately for now.
+        // maybe should handle together, similar to how doing addsubcategory
         addNewNoteToNotes(state, action: PayloadAction<Note>) {
             const newNote = action.payload;
             const newState: AppState = {
@@ -135,6 +136,36 @@ const notesSlice = createSlice({
             return { ...state, categories: newCategories, categoryList: newCategoryList };
         },
 
+        addSubCategory(state, action: PayloadAction<{ subCatName: string; parentCatID: string }>) {
+            const newSubCategory: SubCategory = {
+                id: getRandomID(),
+                name: action.payload.subCatName,
+                notes: [],
+                dateAdded: "",
+                dateUpdated: "",
+                parentCategory: action.payload.parentCatID,
+            };
+
+            // add to parent category
+            const parentCategoryCopy = { ...state.categories[action.payload.parentCatID] };
+            const parentCatSubCatsCopy = [...parentCategoryCopy.subCategories];
+            parentCatSubCatsCopy.push(newSubCategory.id);
+            parentCategoryCopy.subCategories = parentCatSubCatsCopy;
+
+            if (parentCategoryCopy.notes.length > 0) {
+                newSubCategory.notes = [...parentCategoryCopy.notes];
+                parentCategoryCopy.notes = [];
+            }
+
+            const newSubCategories = { ...state.subCategories };
+            newSubCategories[newSubCategory.id] = newSubCategory;
+
+            const categoriesCopy = { ...state.categories };
+            categoriesCopy[parentCategoryCopy.id] = parentCategoryCopy;
+
+            return { ...state, categories: categoriesCopy, subCategories: newSubCategories };
+        },
+
         updateNote(state, action: PayloadAction<Note>) {
             const newNote = action.payload;
             const newNotes = { ...state.notes };
@@ -153,6 +184,7 @@ export const {
     updateNote,
     updateCategory,
     updateSubCategory,
+    addSubCategory,
     updateMenuOverlay,
 } = notesSlice.actions;
 
@@ -160,4 +192,5 @@ export default notesSlice.reducer;
 
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "./store/store";
+import { getRandomID } from "../memoryfunctions/memoryfunctions";
 export const useAppDispatch = () => useDispatch<AppDispatch>();

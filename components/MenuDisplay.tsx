@@ -21,8 +21,10 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
     const dispatch = useDispatch<AppDispatch>();
     // const memory = useSelector((state: RootState) => state.memory);
 
-    const [isCategoryMainMenu, setIsCategoryMainMenu] = useState(overlay.menuType === "category");
-    const [isActiveNoteMenu, setIsActiveNoteMenu] = useState(overlay.menuType === "note");
+    const [isCatsMainMenu, setIsCatsMainMenu] = useState(
+        overlay.menuType === "category" || overlay.menuType === "subCategory"
+    );
+    const [isNoteMainMenu, setIsNoteMainMenu] = useState(overlay.menuType === "note");
     const [isMoveArrows, setIsMoveArrows] = useState(false);
 
     const handleClose = () => {
@@ -57,13 +59,8 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
     return (
         <View style={menuOverlayStyles.container}>
             <View style={menuOverlayStyles.contentContainer}>
-                {isCategoryMainMenu && (
-                    // extract this
-                    <CategoryMainMenu
-                        categoryID={overlay.menuData.categoryID}
-                        setIsMoveArrows={setIsMoveArrows}
-                        setIsCategoryMainMenu={setIsCategoryMainMenu}
-                    />
+                {isCatsMainMenu && (
+                    <CategoryMainMenu setIsMoveArrows={setIsMoveArrows} setIsCategoryMainMenu={setIsCatsMainMenu} />
                 )}
                 {isMoveArrows && <MoveArrows />}
             </View>

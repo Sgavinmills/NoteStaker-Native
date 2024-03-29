@@ -77,7 +77,11 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
     };
 
     const handleMenuPress = () => {
-        const overlay: MenuOverlay = {
+        if (overlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+        const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "category",
             menuData: {
@@ -86,7 +90,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                 subCategoryID: "",
             },
         };
-        dispatch(updateMenuOverlay(overlay));
+        dispatch(updateMenuOverlay(newOverlay));
     };
 
     const addBottomTileMartin = () => {

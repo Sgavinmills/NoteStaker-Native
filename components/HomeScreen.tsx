@@ -45,6 +45,7 @@ const HomeScreen: React.FC = () => {
                 <CategoryModal
                     setNewCatModalVisible={setNewCatModalVisible}
                     newCatModalVisible={newCatModalVisible}
+                    catInfo={{ currentName: "", parentCat: "" }}
                 ></CategoryModal>
                 <TouchableOpacity onPress={() => setNewCatModalVisible(true)}>
                     <Text style={categoryStyles.newCategoryText}>+</Text>
