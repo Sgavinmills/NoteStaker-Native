@@ -61,6 +61,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
 
     const renderSubCategory = ({ item, index }: { item: SubCategory; index: number }) => (
         <SubCategoryTile
+            parentCategoryID={category.id}
             isLastCategory={isLastCategory}
             subCategory={item}
             isLastSubCategory={index === subCatsForThisCat.length - 1}

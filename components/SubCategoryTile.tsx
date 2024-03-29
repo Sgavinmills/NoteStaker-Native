@@ -18,6 +18,7 @@ interface TileProps {
     isLastSubCategory: boolean;
     isNoteInputActive: boolean;
     setIsNoteInputActive: React.Dispatch<React.SetStateAction<boolean>>;
+    parentCategoryID: string;
 }
 
 const SubCategoryTile: React.FC<TileProps> = ({
@@ -26,6 +27,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
     isLastSubCategory,
     isNoteInputActive,
     setIsNoteInputActive,
+    parentCategoryID,
 }) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [isExpanded, setIsExpanded] = useState(false);
@@ -78,7 +80,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
             menuType: "subCategory",
             menuData: {
                 noteID: "",
-                categoryID: "",
+                categoryID: parentCategoryID,
                 subCategoryID: subCategory.id,
             },
         };

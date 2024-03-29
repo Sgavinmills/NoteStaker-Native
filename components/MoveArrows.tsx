@@ -4,7 +4,7 @@ import arrowStyles from "../styles/arrowStyles";
 import { FontAwesome, Entypo } from "@expo/vector-icons";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setArrows, updateCategory, updateCategoryList, updateMenuOverlay, updateSubCategory } from "../redux/slice";
+import { updateCategory, updateCategoryList, updateMenuOverlay, updateSubCategory } from "../redux/slice";
 import { RootState } from "../redux/reducers/reducers";
 
 interface TileProps {}
@@ -18,10 +18,19 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
             const newList = [...memory.categoryList];
             const currentIndex = newList.indexOf(memory.menuOverlay.menuData.categoryID);
             if (currentIndex < newList.length - 1) {
-                const temp = newList[currentIndex + 1];
-                newList[currentIndex + 1] = newList[currentIndex];
-                newList[currentIndex] = temp;
-                dispatch(updateCategoryList(newList));
+                const updatedList = moveDownList(newList, currentIndex);
+                dispatch(updateCategoryList(updatedList));
+            }
+        }
+
+        if (memory.menuOverlay.menuType === "subCategory") {
+            const parentCategoryCopy = { ...memory.categories[memory.menuOverlay.menuData.categoryID] };
+
+            const newList = [...parentCategoryCopy.subCategories];
+            const currentIndex = newList.indexOf(memory.menuOverlay.menuData.subCategoryID);
+            if (currentIndex < newList.length - 1) {
+                parentCategoryCopy.subCategories = moveDownList(newList, currentIndex);
+                dispatch(updateCategory(parentCategoryCopy));
             }
         }
     };
@@ -31,12 +40,35 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
             const newList = [...memory.categoryList];
             const currentIndex = newList.indexOf(memory.menuOverlay.menuData.categoryID);
             if (currentIndex > 0) {
-                const temp = newList[currentIndex - 1];
-                newList[currentIndex - 1] = newList[currentIndex];
-                newList[currentIndex] = temp;
-                dispatch(updateCategoryList(newList));
+                const updatedList = moveUpList(newList, currentIndex);
+                dispatch(updateCategoryList(updatedList));
             }
         }
+
+        if (memory.menuOverlay.menuType === "subCategory") {
+            const parentCategoryCopy = { ...memory.categories[memory.menuOverlay.menuData.categoryID] };
+
+            const newList = [...parentCategoryCopy.subCategories];
+            const currentIndex = newList.indexOf(memory.menuOverlay.menuData.subCategoryID);
+            if (currentIndex > 0) {
+                parentCategoryCopy.subCategories = moveUpList(newList, currentIndex);
+                dispatch(updateCategory(parentCategoryCopy));
+            }
+        }
+    };
+
+    const moveDownList = (newList: string[], index: number) => {
+        const temp = newList[index + 1];
+        newList[index + 1] = newList[index];
+        newList[index] = temp;
+        return [...newList];
+    };
+
+    const moveUpList = (newList: string[], index: number) => {
+        const temp = newList[index - 1];
+        newList[index - 1] = newList[index];
+        newList[index] = temp;
+        return [...newList];
     };
 
     return (
