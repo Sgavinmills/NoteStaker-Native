@@ -189,6 +189,7 @@ const NoteTile: React.FC<TileProps> = ({
                     isShowingImage={isShowingImage}
                     setIsShowingImage={setIsShowingImage}
                     imageURI={note.imageURI}
+                    note={note}
                 />
             )}
         </View>
