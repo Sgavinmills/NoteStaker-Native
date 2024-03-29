@@ -1,5 +1,5 @@
-import { FlatList, TouchableOpacity, Text, View, StatusBar } from "react-native";
-import { useSelector } from "react-redux";
+import { FlatList, TouchableOpacity, Text, View, StatusBar, TouchableWithoutFeedback } from "react-native";
+import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
 import { RootState } from "../redux/reducers/reducers";
@@ -8,10 +8,14 @@ import { Category } from "../types";
 import { useState } from "react";
 import CategoryModal from "./CategoryModal";
 import MenuDisplay from "./MenuDisplay";
+import { AppDispatch } from "../redux/store/store";
+import { updateMenuOverlay } from "../redux/slice";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 
 const HomeScreen: React.FC = () => {
     const memory = useSelector((state: RootState) => state.memory);
     const [newCatModalVisible, setNewCatModalVisible] = useState(false);
+    const dispatch = useDispatch<AppDispatch>();
 
     const catsForHomeScreen: Category[] = [];
     memory.categoryList.forEach((cat) => {
@@ -27,26 +31,35 @@ const HomeScreen: React.FC = () => {
             isLastCategory={index === catsForHomeScreen.length - 1 ? true : false}
         />
     );
-    return (
-        <View style={styles.mainContainer}>
-            <StatusBar translucent={true} />
-            <CategoryModal
-                setNewCatModalVisible={setNewCatModalVisible}
-                newCatModalVisible={newCatModalVisible}
-            ></CategoryModal>
-            <TouchableOpacity onPress={() => setNewCatModalVisible(true)}>
-                <Text style={categoryStyles.newCategoryText}>+</Text>
-            </TouchableOpacity>
 
-            <FlatList
-                removeClippedSubviews={false}
-                style={categoryStyles.categoryListContainer}
-                data={catsForHomeScreen}
-                renderItem={renderCategory}
-                keyExtractor={(cat) => cat.id}
-            />
-            {memory.menuOverlay.isShowing && <MenuDisplay overlay={memory.menuOverlay} />}
-        </View>
+    const handleOutsideMenuPress = () => {
+        if (memory.menuOverlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+    };
+    return (
+        <TouchableWithoutFeedback onPress={handleOutsideMenuPress}>
+            <View style={styles.mainContainer}>
+                <StatusBar translucent={true} />
+                <CategoryModal
+                    setNewCatModalVisible={setNewCatModalVisible}
+                    newCatModalVisible={newCatModalVisible}
+                ></CategoryModal>
+                <TouchableOpacity onPress={() => setNewCatModalVisible(true)}>
+                    <Text style={categoryStyles.newCategoryText}>+</Text>
+                </TouchableOpacity>
+
+                <FlatList
+                    removeClippedSubviews={false}
+                    style={categoryStyles.categoryListContainer}
+                    data={catsForHomeScreen}
+                    renderItem={renderCategory}
+                    keyExtractor={(cat) => cat.id}
+                />
+                {memory.menuOverlay.isShowing && <MenuDisplay overlay={memory.menuOverlay} />}
+            </View>
+        </TouchableWithoutFeedback>
     );
 };
 

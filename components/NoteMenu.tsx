@@ -3,11 +3,12 @@ import noteStyles from "../styles/noteStyles";
 import { FontAwesome, Entypo } from "@expo/vector-icons";
 import { Note } from "../types";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteNoteFromAllCategories, updateNote, setArrows, updateMenuOverlay } from "../redux/slice";
+import { deleteNoteFromAllCategories, updateNote } from "../redux/slice";
 import * as ImagePicker from "expo-image-picker";
 import { Dimensions } from "react-native";
 import { AppDispatch } from "../redux/store/store";
 
+// PROB WONT NEED THIS ANYMORE.
 interface TileProps {
     note: Note;
     setIsShowingNoteMenu: React.Dispatch<React.SetStateAction<boolean>>;

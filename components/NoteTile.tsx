@@ -11,7 +11,7 @@ import ImageModal from "./ImageModal";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
-import { emptyOverlay } from "../utilFuncs/utilFuncs";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 
 interface TileProps {
     note: Note;
@@ -73,7 +73,7 @@ const NoteTile: React.FC<TileProps> = ({
                 ) {
                     // need a util func to get empty overlay
 
-                    dispatch(updateMenuOverlay(emptyOverlay())); // or actually, make turnoffmeuoverlay reducer that just sets all menu data to empty
+                    dispatch(updateMenuOverlay(getEmptyOverlay())); // or actually, make turnoffmeuoverlay reducer that just sets all menu data to empty
                 }
             }
         };

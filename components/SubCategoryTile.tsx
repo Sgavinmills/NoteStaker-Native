@@ -8,6 +8,9 @@ import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
 import { Note, SubCategory } from "../types";
 import NewNoteTile from "./NewNoteTile";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { updateMenuOverlay } from "../redux/slice";
+import { AppDispatch } from "../redux/store/store";
 
 interface TileProps {
     subCategory: SubCategory;
@@ -27,12 +30,19 @@ const SubCategoryTile: React.FC<TileProps> = ({
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
+    const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const dispatch = useDispatch<AppDispatch>();
 
     const notesForThisSubCat = subCategory.notes.map((note) => {
         return notes[note];
     });
 
     const toggleExpansion = () => {
+        if (overlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+
         setIsExpanded(!isExpanded);
     };
 

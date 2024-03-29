@@ -4,11 +4,12 @@ import menuOverlayStyles from "../styles/menuOverlayStyles";
 import { FontAwesome, Entypo, EvilIcons } from "@expo/vector-icons";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setArrows, updateCategory, updateMenuOverlay, updateSubCategory } from "../redux/slice";
+import { updateCategory, updateMenuOverlay, updateSubCategory } from "../redux/slice";
 import { RootState } from "../redux/reducers/reducers";
 import { MenuOverlay } from "../types";
 import CategoryMainMenu from "./CategoryMainMenu";
 import MoveArrows from "./MoveArrows";
+import NoteMenu from "./NoteMenu";
 
 interface TileProps {
     overlay: MenuOverlay;
@@ -21,6 +22,7 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
     // const memory = useSelector((state: RootState) => state.memory);
 
     const [isCategoryMainMenu, setIsCategoryMainMenu] = useState(overlay.menuType === "category");
+    const [isActiveNoteMenu, setIsActiveNoteMenu] = useState(overlay.menuType === "note");
     const [isMoveArrows, setIsMoveArrows] = useState(false);
 
     const handleClose = () => {

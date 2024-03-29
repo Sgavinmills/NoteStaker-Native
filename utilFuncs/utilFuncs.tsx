@@ -1,6 +1,6 @@
 import { MenuOverlay } from "../types";
 
-export const emptyOverlay = () => {
+export const getEmptyOverlay = () => {
     const overlay: MenuOverlay = {
         isShowing: false,
         menuType: "",

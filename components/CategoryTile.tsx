@@ -11,6 +11,7 @@ import NewNoteTile from "./NewNoteTile";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";
 import { updateMenuOverlay } from "../redux/slice";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 
 interface TileProps {
     category: Category;
@@ -24,6 +25,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
 
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
     const notes = useSelector((state: RootState) => state.memory.notes);
+    const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
 
@@ -50,6 +52,10 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
     });
 
     const toggleExpansion = () => {
+        if (overlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
         setIsExpanded(!isExpanded);
     };
 
