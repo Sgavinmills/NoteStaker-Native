@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Modal, View, Text, Button, TouchableOpacity, BackHandler } from "react-native";
 import menuOverlayStyles from "../styles/menuOverlayStyles";
-import { FontAwesome, Entypo, EvilIcons } from "@expo/vector-icons";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { updateCategory, updateMenuOverlay, updateSubCategory } from "../redux/slice";
-import { RootState } from "../redux/reducers/reducers";
 import { MenuOverlay } from "../types";
 import CategoryMainMenu from "./CategoryMainMenu";
 import MoveArrows from "./MoveArrows";
-import NoteMenu from "./NoteMenu";
+import NoteMainMenu from "./NoteMainMenu";
 
 interface TileProps {
     overlay: MenuOverlay;
@@ -61,6 +59,9 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
             <View style={menuOverlayStyles.contentContainer}>
                 {isCatsMainMenu && (
                     <CategoryMainMenu setIsMoveArrows={setIsMoveArrows} setIsCategoryMainMenu={setIsCatsMainMenu} />
+                )}
+                {isNoteMainMenu && (
+                    <NoteMainMenu setIsMoveArrows={setIsMoveArrows} setIsNoteMainMenu={setIsNoteMainMenu} />
                 )}
                 {isMoveArrows && <MoveArrows />}
             </View>

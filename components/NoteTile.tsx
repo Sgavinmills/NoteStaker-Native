@@ -6,7 +6,6 @@ import { useDispatch } from "react-redux";
 import { deleteNoteFromAllCategories, updateMenuOverlay, updateNote } from "../redux/slice";
 import { useEffect, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import NoteMenu from "./NoteMenu";
 import ImageModal from "./ImageModal";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
@@ -48,9 +47,6 @@ const NoteTile: React.FC<TileProps> = ({
     const [image, setImage] = useState<string | null>(null);
     const [isShowingImage, setIsShowingImage] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
-    const [isShowingNoteMenu, setIsShowingNoteMenu] = useState(false);
-    const [xCoordNoteMenu, setXCoordNoteMenu] = useState(0);
-    const [yCoordNoteMenu, setYCoordNoteMenu] = useState(0);
     const handleNoteChange = (text: string) => {
         dispatch(updateNote({ ...note, note: text }));
     };
@@ -108,11 +104,21 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleMenuPress = (event: GestureResponderEvent) => {
-        if (!menuOverlay.isShowing) {
-            setIsShowingNoteMenu(true);
-            setXCoordNoteMenu(event.nativeEvent.pageX);
-            setYCoordNoteMenu(event.nativeEvent.pageY);
+        if (menuOverlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
         }
+
+        const newOverlay: MenuOverlay = {
+            isShowing: true,
+            menuType: "note",
+            menuData: {
+                noteID: note.id,
+                categoryID: categoryID ? categoryID : "",
+                subCategoryID: subCategoryID ? subCategoryID : "",
+            },
+        };
+        dispatch(updateMenuOverlay(newOverlay));
     };
 
     const handleImagePress = () => {
@@ -146,7 +152,7 @@ const NoteTile: React.FC<TileProps> = ({
                     </TouchableOpacity>
                     <TextInput
                         multiline
-                        style={[noteStyles.noteText, (isFocused || isShowingNoteMenu) && noteStyles.noteTextFocused]}
+                        style={[noteStyles.noteText, isFocused && noteStyles.noteTextFocused]}
                         onChangeText={handleNoteChange}
                         onBlur={handleNoteBlur}
                         onFocus={handleNoteFocus}
@@ -163,7 +169,7 @@ const NoteTile: React.FC<TileProps> = ({
                     <TouchableOpacity onPress={handleMenuPress}>
                         <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
                     </TouchableOpacity>
-                    {isShowingNoteMenu && (
+                    {/* {isShowingNoteMenu && (
                         <NoteMenu
                             xCoordNoteMenu={xCoordNoteMenu}
                             yCoordNoteMenu={yCoordNoteMenu}
@@ -173,7 +179,7 @@ const NoteTile: React.FC<TileProps> = ({
                             subCategoryID={subCategoryID}
                             categoryID={categoryID}
                         />
-                    )}
+                    )} */}
                 </View>
             </View>
             {isShowingImage && (

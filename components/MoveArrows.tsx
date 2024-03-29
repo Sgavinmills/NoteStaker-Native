@@ -21,6 +21,7 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
                 const updatedList = moveDownList(newList, currentIndex);
                 dispatch(updateCategoryList(updatedList));
             }
+            return;
         }
 
         if (memory.menuOverlay.menuType === "subCategory") {
@@ -31,6 +32,28 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
             if (currentIndex < newList.length - 1) {
                 parentCategoryCopy.subCategories = moveDownList(newList, currentIndex);
                 dispatch(updateCategory(parentCategoryCopy));
+            }
+            return;
+        }
+
+        if (memory.menuOverlay.menuType === "note") {
+            if (memory.menuOverlay.menuData.subCategoryID) {
+                const subCategoryCopy = { ...memory.subCategories[memory.menuOverlay.menuData.subCategoryID] };
+                const newList = [...subCategoryCopy.notes];
+                const currentIndex = newList.indexOf(memory.menuOverlay.menuData.noteID);
+                if (currentIndex < newList.length - 1) {
+                    subCategoryCopy.notes = moveDownList(newList, currentIndex);
+                    dispatch(updateSubCategory(subCategoryCopy));
+                }
+                return;
+            }
+
+            const categoryCopy = { ...memory.categories[memory.menuOverlay.menuData.categoryID] };
+            const newList = [...categoryCopy.notes];
+            const currentIndex = newList.indexOf(memory.menuOverlay.menuData.noteID);
+            if (currentIndex < newList.length - 1) {
+                categoryCopy.notes = moveDownList(newList, currentIndex);
+                dispatch(updateCategory(categoryCopy));
             }
         }
     };
@@ -43,6 +66,7 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
                 const updatedList = moveUpList(newList, currentIndex);
                 dispatch(updateCategoryList(updatedList));
             }
+            return;
         }
 
         if (memory.menuOverlay.menuType === "subCategory") {
@@ -53,6 +77,28 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
             if (currentIndex > 0) {
                 parentCategoryCopy.subCategories = moveUpList(newList, currentIndex);
                 dispatch(updateCategory(parentCategoryCopy));
+            }
+            return;
+        }
+
+        if (memory.menuOverlay.menuType === "note") {
+            if (memory.menuOverlay.menuData.subCategoryID) {
+                const subCategoryCopy = { ...memory.subCategories[memory.menuOverlay.menuData.subCategoryID] };
+                const newList = [...subCategoryCopy.notes];
+                const currentIndex = newList.indexOf(memory.menuOverlay.menuData.noteID);
+                if (currentIndex > 0) {
+                    subCategoryCopy.notes = moveUpList(newList, currentIndex);
+                    dispatch(updateSubCategory(subCategoryCopy));
+                }
+                return;
+            }
+
+            const categoryCopy = { ...memory.categories[memory.menuOverlay.menuData.categoryID] };
+            const newList = [...categoryCopy.notes];
+            const currentIndex = newList.indexOf(memory.menuOverlay.menuData.noteID);
+            if (currentIndex > 0) {
+                categoryCopy.notes = moveUpList(newList, currentIndex);
+                dispatch(updateCategory(categoryCopy));
             }
         }
     };

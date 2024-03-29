@@ -12,6 +12,7 @@ interface TileProps {
     setIsCategoryMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+// CategoryMainMenu provides main menu for parent categories and sub categories
 const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryMainMenu }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const memory = useSelector((state: RootState) => state.memory);
