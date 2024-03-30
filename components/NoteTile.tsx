@@ -63,13 +63,6 @@ const NoteTile: React.FC<TileProps> = ({
     // if thats the only benefit then maybe we dont want it, might be good to keep menuoverlay open in that situation
     useEffect(() => {
         return () => {
-            if (categoryID) {
-                console.log(memory.categories[categoryID].name);
-            }
-
-            if (subCategoryID) {
-                console.log(memory.subCategories[subCategoryID].name);
-            }
             // cleanup method. Turns off arrow overlay if connected to this note
             if (menuOverlayRef.current && menuOverlayRef.current.menuData.noteID === note.id) {
                 const closeOverlay = subCategoryID

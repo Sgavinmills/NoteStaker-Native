@@ -2,6 +2,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Category, Note, SubCategory, MenuOverlay } from "../types";
 import { memory } from "../mockMemory";
+
 interface AppState {
     notes: { [id: string]: Note };
     categories: { [id: string]: Category };
