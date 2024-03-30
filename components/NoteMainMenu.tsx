@@ -12,9 +12,10 @@ import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 interface TileProps {
     setIsMoveArrows: React.Dispatch<React.SetStateAction<boolean>>;
     setIsNoteMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsAdjustingCategories: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu }) => {
+const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu, setIsAdjustingCategories }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const memory = useSelector((state: RootState) => state.memory);
 
@@ -58,6 +59,11 @@ const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu 
         dispatch(deleteNoteFromAllCategories(id));
     };
 
+    const handleAddRemoveCategories = () => {
+        setIsAdjustingCategories(true);
+        setIsNoteMainMenu(false);
+    };
+
     const dispatch = useDispatch<AppDispatch>();
     return (
         <>
@@ -65,12 +71,12 @@ const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu 
                 <FontAwesome name="camera" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>Add photo to note (tmp)</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer}>
-                <FontAwesome name="plus" style={menuOverlayStyles.icons} />
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddRemoveCategories}>
+                <FontAwesome name="reorder" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>Move between categories</Text>
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleHighPriorityPress}>
-                <FontAwesome name="edit" style={menuOverlayStyles.icons} />
+                <FontAwesome name="star" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>Mark as high priority</Text>
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveNote}>

@@ -118,7 +118,6 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
     };
 
     return (
-        // <View style={arrowStyles.modalContainer}>
         <View style={arrowStyles.arrowsContainer}>
             <TouchableOpacity onPress={handleUpPress}>
                 <Entypo name="arrow-bold-up" style={arrowStyles.arrowUp} />
@@ -127,7 +126,6 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
                 <Entypo name="arrow-bold-down" style={arrowStyles.arrowUp} />
             </TouchableOpacity>
         </View>
-        // </View>
     );
 };
 

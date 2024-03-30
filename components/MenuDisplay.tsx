@@ -8,6 +8,7 @@ import { MenuOverlay } from "../types";
 import CategoryMainMenu from "./CategoryMainMenu";
 import MoveArrows from "./MoveArrows";
 import NoteMainMenu from "./NoteMainMenu";
+import AdjustingCategories from "./AdjustingCategories";
 
 interface TileProps {
     overlay: MenuOverlay;
@@ -18,6 +19,7 @@ interface TileProps {
 const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
     const dispatch = useDispatch<AppDispatch>();
     // const memory = useSelector((state: RootState) => state.memory);
+    const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
 
     const [isCatsMainMenu, setIsCatsMainMenu] = useState(
         overlay.menuType === "category" || overlay.menuType === "subCategory"
@@ -61,9 +63,14 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
                     <CategoryMainMenu setIsMoveArrows={setIsMoveArrows} setIsCategoryMainMenu={setIsCatsMainMenu} />
                 )}
                 {isNoteMainMenu && (
-                    <NoteMainMenu setIsMoveArrows={setIsMoveArrows} setIsNoteMainMenu={setIsNoteMainMenu} />
+                    <NoteMainMenu
+                        setIsAdjustingCategories={setIsAdjustingCategories}
+                        setIsMoveArrows={setIsMoveArrows}
+                        setIsNoteMainMenu={setIsNoteMainMenu}
+                    />
                 )}
                 {isMoveArrows && <MoveArrows />}
+                {isAdjustingCategories && <AdjustingCategories />}
             </View>
             <Button title="Close" onPress={handleClose} />
         </View>

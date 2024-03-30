@@ -9,6 +9,9 @@ const theme = {
         modalOverlayBackground: "rgba(0, 0, 0, 0.9)",
         noteMenuBorder: "black",
         noteMenuBackground: "grey",
+        adjustCategoryMainTab: "#6495ED",
+        adjustCategorySubTab: "#FFA07A",
+        adjustCategoryTabSelected: "rgb(10, 191, 86)",
     },
 };
 

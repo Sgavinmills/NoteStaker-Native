@@ -11,6 +11,7 @@ import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { memory } from "../mockMemory";
 
 interface TileProps {
     note: Note;
@@ -19,7 +20,7 @@ interface TileProps {
     isLastNote: boolean;
     isInSubCategory: boolean; // prob dont need this as well as ID, but leaving for now
     subCategoryID?: string;
-    categoryID?: string;
+    categoryID?: string; // dont think this is optional anymore. Should simplify some conditions elsewhere.
     isNoteInputActive: boolean;
     setIsNoteInputActive: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -58,17 +59,24 @@ const NoteTile: React.FC<TileProps> = ({
         menuOverlayRef.current = menuOverlay;
     }, [menuOverlay]);
 
-    // cleanup method so when notetile is disposed of (think category closed) the menu is turned off
+    // cleanup method so when notetile is disposed of (think removed from category) the menu is turned off
+    // if thats the only benefit then maybe we dont want it, might be good to keep menuoverlay open in that situation
     useEffect(() => {
         return () => {
+            if (categoryID) {
+                console.log(memory.categories[categoryID].name);
+            }
+
+            if (subCategoryID) {
+                console.log(memory.subCategories[subCategoryID].name);
+            }
             // cleanup method. Turns off arrow overlay if connected to this note
             if (menuOverlayRef.current && menuOverlayRef.current.menuData.noteID === note.id) {
-                if (
-                    menuOverlayRef.current.menuData.categoryID === categoryID ||
-                    menuOverlayRef.current.menuData.subCategoryID === subCategoryID
-                ) {
-                    // need a util func to get empty overlay
-
+                const closeOverlay = subCategoryID
+                    ? menuOverlayRef.current.menuData.categoryID === categoryID &&
+                      menuOverlayRef.current.menuData.subCategoryID === subCategoryID
+                    : menuOverlayRef.current.menuData.categoryID === categoryID;
+                if (closeOverlay) {
                     dispatch(updateMenuOverlay(getEmptyOverlay())); // or actually, make turnoffmeuoverlay reducer that just sets all menu data to empty
                 }
             }
@@ -108,7 +116,6 @@ const NoteTile: React.FC<TileProps> = ({
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;
         }
-
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "note",

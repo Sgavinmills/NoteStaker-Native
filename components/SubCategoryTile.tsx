@@ -90,6 +90,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
             subCategoryID={subCategory.id}
+            categoryID={parentCategoryID}
             note={item}
             isLastNote={index === notesForThisSubCat.length - 1}
             isLastCategory={isLastCategory}
