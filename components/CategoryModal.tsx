@@ -42,7 +42,7 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
 
     const updateCurrentCategory = () => {
         if (catInfo.parentCat) {
-            updateSubCategory({ ...subCategories[overlay.menuData.subCategoryID], name: newCategoryName });
+            dispatch(updateSubCategory({ ...subCategories[overlay.menuData.subCategoryID], name: newCategoryName }));
             return;
         }
 
@@ -69,7 +69,7 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
 
     const validCatName = () => {
         if (overlay.menuType === "category") {
-            const currentSubCats = categories[catInfo.parentCat].subCategories;
+            const currentSubCats = categories[overlay.menuData.categoryID].subCategories;
             return !currentSubCats.some((subCatID) => {
                 return subCategories[subCatID].name === newCategoryName;
             });
@@ -80,7 +80,7 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
         });
     };
 
-    const handleAddCategory = () => {
+    const handleSubmit = () => {
         if (!newCategoryName) {
             setError(true);
             setErrorMessage("");
@@ -133,7 +133,7 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
                         value={newCategoryName}
                     />
                     <View style={modalStyles.modalButtonContainer}>
-                        <Button title="Submit" onPress={handleAddCategory} />
+                        <Button title="Submit" onPress={handleSubmit} />
                     </View>
                     {parentCatHasNotes && (
                         <View style={modalStyles.errorTextContainer}>

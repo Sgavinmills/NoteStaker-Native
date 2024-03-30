@@ -9,6 +9,10 @@ interface AppState {
     categoryList: string[];
 
     menuOverlay: MenuOverlay;
+
+    // want to separate menu from memory
+    // but also since generally update notes, categoies and subcategories separately
+    // can they be separate states as well? Does it matter?
 }
 
 const initialState: AppState = {
@@ -26,6 +30,15 @@ const initialState: AppState = {
         },
     },
 };
+// i think these should be refactored so all
+// the reducer funcs just take what the state should be
+// and update its bit of state accordingly
+
+// then the components will call util funcs to work out the state and then call reducers with the result
+// and util funcs are pure components that take some of the state, make copies and make it how it should be then return
+// then for some that do multple calls, ie remoaALlNotes does updateNotes and updateCategory we can haeb more general ones to just update all state?
+
+// defo do this, can add some unit tests as we refactor the functions too, pretty important at this stage i think.
 
 const notesSlice = createSlice({
     name: "notes",
@@ -68,7 +81,9 @@ const notesSlice = createSlice({
         },
 
         updateSubCategory(state, action: PayloadAction<SubCategory>) {
+            console.log("huh");
             const subCategoryCopy = action.payload;
+            console.log(subCategoryCopy);
             const subCategoryId = subCategoryCopy.id;
 
             const subCategoriesCopy = { ...state.subCategories };
@@ -78,6 +93,22 @@ const notesSlice = createSlice({
             }
 
             return { ...state, subCategories: subCategoriesCopy };
+        },
+
+        updateNotes(state: AppState, action: PayloadAction<{ [id: string]: Note }>) {
+            const newNotes = { ...action.payload };
+            return { ...state, notes: newNotes };
+        },
+
+        updateCategories(state: AppState, action: PayloadAction<{ [id: string]: Category }>) {
+            const newCategories = { ...action.payload };
+
+            return { ...state, categories: newCategories };
+        },
+
+        updateSubCategories(state: AppState, action: PayloadAction<{ [id: string]: SubCategory }>) {
+            const newSubCategories = { ...action.payload };
+            return { ...state, subCategories: newSubCategories };
         },
 
         deleteNoteFromAllCategories(state: AppState, action: PayloadAction<string>) {
@@ -136,6 +167,9 @@ const notesSlice = createSlice({
             return { ...state, categories: newCategories, categoryList: newCategoryList };
         },
 
+        // when we do the refactyor, things like this will use the reducer
+        // updateCategories.
+        // the rest of the logic will be in a util function.
         addSubCategory(state, action: PayloadAction<{ subCatName: string; parentCatID: string }>) {
             const newSubCategory: SubCategory = {
                 id: getRandomID(),
@@ -178,6 +212,7 @@ const notesSlice = createSlice({
 });
 export const {
     updateCategoryList,
+    updateNotes,
     deleteNoteFromAllCategories,
     addNewNoteToNotes,
     addCategory,
@@ -186,6 +221,8 @@ export const {
     updateSubCategory,
     addSubCategory,
     updateMenuOverlay,
+    updateCategories,
+    updateSubCategories,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

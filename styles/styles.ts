@@ -7,6 +7,11 @@ const styles = StyleSheet.create({
         paddingTop: StatusBar.currentHeight,
         backgroundColor: theme.colors.blackBackground,
     },
+
+    logState: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
 });
 
 export default styles;
