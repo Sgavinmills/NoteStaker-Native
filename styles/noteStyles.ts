@@ -93,6 +93,10 @@ const noteStyles = StyleSheet.create({
         fontSize: 33,
         color: "red",
     },
+
+    highPriority: {
+        color: "gold",
+    },
 });
 
 export default noteStyles;

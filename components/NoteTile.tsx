@@ -152,7 +152,11 @@ const NoteTile: React.FC<TileProps> = ({
                     </TouchableOpacity>
                     <TextInput
                         multiline
-                        style={[noteStyles.noteText, isFocused && noteStyles.noteTextFocused]}
+                        style={[
+                            noteStyles.noteText,
+                            isFocused && noteStyles.noteTextFocused,
+                            note.priority === "high" && noteStyles.highPriority,
+                        ]}
                         onChangeText={handleNoteChange}
                         onBlur={handleNoteBlur}
                         onFocus={handleNoteFocus}

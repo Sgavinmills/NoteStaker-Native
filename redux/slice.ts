@@ -81,9 +81,7 @@ const notesSlice = createSlice({
         },
 
         updateSubCategory(state, action: PayloadAction<SubCategory>) {
-            console.log("huh");
             const subCategoryCopy = action.payload;
-            console.log(subCategoryCopy);
             const subCategoryId = subCategoryCopy.id;
 
             const subCategoriesCopy = { ...state.subCategories };

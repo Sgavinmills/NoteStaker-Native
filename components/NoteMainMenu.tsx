@@ -46,6 +46,12 @@ const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu 
         }
     };
 
+    const handleHighPriorityPress = () => {
+        const noteCopy = { ...memory.notes[overlay.menuData.noteID] };
+        noteCopy.priority = noteCopy.priority !== "high" ? "high" : "normal";
+        dispatch(updateNote(noteCopy));
+    };
+
     const handleDelete = () => {
         // TODO : Add confirmation check before deleting.
         const id = overlay.menuData.noteID;
@@ -63,7 +69,7 @@ const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu 
                 <FontAwesome name="plus" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>Move between categories</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer}>
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleHighPriorityPress}>
                 <FontAwesome name="edit" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>Mark as high priority</Text>
             </TouchableOpacity>
