@@ -144,6 +144,12 @@ const NoteTile: React.FC<TileProps> = ({
         return isLastSubCategory && isLastNote;
     };
 
+    const handleCheckboxPress = () => {
+        const noteCopy = { ...note };
+        noteCopy.completed = !noteCopy.completed;
+        dispatch(updateNote(noteCopy));
+    };
+
     return (
         <View style={[addBottomTileMargin() && noteStyles.lastMargin, isLastNote && noteStyles.bottomBorder]}>
             <View
@@ -173,10 +179,14 @@ const NoteTile: React.FC<TileProps> = ({
                     />
                 </View>
                 <View style={noteStyles.tileIconsContainer}>
-                    {note.completed && <Text style={[noteStyles.icons, noteStyles.completedCheckbox]}>&#x2705;</Text>}
-                    {!note.completed && (
-                        <Text style={[noteStyles.icons, noteStyles.notCompletedCheckbox]}>&#x26AA;</Text>
-                    )}
+                    <TouchableOpacity onPress={handleCheckboxPress}>
+                        {note.completed && (
+                            <Text style={[noteStyles.icons, noteStyles.completedCheckbox]}>&#x2705;</Text>
+                        )}
+                        {!note.completed && (
+                            <Text style={[noteStyles.icons, noteStyles.notCompletedCheckbox]}>&#x26AA;</Text>
+                        )}
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={handleMenuPress}>
                         <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
                     </TouchableOpacity>

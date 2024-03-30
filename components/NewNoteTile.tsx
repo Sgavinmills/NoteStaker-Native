@@ -122,7 +122,7 @@ const NewNoteTile: React.FC<TileProps> = ({
                 />
             </View>
             <View style={noteStyles.tileIconsContainer}>
-                <Text style={noteStyles.icons}>&#x26AA;</Text>
+                <Text style={[noteStyles.icons, noteStyles.notCompletedCheckbox]}>&#x26AA;</Text>
                 <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
             </View>
         </View>
