@@ -14,6 +14,7 @@ export interface Note {
     priority: string;
     completed: boolean;
     imageURI: string;
+    isNewNote: boolean;
 }
 
 export interface Category {

@@ -1,16 +1,15 @@
 import { Text, View, TouchableWithoutFeedback, FlatList, TouchableOpacity } from "react-native";
 import categoryStyles from "../styles/categoryStyles";
-import noteStyles from "../styles/noteStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
 import { RootState } from "../redux/reducers/reducers";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
 import { Note, SubCategory, MenuOverlay } from "../types";
-import NewNoteTile from "./NewNoteTile";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
-import { updateMenuOverlay } from "../redux/slice";
+import { addNewNoteToNotes, updateMenuOverlay, updateSubCategory } from "../redux/slice";
 import { AppDispatch } from "../redux/store/store";
+import { getRandomID } from "../memoryfunctions/memoryfunctions";
 
 interface TileProps {
     subCategory: SubCategory;
@@ -91,8 +90,25 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
     );
 
     const handleAddNote = () => {
-        setIsExpanded(true);
-        setAddingNewNote(true);
+        const noteToAdd: Note = {
+            id: getRandomID(),
+            note: "",
+            additionalInfo: "",
+            dateAdded: "",
+            dateUpdated: "",
+            priority: "normal",
+            completed: false,
+            imageURI: "",
+            isNewNote: true,
+        };
+        dispatch(addNewNoteToNotes(noteToAdd));
+
+        const subCategoryNotes = [...subCategory.notes];
+        subCategoryNotes.unshift(noteToAdd.id);
+        dispatch(updateSubCategory({ ...subCategory, notes: subCategoryNotes }));
+        if (!isExpanded) {
+            toggleExpansion();
+        }
     };
 
     return (
@@ -117,14 +133,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
                     </View>
                 </View>
             </TouchableWithoutFeedback>
-            {isAddingNewNote && (
-                <NewNoteTile
-                    isLastCategory={isLastCategory}
-                    subCategory={subCategory}
-                    isLastSubCategory={isLastSubCategory}
-                    setAddingNewNote={setAddingNewNote}
-                />
-            )}
+
             {isExpanded &&
                 // <FlatList
                 //     style={noteStyles.noteContainer}

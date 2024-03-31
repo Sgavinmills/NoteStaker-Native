@@ -40,14 +40,15 @@ const NoteTile: React.FC<TileProps> = ({
 }) => {
     const dispatch = useDispatch<AppDispatch>();
     const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
 
-    const [noteEditMode, setNoteEditMode] = useState(false);
-
-    const textInputRef = useRef<TextInput>(null);
     const [isShowingImage, setIsShowingImage] = useState(false);
-    const [isFocused, setIsFocused] = useState(false);
     const handleNoteChange = (text: string) => {
-        dispatch(updateNote({ ...note, note: text }));
+        const noteCopy = { ...note, note: text };
+        if (noteCopy.isNewNote) {
+            noteCopy.isNewNote = false;
+        }
+        dispatch(updateNote(noteCopy));
     };
 
     const menuOverlayRef = useRef(menuOverlay);
@@ -149,7 +150,7 @@ const NoteTile: React.FC<TileProps> = ({
                             multiline
                             style={[
                                 noteStyles.noteText,
-                                isFocused && noteStyles.noteTextFocused,
+                                noteStyles.noteTextFocused,
                                 note.priority === "high" && noteStyles.highPriority,
                             ]}
                             onChangeText={handleNoteChange}
@@ -160,13 +161,7 @@ const NoteTile: React.FC<TileProps> = ({
                     )}
                     {!noteEditMode && (
                         <TouchableWithoutFeedback onPress={handleTouchNote}>
-                            <Text
-                                style={[
-                                    noteStyles.noteText,
-                                    isFocused && noteStyles.noteTextFocused,
-                                    note.priority === "high" && noteStyles.highPriority,
-                                ]}
-                            >
+                            <Text style={[noteStyles.noteText, note.priority === "high" && noteStyles.highPriority]}>
                                 {note.note}
                             </Text>
                         </TouchableWithoutFeedback>

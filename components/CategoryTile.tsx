@@ -7,11 +7,11 @@ import { Category, SubCategory, Note, MenuOverlay } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import NoteTile from "./NoteTile";
-import NewNoteTile from "./NewNoteTile";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";
-import { updateMenuOverlay } from "../redux/slice";
+import { addNewNoteToNotes, updateCategory, updateMenuOverlay } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { getRandomID } from "../memoryfunctions/memoryfunctions";
 
 interface TileProps {
     category: Category;
@@ -66,7 +66,23 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
     );
 
     const handleAddNote = () => {
-        setAddingNewNote(true);
+        const noteToAdd: Note = {
+            id: getRandomID(),
+            note: "",
+            additionalInfo: "",
+            dateAdded: "",
+            dateUpdated: "",
+            priority: "normal",
+            completed: false,
+            imageURI: "",
+            isNewNote: true,
+        };
+        dispatch(addNewNoteToNotes(noteToAdd));
+
+        const categoryNotes = [...category.notes];
+        categoryNotes.unshift(noteToAdd.id);
+        dispatch(updateCategory({ ...category, notes: categoryNotes }));
+
         if (!isExpanded) {
             toggleExpansion();
         }
@@ -147,9 +163,6 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                     renderItem={renderSubCategory}
                     keyExtractor={(cat) => cat.id}
                 />
-            )}
-            {isAddingNewNote && (
-                <NewNoteTile isLastCategory={isLastCategory} category={category} setAddingNewNote={setAddingNewNote} />
             )}
             {isExpanded && category.subCategories.length == 0 && (
                 <FlatList
