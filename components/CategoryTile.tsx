@@ -138,6 +138,9 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
+        if (!isExpanded) {
+            setIsExpanded(true);
+        }
     };
 
     const addBottomTileMartin = () => {

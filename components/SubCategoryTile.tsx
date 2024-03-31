@@ -76,6 +76,10 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
+
+        if (!isExpanded) {
+            setIsExpanded(true);
+        }
     };
 
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
