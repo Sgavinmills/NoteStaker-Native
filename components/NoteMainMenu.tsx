@@ -8,7 +8,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import * as ImagePicker from "expo-image-picker";
 import { deleteNoteFromAllCategories, updateMenuOverlay, updateNote } from "../redux/slice";
-import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { getEmptyOverlay, noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
+import DeleteModal from "./DeleteModal";
 interface TileProps {
     setIsMoveArrows: React.Dispatch<React.SetStateAction<boolean>>;
     setIsNoteMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
@@ -18,6 +19,8 @@ interface TileProps {
 const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu, setIsAdjustingCategories }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const memory = useSelector((state: RootState) => state.memory);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [deleteInfo, setDeleteInfo] = useState({ dataType: "", id: "", deleteMessage: "" });
 
     const handleMoveNote = () => {
         setIsMoveArrows(true);
@@ -55,8 +58,29 @@ const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu,
 
     const handleDelete = () => {
         // TODO : Add confirmation check before deleting.
-        const id = overlay.menuData.noteID;
-        dispatch(deleteNoteFromAllCategories(id));
+        setDeleteModalVisible(true);
+        const deleteInfo = {
+            dataType: "note",
+            id: overlay.menuData.noteID,
+            deleteMessage: "Are you sure you want to delete?",
+        };
+
+        const catsToSkip = overlay.menuData.subCategoryID ? null : overlay.menuData.categoryID;
+        const subCatsToSkip = overlay.menuData.subCategoryID ? [overlay.menuData.subCategoryID] : [];
+
+        if (
+            noteExistsInOtherCategories(
+                memory.categories,
+                memory.subCategories,
+                overlay.menuData.noteID,
+                catsToSkip,
+                subCatsToSkip
+            )
+        ) {
+            deleteInfo.deleteMessage =
+                "The note you are about to delete exists in other categories. If you delete, it will be removed from those too. If you only want to remove it from this category then use the move between categories option instead.";
+        }
+        setDeleteInfo(deleteInfo);
     };
 
     const handleAddRemoveCategories = () => {
@@ -91,6 +115,13 @@ const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu,
                 <FontAwesome name="times" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>See additional note info</Text>
             </TouchableOpacity>
+            {deleteModalVisible && (
+                <DeleteModal
+                    setDeleteModalVisible={setDeleteModalVisible}
+                    deleteModalVisible={deleteModalVisible}
+                    deleteInfo={deleteInfo}
+                />
+            )}
         </>
     );
 };

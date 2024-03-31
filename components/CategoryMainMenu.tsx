@@ -16,6 +16,7 @@ import {
     updateSubCategory,
 } from "../redux/slice";
 import { getEmptyOverlay, noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
+import DeleteModal from "./DeleteModal";
 
 interface TileProps {
     setIsMoveArrows: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,9 +28,18 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const memory = useSelector((state: RootState) => state.memory);
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
+    const [deleteFunction, setDeleteFunction] = useState<null | (() => void) | undefined>(null); // need to refactor soon so sdont need to pass this. wanna just call the util func then dispatch from delete modal.
     const catName = overlay.menuType === "category" ? "category" : "sub-category";
     const dispatch = useDispatch<AppDispatch>();
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [deleteInfo, setDeleteInfo] = useState({ dataType: "", id: "", deleteMessage: "" });
+    const showRemoveAllOption = () => {
+        if (overlay.menuType === "subCategory") {
+            return true;
+        }
 
+        return memory.categories[overlay.menuData.categoryID].subCategories.length === 0;
+    };
     const handleEditName = () => {
         setCatModalInfo({
             currentName: getNameOfMenu(),
@@ -61,6 +71,17 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
     };
 
     const handleRemoveAllNotes = () => {
+        setDeleteInfo({
+            dataType: overlay.menuType,
+            id: overlay.menuType === "category" ? overlay.menuData.categoryID : overlay.menuData.subCategoryID,
+            deleteMessage:
+                "Are you sure you want to remove all notes from this category? All notes not within other categories will be permenantly deleted",
+        });
+        setDeleteModalVisible(true);
+        setDeleteFunction(removeAllNotes);
+    };
+
+    const removeAllNotes = () => {
         if (overlay.menuType === "category") {
             const categoryCopy = { ...memory.categories[overlay.menuData.categoryID] };
             const notesToDel = categoryCopy.notes;
@@ -105,6 +126,17 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
             dispatch(updateNotes(memoryNotesCopy));
         }
         dispatch(updateMenuOverlay(getEmptyOverlay()));
+    };
+
+    const handleDeleteCategory = () => {
+        setDeleteInfo({
+            dataType: overlay.menuType,
+            id: overlay.menuType === "category" ? overlay.menuData.categoryID : overlay.menuData.subCategoryID,
+            deleteMessage:
+                "Are you sure you want to delete this category? All notes not within other categories will be permenantly deleted",
+        });
+        setDeleteFunction(deleteCategory);
+        setDeleteModalVisible(true);
     };
 
     // deleteCategory deletes the category. It also deletes the subcategories. Any notes in the category or subcategories
@@ -229,15 +261,24 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
                 <Entypo name="select-arrows" style={[menuOverlayStyles.icons]} />
                 <Text style={menuOverlayStyles.text}>Move {catName}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleRemoveAllNotes}>
-                <FontAwesome name="trash" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>Remove all notes from {catName}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={deleteCategory}>
+            {showRemoveAllOption() && (
+                <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleRemoveAllNotes}>
+                    <FontAwesome name="trash" style={menuOverlayStyles.icons} />
+                    <Text style={menuOverlayStyles.text}>Remove all notes from {catName}</Text>
+                </TouchableOpacity>
+            )}
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDeleteCategory}>
                 <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
                 <Text style={menuOverlayStyles.text}>Delete {catName}</Text>
             </TouchableOpacity>
-
+            {deleteModalVisible && (
+                <DeleteModal
+                    deleteInfo={deleteInfo}
+                    deleteModalVisible={deleteModalVisible}
+                    setDeleteModalVisible={setDeleteModalVisible}
+                    deleteCategory={deleteFunction}
+                />
+            )}
             {isCategoryModal && (
                 <CategoryModal
                     newCatModalVisible={isCategoryModal}

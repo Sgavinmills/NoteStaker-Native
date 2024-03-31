@@ -49,6 +49,11 @@ const modalStyles = StyleSheet.create({
         alignItems: "center",
     },
 
+    text: {
+        color: "white",
+        textAlign: "center",
+    },
+
     errorText: {
         color: theme.colors.categoryText,
         position: "absolute",
@@ -57,6 +62,16 @@ const modalStyles = StyleSheet.create({
 
     modalButtonContainer: {
         width: "65%",
+    },
+
+    deleteButtonContainer: {
+        width: "65%",
+        margin: 10,
+        justifyContent: "space-between",
+    },
+
+    deleteButton: {
+        marginBottom: 15,
     },
 
     imageContainer: {
@@ -72,6 +87,7 @@ const modalStyles = StyleSheet.create({
         borderRadius: 20,
     },
 
+    // image modal
     buttonContainer: {
         position: "absolute",
         bottom: 10,
