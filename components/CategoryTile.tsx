@@ -20,7 +20,6 @@ interface TileProps {
 }
 
 const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) => {
-    const [isNoteInputActive, setIsNoteInputActive] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
 
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
@@ -36,8 +35,6 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
             isLastCategory={isLastCategory}
             isLastNote={index === notesForThisCat.length - 1}
             isInSubCategory={false}
-            isNoteInputActive={isNoteInputActive}
-            setIsNoteInputActive={setIsNoteInputActive}
         />
     );
 
@@ -65,8 +62,6 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
             isLastCategory={isLastCategory}
             subCategory={item}
             isLastSubCategory={index === subCatsForThisCat.length - 1}
-            isNoteInputActive={isNoteInputActive}
-            setIsNoteInputActive={setIsNoteInputActive}
         />
     );
 

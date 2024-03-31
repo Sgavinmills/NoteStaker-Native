@@ -1,17 +1,23 @@
-import { Text, View, TextInput, Image, TouchableOpacity, GestureResponderEvent } from "react-native";
+import {
+    Text,
+    View,
+    TextInput,
+    Image,
+    TouchableOpacity,
+    GestureResponderEvent,
+    TouchableWithoutFeedback,
+} from "react-native";
 import noteStyles from "../styles/noteStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { MenuOverlay, Note } from "../types";
 import { useDispatch } from "react-redux";
 import { deleteNoteFromAllCategories, updateMenuOverlay, updateNote } from "../redux/slice";
 import { useEffect, useRef, useState } from "react";
-import * as ImagePicker from "expo-image-picker";
 import ImageModal from "./ImageModal";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
-import { memory } from "../mockMemory";
 
 interface TileProps {
     note: Note;
@@ -21,14 +27,7 @@ interface TileProps {
     isInSubCategory: boolean; // prob dont need this as well as ID, but leaving for now
     subCategoryID?: string;
     categoryID?: string; // dont think this is optional anymore. Should simplify some conditions elsewhere.
-    isNoteInputActive: boolean;
-    setIsNoteInputActive: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
-// Add button to print current state to console.
-
-// Add 'add note to bottom' of cat functionality. Might be nice with a small subtle downarrow at the bottom of the last note in cat
-// which then adds a addnotetile .
 
 const NoteTile: React.FC<TileProps> = ({
     note,
@@ -38,14 +37,13 @@ const NoteTile: React.FC<TileProps> = ({
     isLastSubCategory,
     categoryID, // might as well just pass full category and subcategory rather than just IDs...
     subCategoryID,
-    isNoteInputActive,
-    setIsNoteInputActive,
 }) => {
     const dispatch = useDispatch<AppDispatch>();
     const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
 
+    const [noteEditMode, setNoteEditMode] = useState(false);
+
     const textInputRef = useRef<TextInput>(null);
-    const [image, setImage] = useState<string | null>(null);
     const [isShowingImage, setIsShowingImage] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
     const handleNoteChange = (text: string) => {
@@ -77,31 +75,13 @@ const NoteTile: React.FC<TileProps> = ({
     }, []);
 
     const handleNoteBlur = () => {
-        setIsNoteInputActive(false);
         if (note.note === "") {
             const id = note.id;
             dispatch(deleteNoteFromAllCategories(id));
             // should give option to delete from just the category or sub category
             //   " you are about to remove note from all cats and sub cats, would you prefer to just delete from this one?"
         }
-        setIsFocused(false);
-    };
-
-    const handleNoteFocus = () => {
-        setIsFocused(true);
-        setIsNoteInputActive(true);
-    };
-
-    const isEdittable = () => {
-        if (isFocused) {
-            return true;
-        }
-
-        if (menuOverlay.isShowing) {
-            return false;
-        }
-
-        return !isNoteInputActive;
+        setNoteEditMode(false);
     };
 
     const handleMenuPress = (event: GestureResponderEvent) => {
@@ -143,6 +123,14 @@ const NoteTile: React.FC<TileProps> = ({
         dispatch(updateNote(noteCopy));
     };
 
+    const handleTouchNote = () => {
+        if (menuOverlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+        setNoteEditMode(true);
+    };
+
     return (
         <View style={[addBottomTileMargin() && noteStyles.lastMargin, isLastNote && noteStyles.bottomBorder]}>
             <View
@@ -156,20 +144,33 @@ const NoteTile: React.FC<TileProps> = ({
                     <TouchableOpacity onPress={handleImagePress}>
                         {note.imageURI && <Image source={{ uri: note.imageURI }} style={{ height: 150, width: 150 }} />}
                     </TouchableOpacity>
-                    <TextInput
-                        multiline
-                        style={[
-                            noteStyles.noteText,
-                            isFocused && noteStyles.noteTextFocused,
-                            note.priority === "high" && noteStyles.highPriority,
-                        ]}
-                        onChangeText={handleNoteChange}
-                        onBlur={handleNoteBlur}
-                        onFocus={handleNoteFocus}
-                        value={note.note}
-                        ref={textInputRef}
-                        editable={isEdittable()}
-                    />
+                    {noteEditMode && (
+                        <TextInput
+                            multiline
+                            style={[
+                                noteStyles.noteText,
+                                isFocused && noteStyles.noteTextFocused,
+                                note.priority === "high" && noteStyles.highPriority,
+                            ]}
+                            onChangeText={handleNoteChange}
+                            onBlur={handleNoteBlur}
+                            value={note.note}
+                            autoFocus
+                        />
+                    )}
+                    {!noteEditMode && (
+                        <TouchableWithoutFeedback onPress={handleTouchNote}>
+                            <Text
+                                style={[
+                                    noteStyles.noteText,
+                                    isFocused && noteStyles.noteTextFocused,
+                                    note.priority === "high" && noteStyles.highPriority,
+                                ]}
+                            >
+                                {note.note}
+                            </Text>
+                        </TouchableWithoutFeedback>
+                    )}
                 </View>
                 <View style={noteStyles.tileIconsContainer}>
                     <TouchableOpacity onPress={handleCheckboxPress}>

@@ -16,19 +16,10 @@ interface TileProps {
     subCategory: SubCategory;
     isLastCategory: boolean;
     isLastSubCategory: boolean;
-    isNoteInputActive: boolean;
-    setIsNoteInputActive: React.Dispatch<React.SetStateAction<boolean>>;
     parentCategoryID: string;
 }
 
-const SubCategoryTile: React.FC<TileProps> = ({
-    subCategory,
-    isLastCategory,
-    isLastSubCategory,
-    isNoteInputActive,
-    setIsNoteInputActive,
-    parentCategoryID,
-}) => {
+const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isLastSubCategory, parentCategoryID }) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
@@ -96,8 +87,6 @@ const SubCategoryTile: React.FC<TileProps> = ({
             isLastCategory={isLastCategory}
             isLastSubCategory={isLastSubCategory}
             isInSubCategory={true}
-            isNoteInputActive={isNoteInputActive}
-            setIsNoteInputActive={setIsNoteInputActive}
         />
     );
 
@@ -136,14 +125,27 @@ const SubCategoryTile: React.FC<TileProps> = ({
                     setAddingNewNote={setAddingNewNote}
                 />
             )}
-            {isExpanded && (
-                <FlatList
-                    style={noteStyles.noteContainer}
-                    data={notesForThisSubCat}
-                    renderItem={renderNote}
-                    keyExtractor={(note) => note.id}
-                />
-            )}
+            {isExpanded &&
+                // <FlatList
+                //     style={noteStyles.noteContainer}
+                //     data={notesForThisSubCat}
+                //     renderItem={renderNote}
+                //     keyExtractor={(note) => note.id}
+                // />
+                notesForThisSubCat.map((note, index) => {
+                    return (
+                        <NoteTile
+                            subCategoryID={subCategory.id}
+                            categoryID={parentCategoryID}
+                            note={note}
+                            isLastNote={index === notesForThisSubCat.length - 1}
+                            isLastCategory={isLastCategory}
+                            isLastSubCategory={isLastSubCategory}
+                            isInSubCategory={true}
+                            key={note.id}
+                        />
+                    );
+                })}
         </>
     );
 };
