@@ -76,11 +76,16 @@ const NoteTile: React.FC<TileProps> = ({
     }, []);
 
     const handleNoteBlur = () => {
-        if (note.note === "") {
+        if (note.note === "" && note.imageURI === "") {
             const id = note.id;
             dispatch(deleteNoteFromAllCategories(id));
             // should give option to delete from just the category or sub category
             //   " you are about to remove note from all cats and sub cats, would you prefer to just delete from this one?"
+        }
+
+        if (note.isNewNote) {
+            const noteCopy = { ...note, isNewNote: false };
+            dispatch(updateNote(noteCopy));
         }
         setNoteEditMode(false);
     };

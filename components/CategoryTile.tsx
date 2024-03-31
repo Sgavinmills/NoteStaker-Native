@@ -1,4 +1,4 @@
-import { Text, View, FlatList, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
+import { Text, View, FlatList, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent } from "react-native";
 import { useRef, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
@@ -9,9 +9,10 @@ import { RootState } from "../redux/reducers/reducers";
 import NoteTile from "./NoteTile";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";
-import { addNewNoteToNotes, updateCategory, updateMenuOverlay } from "../redux/slice";
+import { addNewNoteToNotes, updateCategory, updateMenuOverlay, updateNote } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
+import * as ImagePicker from "expo-image-picker";
 
 interface TileProps {
     category: Category;
@@ -88,6 +89,40 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         }
     };
 
+    const handleLongPressAddNote = (event: GestureResponderEvent) => {
+        pickImage();
+    };
+
+    const pickImage = async () => {
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            const imageURI = result.assets[0].uri;
+            const noteToAdd: Note = {
+                id: getRandomID(),
+                note: "",
+                additionalInfo: "",
+                dateAdded: "",
+                dateUpdated: "",
+                priority: "normal",
+                completed: false,
+                imageURI: imageURI,
+                isNewNote: true,
+            };
+            dispatch(addNewNoteToNotes(noteToAdd));
+
+            const categoryNotes = [...category.notes];
+            categoryNotes.unshift(noteToAdd.id);
+            dispatch(updateCategory({ ...category, notes: categoryNotes }));
+        }
+        setIsExpanded(true);
+    };
+
     const handleMenuPress = () => {
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
@@ -138,7 +173,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
                         {category.subCategories.length === 0 && (
-                            <TouchableOpacity onPress={handleAddNote}>
+                            <TouchableOpacity onPress={handleAddNote} onLongPress={handleLongPressAddNote}>
                                 <FontAwesome name="plus" style={[categoryStyles.plusIconText, categoryStyles.icons]} />
                             </TouchableOpacity>
                         )}

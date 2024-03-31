@@ -5,7 +5,7 @@ import { MaterialIcons } from "@expo/vector-icons"; // or your preferred icon li
 import { Note } from "../types";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch } from "react-redux";
-import { updateNote } from "../redux/slice";
+import { deleteNoteFromAllCategories, updateNote } from "../redux/slice";
 
 interface TileProps {
     height: number;
@@ -25,6 +25,10 @@ const ImageModal: React.FC<TileProps> = ({ note, height, width, isShowingImage, 
     const handleDelete = () => {
         setIsShowingImage(false);
 
+        if (note.note === "") {
+            dispatch(deleteNoteFromAllCategories(note.id));
+            return;
+        }
         const noteCopy = { ...note };
         dispatch(updateNote({ ...noteCopy, imageURI: "" }));
     };

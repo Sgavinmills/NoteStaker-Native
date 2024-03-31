@@ -1,4 +1,4 @@
-import { Text, View, TouchableWithoutFeedback, FlatList, TouchableOpacity } from "react-native";
+import { GestureResponderEvent, Text, View, TouchableWithoutFeedback, FlatList, TouchableOpacity } from "react-native";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
@@ -10,6 +10,7 @@ import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { addNewNoteToNotes, updateMenuOverlay, updateSubCategory } from "../redux/slice";
 import { AppDispatch } from "../redux/store/store";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
+import * as ImagePicker from "expo-image-picker";
 
 interface TileProps {
     subCategory: SubCategory;
@@ -111,13 +112,47 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
         }
     };
 
+    const handleLongPressAddNote = (event: GestureResponderEvent) => {
+        pickImage();
+    };
+
+    const pickImage = async () => {
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            const imageURI = result.assets[0].uri;
+            const noteToAdd: Note = {
+                id: getRandomID(),
+                note: "",
+                additionalInfo: "",
+                dateAdded: "",
+                dateUpdated: "",
+                priority: "normal",
+                completed: false,
+                imageURI: imageURI,
+                isNewNote: true,
+            };
+            dispatch(addNewNoteToNotes(noteToAdd));
+
+            const subCategoryNotes = [...subCategory.notes];
+            subCategoryNotes.unshift(noteToAdd.id);
+            dispatch(updateSubCategory({ ...subCategory, notes: subCategoryNotes }));
+        }
+        setIsExpanded(true);
+    };
+
     return (
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
                 <View style={[categoryStyles.subCategoryTile, addBottomTileMargin() && categoryStyles.lastMargin]}>
                     <Text style={categoryStyles.subCategoryText}>↳ {subCategory.name}</Text>
                     <View style={categoryStyles.tileIconsContainer}>
-                        <TouchableOpacity onPress={handleAddNote}>
+                        <TouchableOpacity onPress={handleAddNote} onLongPress={handleLongPressAddNote}>
                             <FontAwesome name="plus" style={[categoryStyles.categoryText, categoryStyles.icons]} />
                         </TouchableOpacity>
                         <FontAwesome
