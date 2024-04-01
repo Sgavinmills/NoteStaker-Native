@@ -22,9 +22,7 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const memory = useSelector((state: RootState) => state.memory);
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
-    const [deleteFunction, setDeleteFunction] = useState<null | (() => void) | undefined>(null); // need to refactor soon so sdont need to pass this. wanna just call the util func then dispatch from delete modal.
     const catName = overlay.menuType === "category" ? "category" : "sub-category";
-    const dispatch = useDispatch<AppDispatch>();
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteMessage: "", deleteType: "" });
     const showRemoveAllOption = () => {
@@ -65,21 +63,39 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
     };
 
     const handleRemoveAllNotes = () => {
-        setDeleteInfo({
+        const deleteInfo: DeleteInfo = {
             deleteType: "removeAll",
-            deleteMessage:
-                "Are you sure you want to remove all notes from this category? All notes not within other categories will be permenantly deleted",
-        });
+            deleteMessage: "",
+        };
+
+        let catName: string;
+        if (overlay.menuType === "category") {
+            catName = memory.categories[overlay.menuData.categoryID].name;
+        } else {
+            catName = memory.subCategories[overlay.menuData.subCategoryID].name;
+        }
+
+        deleteInfo.deleteMessage = `Are you sure you want to remove all notes from ${catName}? All notes not within other categories will be permenantly deleted`;
+        setDeleteInfo(deleteInfo);
         setDeleteModalVisible(true);
-        // setDeleteFunction(removeAllNotes);
     };
 
     const handleDeleteCategory = () => {
-        setDeleteInfo({
-            deleteType: "deleteCategory",
-            deleteMessage:
-                "Are you sure you want to delete this category? All notes not within other categories will be permenantly deleted",
-        });
+        const deleteInfo: DeleteInfo = {
+            deleteType: "removeAll",
+            deleteMessage: "",
+        };
+
+        let catName: string;
+        if (overlay.menuType === "category") {
+            catName = memory.categories[overlay.menuData.categoryID].name;
+        } else {
+            catName = memory.subCategories[overlay.menuData.subCategoryID].name;
+        }
+
+        deleteInfo.deleteMessage = `Are you sure you want to delete the category ${catName}? All notes not within other categories will be permenantly deleted`;
+
+        setDeleteInfo(deleteInfo);
         setDeleteModalVisible(true);
     };
 
