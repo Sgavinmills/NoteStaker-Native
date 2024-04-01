@@ -10,7 +10,7 @@ const arrowStyles = StyleSheet.create({
 
     arrowUp: {
         fontSize: 150,
-        color: "#2196F3",
+        color: theme.colors.buttonBlue,
     },
 });
 

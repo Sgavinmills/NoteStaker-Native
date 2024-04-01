@@ -13,6 +13,7 @@ const theme = {
         adjustCategoryMainTab: "#6495ED",
         adjustCategorySubTab: "#FFA07A",
         adjustCategoryTabSelected: "rgb(10, 191, 86)",
+        buttonBlue: "#2196F3",
     },
 };
 

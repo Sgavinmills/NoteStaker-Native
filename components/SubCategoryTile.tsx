@@ -11,6 +11,7 @@ import { addNewNoteToNotes, updateMenuOverlay, updateSubCategory } from "../redu
 import { AppDispatch } from "../redux/store/store";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import * as ImagePicker from "expo-image-picker";
+import SubtleMessage from "./SubtleMessage";
 
 interface TileProps {
     subCategory: SubCategory;
@@ -21,6 +22,8 @@ interface TileProps {
 
 const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isLastSubCategory, parentCategoryID }) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
+    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
+
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingNewNote, setAddingNewNote] = useState(false);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
@@ -35,6 +38,15 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
     const toggleExpansion = () => {
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+
+        const isEmpty = subCategory.notes.length === 0;
+        if (isEmpty) {
+            setShowSubtleMessage(true);
+            setTimeout(() => {
+                setShowSubtleMessage(false);
+            }, 500);
             return;
         }
 
@@ -196,7 +208,13 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
                     </View>
                 </View>
             </TouchableWithoutFeedback>
-
+            {showSubtleMessage && (
+                <SubtleMessage
+                    message="This category is empty"
+                    visible={showSubtleMessage}
+                    setSubtleMessage={setShowSubtleMessage}
+                />
+            )}
             {isExpanded &&
                 // <FlatList
                 //     style={noteStyles.noteContainer}

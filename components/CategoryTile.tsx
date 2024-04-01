@@ -13,6 +13,7 @@ import { addNewNoteToNotes, updateCategory, updateMenuOverlay, updateNote } from
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import * as ImagePicker from "expo-image-picker";
+import SubtleMessage from "./SubtleMessage";
 
 interface TileProps {
     category: Category;
@@ -22,6 +23,7 @@ interface TileProps {
 
 const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
 
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
     const notes = useSelector((state: RootState) => state.memory.notes);
@@ -52,6 +54,15 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
     const toggleExpansion = () => {
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+
+        const isEmpty = category.notes.length === 0 && category.subCategories.length === 0;
+        if (isEmpty) {
+            setShowSubtleMessage(true);
+            setTimeout(() => {
+                setShowSubtleMessage(false);
+            }, 500);
             return;
         }
         setIsExpanded(!isExpanded);
@@ -199,6 +210,13 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                     </View>
                 </View>
             </TouchableWithoutFeedback>
+            {showSubtleMessage && (
+                <SubtleMessage
+                    message="This sub category is empty"
+                    visible={showSubtleMessage}
+                    setSubtleMessage={setShowSubtleMessage}
+                />
+            )}
             {isExpanded && category.subCategories.length > 0 && (
                 <FlatList
                     removeClippedSubviews={false}

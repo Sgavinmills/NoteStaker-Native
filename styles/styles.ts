@@ -12,6 +12,19 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
     },
+
+    subtleMessageContainer: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+        backgroundColor: theme.colors.buttonBlue,
+        padding: 5,
+    },
+
+    subtleMessageText: {
+        textAlign: "center",
+        color: "white",
+    },
 });
 
 export default styles;
