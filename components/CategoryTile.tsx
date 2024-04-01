@@ -153,10 +153,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         }
 
         const isEmpty = category.notes.length === 0 && category.subCategories.length === 0;
-        if (isEmpty && !isAddingNewNote) {
-            return true;
-        }
-        return false;
+        return isEmpty;
     };
 
     const tileHasMenuOpen = () => {

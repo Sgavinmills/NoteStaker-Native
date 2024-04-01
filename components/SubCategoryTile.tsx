@@ -42,7 +42,11 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
     };
 
     const tileHasMenuOpen = () => {
-        if (overlay.menuType === "subCategory" && overlay.menuData.subCategoryID === subCategory.id) {
+        if (
+            overlay.isShowing &&
+            overlay.menuType === "subCategory" &&
+            overlay.menuData.subCategoryID === subCategory.id
+        ) {
             return true;
         }
 
