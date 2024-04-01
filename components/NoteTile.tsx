@@ -108,6 +108,11 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleImagePress = () => {
+        if (menuOverlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+
         setIsShowingImage(true);
     };
 

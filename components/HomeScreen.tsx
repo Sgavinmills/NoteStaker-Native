@@ -26,6 +26,15 @@ const HomeScreen: React.FC = () => {
         }
     });
 
+    const handleNewCategoryPress = () => {
+        if (memory.menuOverlay.isShowing) {
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+
+        setNewCatModalVisible(true);
+    };
+
     const renderCategory = ({ item, index }: { item: Category; index: number }) => (
         <CategoryTile
             category={item}
@@ -50,7 +59,7 @@ const HomeScreen: React.FC = () => {
                     newCatModalVisible={newCatModalVisible}
                     catInfo={{ currentName: "", parentCat: "" }}
                 ></CategoryModal>
-                <TouchableOpacity onPress={() => setNewCatModalVisible(true)}>
+                <TouchableOpacity onPress={handleNewCategoryPress}>
                     <Text style={categoryStyles.newCategoryText}>+</Text>
                 </TouchableOpacity>
 
