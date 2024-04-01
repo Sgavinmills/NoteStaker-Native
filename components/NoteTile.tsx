@@ -184,7 +184,7 @@ const NoteTile: React.FC<TileProps> = ({
                         />
                     )}
                     {!noteEditMode && (
-                        <TouchableWithoutFeedback onPress={handleTouchNote}>
+                        <TouchableWithoutFeedback onPress={handleTouchNote} onLongPress={handleMenuPress}>
                             <Text style={[noteStyles.noteText, note.priority === "high" && noteStyles.highPriority]}>
                                 {note.note}
                             </Text>

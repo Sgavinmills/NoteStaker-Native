@@ -28,7 +28,6 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
     const notes = useSelector((state: RootState) => state.memory.notes);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const [isAddingNewNote, setAddingNewNote] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
 
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
@@ -177,7 +176,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
 
     return (
         <>
-            <TouchableWithoutFeedback onPress={toggleExpansion}>
+            <TouchableWithoutFeedback onPress={toggleExpansion} onLongPress={handleMenuPress}>
                 <View
                     style={[
                         categoryStyles.categoryTile,

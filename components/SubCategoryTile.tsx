@@ -178,7 +178,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
 
     return (
         <>
-            <TouchableWithoutFeedback onPress={toggleExpansion}>
+            <TouchableWithoutFeedback onPress={toggleExpansion} onLongPress={handleMenuPress}>
                 <View
                     style={[
                         categoryStyles.subCategoryTile,
