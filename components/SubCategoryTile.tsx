@@ -210,7 +210,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
             </TouchableWithoutFeedback>
             {showSubtleMessage && (
                 <SubtleMessage
-                    message="This category is empty"
+                    message="This sub-category is empty"
                     visible={showSubtleMessage}
                     setSubtleMessage={setShowSubtleMessage}
                 />

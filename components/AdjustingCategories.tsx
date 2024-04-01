@@ -8,12 +8,15 @@ import { updateCategory, updateCategoryList, updateMenuOverlay, updateSubCategor
 import { RootState } from "../redux/reducers/reducers";
 import { noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
 import theme from "../styles/constants";
+import SubtleMessage from "./SubtleMessage";
 
 interface TileProps {}
 
 // since menuoverlay data wont change we can just extract to easily readable and reusuable consts.
 
 const AdjustingCategories: React.FC<TileProps> = ({}) => {
+    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
+
     const handleSubCategoryClick = (subCategoryID: string) => {
         // basically just check if it is in the notes array and add/remove it accordingly?
         // we still need the check to make sue it exists else where... but we will also need that in cats too.
@@ -31,6 +34,10 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                     [subCategoryID]
                 )
             ) {
+                setShowSubtleMessage(true);
+                setTimeout(() => {
+                    setShowSubtleMessage(false);
+                }, 500);
                 return;
             }
 
@@ -58,6 +65,10 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                         []
                     )
                 ) {
+                    setShowSubtleMessage(true);
+                    setTimeout(() => {
+                        setShowSubtleMessage(false);
+                    }, 500);
                     return;
                 }
                 notesCopy.splice(index, 1);
@@ -154,6 +165,13 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                         <FontAwesome6 name="arrow-turn-up" size={24} color={theme.colors.categoryText} />
                     </TouchableOpacity>
                 </>
+            )}
+            {showSubtleMessage && (
+                <SubtleMessage
+                    message="Can't remove from only category"
+                    visible={showSubtleMessage}
+                    setSubtleMessage={setShowSubtleMessage}
+                />
             )}
         </View>
     );

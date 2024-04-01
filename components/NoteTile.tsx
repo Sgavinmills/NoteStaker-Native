@@ -59,8 +59,8 @@ const NoteTile: React.FC<TileProps> = ({
         menuOverlayRef.current = menuOverlay;
     }, [menuOverlay]);
 
-    // cleanup method so when notetile is disposed of (think removed from category) the menu is turned off
-    // if thats the only benefit then maybe we dont want it, might be good to keep menuoverlay open in that situation
+    // this cleanup method closes the menu overlay if the tile its related to gets disposed of. Originally was for if the category got closed (which is no longer possible)
+    // and then for when removing from category, but we've now taken that out. GUnna leave code in for now incase it does need to be actioned but atm doesnt do anything.
     useEffect(() => {
         return () => {
             // cleanup method. Turns off arrow overlay if connected to this note
@@ -70,7 +70,7 @@ const NoteTile: React.FC<TileProps> = ({
                       menuOverlayRef.current.menuData.subCategoryID === subCategoryID
                     : menuOverlayRef.current.menuData.categoryID === categoryID;
                 if (closeOverlay) {
-                    dispatch(updateMenuOverlay(getEmptyOverlay())); // or actually, make turnoffmeuoverlay reducer that just sets all menu data to empty
+                    // dispatch(updateMenuOverlay(getEmptyOverlay())); // or actually, make turnoffmeuoverlay reducer that just sets all menu data to empty
                 }
             }
         };
