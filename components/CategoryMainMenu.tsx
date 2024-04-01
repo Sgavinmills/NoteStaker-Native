@@ -82,7 +82,7 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
 
     const handleDeleteCategory = () => {
         const deleteInfo: DeleteInfo = {
-            deleteType: "removeAll",
+            deleteType: "deleteCategory",
             deleteMessage: "",
         };
 

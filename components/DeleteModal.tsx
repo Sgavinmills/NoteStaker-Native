@@ -214,6 +214,7 @@ const DeleteModal: React.FC<TileProps> = ({
         switch (deleteInfo.deleteType) {
             case "deleteNote": {
                 dispatch(deleteNoteFromAllCategories(overlay.menuData.noteID));
+                dispatch(updateMenuOverlay(getEmptyOverlay()));
                 break;
             }
             case "deleteCategory": {

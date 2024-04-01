@@ -10,15 +10,23 @@ import {
 import noteStyles from "../styles/noteStyles";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
-import { MenuOverlay, Note } from "../types";
+import { Category, MenuOverlay, Note, SubCategory } from "../types";
 import { useDispatch } from "react-redux";
-import { deleteNoteFromAllCategories, updateMenuOverlay, updateNote } from "../redux/slice";
+import {
+    addNewNoteToNotes,
+    deleteNoteFromAllCategories,
+    updateCategory,
+    updateMenuOverlay,
+    updateNote,
+    updateSubCategory,
+} from "../redux/slice";
 import { useEffect, useRef, useState } from "react";
 import ImageModal from "./ImageModal";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { getRandomID } from "../memoryfunctions/memoryfunctions";
 
 interface TileProps {
     note: Note;
@@ -26,8 +34,8 @@ interface TileProps {
     isLastSubCategory?: boolean;
     isLastNote: boolean;
     isInSubCategory: boolean; // prob dont need this as well as ID, but leaving for now
-    subCategoryID?: string;
-    categoryID?: string; // dont think this is optional anymore. Should simplify some conditions elsewhere.
+    subCategory?: SubCategory;
+    category: Category;
 }
 
 const NoteTile: React.FC<TileProps> = ({
@@ -36,8 +44,8 @@ const NoteTile: React.FC<TileProps> = ({
     isInSubCategory, //p prob wont need with passing the IDs too
     isLastNote,
     isLastSubCategory,
-    categoryID, // might as well just pass full category and subcategory rather than just IDs...
-    subCategoryID,
+    category,
+    subCategory,
 }) => {
     const dispatch = useDispatch<AppDispatch>();
     const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
@@ -65,10 +73,10 @@ const NoteTile: React.FC<TileProps> = ({
         return () => {
             // cleanup method. Turns off arrow overlay if connected to this note
             if (menuOverlayRef.current && menuOverlayRef.current.menuData.noteID === note.id) {
-                const closeOverlay = subCategoryID
-                    ? menuOverlayRef.current.menuData.categoryID === categoryID &&
-                      menuOverlayRef.current.menuData.subCategoryID === subCategoryID
-                    : menuOverlayRef.current.menuData.categoryID === categoryID;
+                const closeOverlay = subCategory?.id
+                    ? menuOverlayRef.current.menuData.categoryID === category.id &&
+                      menuOverlayRef.current.menuData.subCategoryID === subCategory.id
+                    : menuOverlayRef.current.menuData.categoryID === category.id;
                 if (closeOverlay) {
                     // dispatch(updateMenuOverlay(getEmptyOverlay())); // or actually, make turnoffmeuoverlay reducer that just sets all menu data to empty
                 }
@@ -101,8 +109,8 @@ const NoteTile: React.FC<TileProps> = ({
             menuType: "note",
             menuData: {
                 noteID: note.id,
-                categoryID: categoryID ? categoryID : "",
-                subCategoryID: subCategoryID ? subCategoryID : "",
+                categoryID: category ? category.id : "",
+                subCategoryID: subCategory ? subCategory.id : "",
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
@@ -145,11 +153,11 @@ const NoteTile: React.FC<TileProps> = ({
 
     const tileHasMenuOpen = () => {
         if (menuOverlay.isShowing && menuOverlay.menuType === "note" && menuOverlay.menuData.noteID === note.id) {
-            if (menuOverlay.menuData.subCategoryID) {
-                return menuOverlay.menuData.subCategoryID === subCategoryID;
+            if (menuOverlay.menuData.subCategoryID && subCategory) {
+                return menuOverlay.menuData.subCategoryID === subCategory.id;
             }
 
-            return menuOverlay.menuData.categoryID === categoryID;
+            return menuOverlay.menuData.categoryID === category.id;
         }
 
         return false;
@@ -204,6 +212,7 @@ const NoteTile: React.FC<TileProps> = ({
                         <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
                     </TouchableOpacity>
                 </View>
+                {isLastNote && <AddNoteToBottom subCategory={subCategory} category={category} />}
             </View>
             {isShowingImage && (
                 <ImageModal
@@ -215,6 +224,50 @@ const NoteTile: React.FC<TileProps> = ({
                     note={note}
                 />
             )}
+        </View>
+    );
+};
+
+interface Props {
+    subCategory?: SubCategory;
+    category?: Category;
+}
+
+const AddNoteToBottom: React.FC<Props> = ({ subCategory, category }) => {
+    const dispatch = useDispatch<AppDispatch>();
+
+    const handleAddNoteToBottom = () => {
+        const noteToAdd: Note = {
+            id: getRandomID(),
+            note: "",
+            additionalInfo: "",
+            dateAdded: "",
+            dateUpdated: "",
+            priority: "normal",
+            completed: false,
+            imageURI: "",
+            isNewNote: true,
+        };
+        dispatch(addNewNoteToNotes(noteToAdd));
+
+        if (subCategory) {
+            const subCategoryNotes = [...subCategory.notes];
+            subCategoryNotes.push(noteToAdd.id);
+            dispatch(updateSubCategory({ ...subCategory, notes: subCategoryNotes }));
+            return;
+        }
+
+        if (category) {
+            const categoryNotes = [...category.notes];
+            categoryNotes.push(noteToAdd.id);
+            dispatch(updateCategory({ ...category, notes: categoryNotes }));
+        }
+    };
+    return (
+        <View style={noteStyles.addToBottomContainer}>
+            <TouchableWithoutFeedback onPress={handleAddNoteToBottom}>
+                <Text style={noteStyles.addToBottomText}>+</Text>
+            </TouchableWithoutFeedback>
         </View>
     );
 };

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { RootState } from "../redux/reducers/reducers";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
-import { Note, SubCategory, MenuOverlay } from "../types";
+import { Note, SubCategory, MenuOverlay, Category } from "../types";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { addNewNoteToNotes, updateMenuOverlay, updateSubCategory } from "../redux/slice";
 import { AppDispatch } from "../redux/store/store";
@@ -17,10 +17,10 @@ interface TileProps {
     subCategory: SubCategory;
     isLastCategory: boolean;
     isLastSubCategory: boolean;
-    parentCategoryID: string;
+    parentCategory: Category;
 }
 
-const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isLastSubCategory, parentCategoryID }) => {
+const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isLastSubCategory, parentCategory }) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
     const [showSubtleMessage, setShowSubtleMessage] = useState(false);
 
@@ -97,7 +97,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
             menuType: "subCategory",
             menuData: {
                 noteID: "",
-                categoryID: parentCategoryID,
+                categoryID: parentCategory.id,
                 subCategoryID: subCategory.id,
             },
         };
@@ -110,8 +110,8 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
 
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
-            subCategoryID={subCategory.id}
-            categoryID={parentCategoryID}
+            subCategory={subCategory}
+            category={parentCategory}
             note={item}
             isLastNote={index === notesForThisSubCat.length - 1}
             isLastCategory={isLastCategory}
@@ -225,8 +225,8 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
                 notesForThisSubCat.map((note, index) => {
                     return (
                         <NoteTile
-                            subCategoryID={subCategory.id}
-                            categoryID={parentCategoryID}
+                            subCategory={subCategory}
+                            category={parentCategory}
                             note={note}
                             isLastNote={index === notesForThisSubCat.length - 1}
                             isLastCategory={isLastCategory}

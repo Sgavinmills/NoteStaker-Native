@@ -97,6 +97,17 @@ const noteStyles = StyleSheet.create({
     highPriority: {
         color: "gold",
     },
+
+    addToBottomContainer: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+    },
+
+    addToBottomText: {
+        color: theme.colors.noteText,
+        textAlign: "center",
+    },
 });
 
 export default noteStyles;
