@@ -101,12 +101,14 @@ const noteStyles = StyleSheet.create({
     addToBottomContainer: {
         position: "absolute",
         bottom: 0,
-        width: "100%",
+        left: 0,
     },
 
     addToBottomText: {
-        color: theme.colors.noteText,
+        color: theme.colors.tileBackground,
         textAlign: "center",
+        fontSize: 20,
+        paddingLeft: 5,
     },
 });
 

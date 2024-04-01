@@ -36,6 +36,7 @@ interface TileProps {
     isInSubCategory: boolean; // prob dont need this as well as ID, but leaving for now
     subCategory?: SubCategory;
     category: Category;
+    index: number;
 }
 
 const NoteTile: React.FC<TileProps> = ({
@@ -46,6 +47,7 @@ const NoteTile: React.FC<TileProps> = ({
     isLastSubCategory,
     category,
     subCategory,
+    index,
 }) => {
     const dispatch = useDispatch<AppDispatch>();
     const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
@@ -212,7 +214,7 @@ const NoteTile: React.FC<TileProps> = ({
                         <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
                     </TouchableOpacity>
                 </View>
-                {isLastNote && <AddNoteToBottom subCategory={subCategory} category={category} />}
+                {<InsertNote subCategory={subCategory} category={category} index={index} />}
             </View>
             {isShowingImage && (
                 <ImageModal
@@ -231,9 +233,12 @@ const NoteTile: React.FC<TileProps> = ({
 interface Props {
     subCategory?: SubCategory;
     category?: Category;
+    index: number;
 }
 
-const AddNoteToBottom: React.FC<Props> = ({ subCategory, category }) => {
+// InsertNote is an invisible symbol at the bottom left of each note tile to allow a clickable space
+// for inserting notes into specific places in the note list.
+const InsertNote: React.FC<Props> = ({ subCategory, category, index }) => {
     const dispatch = useDispatch<AppDispatch>();
 
     const handleAddNoteToBottom = () => {
@@ -252,14 +257,15 @@ const AddNoteToBottom: React.FC<Props> = ({ subCategory, category }) => {
 
         if (subCategory) {
             const subCategoryNotes = [...subCategory.notes];
-            subCategoryNotes.push(noteToAdd.id);
+            subCategoryNotes.splice(index + 1, 0, noteToAdd.id);
             dispatch(updateSubCategory({ ...subCategory, notes: subCategoryNotes }));
             return;
         }
 
         if (category) {
             const categoryNotes = [...category.notes];
-            categoryNotes.push(noteToAdd.id);
+            categoryNotes.splice(index + 1, 0, noteToAdd.id);
+
             dispatch(updateCategory({ ...category, notes: categoryNotes }));
         }
     };

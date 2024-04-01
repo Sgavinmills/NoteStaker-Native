@@ -110,6 +110,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
 
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
+            index={Number(index)}
             subCategory={subCategory}
             category={parentCategory}
             note={item}
@@ -225,6 +226,7 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
                 notesForThisSubCat.map((note, index) => {
                     return (
                         <NoteTile
+                            index={index}
                             subCategory={subCategory}
                             category={parentCategory}
                             note={note}

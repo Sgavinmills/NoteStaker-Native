@@ -32,6 +32,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
 
     const renderNote = ({ item, index }: { item: Note; index: Number }) => (
         <NoteTile
+            index={Number(index)}
             note={item}
             category={category}
             isLastCategory={isLastCategory}
