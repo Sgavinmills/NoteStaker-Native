@@ -154,7 +154,11 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
                 <View style={[categoryStyles.subCategoryTile, addBottomTileMargin() && categoryStyles.lastMargin]}>
-                    <Text style={categoryStyles.subCategoryText}>↳ {subCategory.name}</Text>
+                    <View style={categoryStyles.categoryTextContainer}>
+                        <Text style={categoryStyles.subCategoryText} adjustsFontSizeToFit={true} numberOfLines={1}>
+                            ↳ {subCategory.name}
+                        </Text>
+                    </View>
                     <View style={categoryStyles.tileIconsContainer}>
                         <TouchableOpacity onPress={handleAddNote} onLongPress={handleLongPressAddNote}>
                             <FontAwesome name="plus" style={[categoryStyles.categoryText, categoryStyles.icons]} />
