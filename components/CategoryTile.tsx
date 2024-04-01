@@ -159,6 +159,14 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         return false;
     };
 
+    const tileHasMenuOpen = () => {
+        if (overlay.isShowing && overlay.menuType === "category" && overlay.menuData.categoryID === category.id) {
+            return true;
+        }
+
+        return false;
+    };
+
     return (
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
@@ -167,6 +175,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                         categoryStyles.categoryTile,
                         index === 0 && categoryStyles.categoryTileFirst,
                         addBottomTileMartin() && categoryStyles.lastMargin,
+                        tileHasMenuOpen() && categoryStyles.categoryTileSelected,
                     ]}
                 >
                     <View style={categoryStyles.categoryTextContainer}>

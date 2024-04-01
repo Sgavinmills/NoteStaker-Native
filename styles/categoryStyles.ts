@@ -29,6 +29,10 @@ const catStyles = StyleSheet.create({
         justifyContent: "space-between",
     },
 
+    categoryTileSelected: {
+        backgroundColor: theme.colors.tileBackgroundSelected,
+    },
+
     categoryTileFirst: {
         marginTop: 0,
     },

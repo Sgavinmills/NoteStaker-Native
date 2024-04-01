@@ -25,7 +25,6 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
     const [isAddingNewNote, setAddingNewNote] = useState(false);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const dispatch = useDispatch<AppDispatch>();
-    console.log("hi im a sub cat");
     const notesForThisSubCat: Note[] = [];
     subCategory.notes.forEach((note) => {
         if (notes[note]) {
@@ -40,6 +39,14 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
         }
 
         setIsExpanded(!isExpanded);
+    };
+
+    const tileHasMenuOpen = () => {
+        if (overlay.menuType === "subCategory" && overlay.menuData.subCategoryID === subCategory.id) {
+            return true;
+        }
+
+        return false;
     };
 
     const addBottomTileMargin = () => {
@@ -156,7 +163,13 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
     return (
         <>
             <TouchableWithoutFeedback onPress={toggleExpansion}>
-                <View style={[categoryStyles.subCategoryTile, addBottomTileMargin() && categoryStyles.lastMargin]}>
+                <View
+                    style={[
+                        categoryStyles.subCategoryTile,
+                        addBottomTileMargin() && categoryStyles.lastMargin,
+                        tileHasMenuOpen() && categoryStyles.categoryTileSelected,
+                    ]}
+                >
                     <View style={categoryStyles.categoryTextContainer}>
                         <Text style={categoryStyles.subCategoryText} adjustsFontSizeToFit={true} numberOfLines={1}>
                             ↳ {subCategory.name}

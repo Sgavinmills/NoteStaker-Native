@@ -8,6 +8,7 @@ import {
     TouchableWithoutFeedback,
 } from "react-native";
 import noteStyles from "../styles/noteStyles";
+import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { MenuOverlay, Note } from "../types";
 import { useDispatch } from "react-redux";
@@ -142,6 +143,18 @@ const NoteTile: React.FC<TileProps> = ({
         setNoteEditMode(true);
     };
 
+    const tileHasMenuOpen = () => {
+        if (menuOverlay.isShowing && menuOverlay.menuType === "note" && menuOverlay.menuData.noteID === note.id) {
+            if (menuOverlay.menuData.subCategoryID) {
+                return menuOverlay.menuData.subCategoryID === subCategoryID;
+            }
+
+            return menuOverlay.menuData.categoryID === categoryID;
+        }
+
+        return false;
+    };
+
     return (
         <View style={[addBottomTileMargin() && noteStyles.lastMargin, isLastNote && noteStyles.bottomBorder]}>
             <View
@@ -149,6 +162,7 @@ const NoteTile: React.FC<TileProps> = ({
                     addBottomTileMargin() && noteStyles.lastMargin,
                     isLastNote && noteStyles.bottomBorder,
                     noteStyles.noteTile,
+                    tileHasMenuOpen() && categoryStyles.categoryTileSelected,
                 ]}
             >
                 <View style={noteStyles.noteContainer}>
