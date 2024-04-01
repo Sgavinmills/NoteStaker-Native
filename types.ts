@@ -46,3 +46,8 @@ export interface MenuData {
     categoryID: string;
     subCategoryID: string;
 }
+
+export interface DeleteInfo {
+    deleteType: "removeAll" | "deleteCategory" | "deleteNote" | "deleteImage" | "";
+    deleteMessage: string;
+}

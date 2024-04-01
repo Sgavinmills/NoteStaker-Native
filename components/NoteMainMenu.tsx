@@ -10,6 +10,8 @@ import * as ImagePicker from "expo-image-picker";
 import { deleteNoteFromAllCategories, updateMenuOverlay, updateNote } from "../redux/slice";
 import { getEmptyOverlay, noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
 import DeleteModal from "./DeleteModal";
+import { DeleteInfo } from "../types";
+
 interface TileProps {
     setIsMoveArrows: React.Dispatch<React.SetStateAction<boolean>>;
     setIsNoteMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,7 +22,7 @@ const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu,
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const memory = useSelector((state: RootState) => state.memory);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-    const [deleteInfo, setDeleteInfo] = useState({ dataType: "", id: "", deleteMessage: "" });
+    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteType: "", deleteMessage: "" });
 
     const handleMoveNote = () => {
         setIsMoveArrows(true);
@@ -57,11 +59,9 @@ const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu,
     };
 
     const handleDelete = () => {
-        // TODO : Add confirmation check before deleting.
         setDeleteModalVisible(true);
-        const deleteInfo = {
-            dataType: "note",
-            id: overlay.menuData.noteID,
+        const deleteInfo: DeleteInfo = {
+            deleteType: "deleteNote",
             deleteMessage: "Are you sure you want to delete?",
         };
 

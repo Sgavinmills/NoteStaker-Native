@@ -54,11 +54,13 @@ const HomeScreen: React.FC = () => {
         <TouchableWithoutFeedback onPress={handleOutsideMenuPress}>
             <View style={styles.mainContainer}>
                 <StatusBar translucent={true} />
-                <CategoryModal
-                    setNewCatModalVisible={setNewCatModalVisible}
-                    newCatModalVisible={newCatModalVisible}
-                    catInfo={{ currentName: "", parentCat: "" }}
-                ></CategoryModal>
+                {newCatModalVisible && (
+                    <CategoryModal
+                        setNewCatModalVisible={setNewCatModalVisible}
+                        newCatModalVisible={newCatModalVisible}
+                        catInfo={{ currentName: "", parentCat: "" }}
+                    ></CategoryModal>
+                )}
                 <TouchableOpacity onPress={handleNewCategoryPress}>
                     <Text style={categoryStyles.newCategoryText}>+</Text>
                 </TouchableOpacity>

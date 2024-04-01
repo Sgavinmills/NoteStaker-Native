@@ -25,9 +25,12 @@ const SubCategoryTile: React.FC<TileProps> = ({ subCategory, isLastCategory, isL
     const [isAddingNewNote, setAddingNewNote] = useState(false);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const dispatch = useDispatch<AppDispatch>();
-
-    const notesForThisSubCat = subCategory.notes.map((note) => {
-        return notes[note];
+    console.log("hi im a sub cat");
+    const notesForThisSubCat: Note[] = [];
+    subCategory.notes.forEach((note) => {
+        if (notes[note]) {
+            notesForThisSubCat.push(notes[note]);
+        }
     });
 
     const toggleExpansion = () => {
