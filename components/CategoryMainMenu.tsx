@@ -15,10 +15,11 @@ import DeleteModal from "./DeleteModal";
 interface TileProps {
     setIsMoveArrows: React.Dispatch<React.SetStateAction<boolean>>;
     setIsCategoryMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
+    setScrollTo: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // CategoryMainMenu provides main menu for parent categories and sub categories
-const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryMainMenu }) => {
+const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryMainMenu, setScrollTo }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const memory = useSelector((state: RootState) => state.memory);
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
@@ -99,6 +100,14 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
         setDeleteModalVisible(true);
     };
 
+    const handleScrollTo = () => {
+        if (overlay.menuType === "category") {
+            setScrollTo("category");
+        } else {
+            setScrollTo("subCategory");
+        }
+    };
+
     const [isCategoryModal, setIsCategoryModal] = useState(false);
     return (
         <>
@@ -125,6 +134,10 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDeleteCategory}>
                 <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
                 <Text style={menuOverlayStyles.text}>Delete {catName}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleScrollTo}>
+                <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
+                <Text style={menuOverlayStyles.text}>SCROLL TO</Text>
             </TouchableOpacity>
             {deleteModalVisible && (
                 <DeleteModal

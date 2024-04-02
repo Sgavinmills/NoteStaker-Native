@@ -10,7 +10,7 @@ import {
 import noteStyles from "../styles/noteStyles";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
-import { Category, MenuOverlay, Note, SubCategory } from "../types";
+import { Category, MenuOverlay, Note, SubCategory, CatHeight, SubHeight } from "../types";
 import { useDispatch } from "react-redux";
 import {
     addNewNoteToNotes,
@@ -37,6 +37,10 @@ interface TileProps {
     subCategory?: SubCategory;
     category: Category;
     index: number;
+    subCategoryIndex?: number;
+    parentCategoryIndex: number;
+    heightData: CatHeight[];
+    setHeightData: React.Dispatch<React.SetStateAction<CatHeight[]>>;
 }
 
 const NoteTile: React.FC<TileProps> = ({
@@ -48,6 +52,10 @@ const NoteTile: React.FC<TileProps> = ({
     category,
     subCategory,
     index,
+    subCategoryIndex,
+    parentCategoryIndex,
+    heightData,
+    setHeightData,
 }) => {
     const dispatch = useDispatch<AppDispatch>();
     const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
@@ -113,6 +121,9 @@ const NoteTile: React.FC<TileProps> = ({
                 noteID: note.id,
                 categoryID: category ? category.id : "",
                 subCategoryID: subCategory ? subCategory.id : "",
+                categoryIndex: parentCategoryIndex,
+                subCategoryIndex: subCategoryIndex !== undefined ? subCategoryIndex : null,
+                noteIndex: index,
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
@@ -135,7 +146,6 @@ const NoteTile: React.FC<TileProps> = ({
         if (!isInSubCategory) {
             return isLastNote;
         }
-
         return isLastSubCategory && isLastNote;
     };
 
@@ -165,8 +175,36 @@ const NoteTile: React.FC<TileProps> = ({
         return false;
     };
 
+    const handleCategoryLayout = (event: any) => {
+        const { height } = event.nativeEvent.layout;
+
+        setHeightData((prevState: CatHeight[]) => {
+            const newState = [...prevState];
+
+            const newCatHeight = { ...newState[parentCategoryIndex] };
+            if (subCategoryIndex !== undefined && subCategoryIndex >= 0) {
+                const newSubCatHeight = { ...newCatHeight.subHeights[subCategoryIndex] };
+                newSubCatHeight.noteHeights[index] = height;
+                newCatHeight.subHeights[subCategoryIndex] = newSubCatHeight;
+
+                newState[parentCategoryIndex] = newCatHeight;
+
+                return newState;
+            } else {
+                const newNoteHeights = [...newCatHeight.noteHeights];
+                newNoteHeights[index] = height;
+                newCatHeight.noteHeights = newNoteHeights;
+                newState[parentCategoryIndex] = newCatHeight;
+                return newState;
+            }
+        });
+    };
+
     return (
-        <View style={[addBottomTileMargin() && noteStyles.lastMargin, isLastNote && noteStyles.bottomBorder]}>
+        <View
+            onLayout={handleCategoryLayout}
+            style={[addBottomTileMargin() && noteStyles.lastMargin, isLastNote && noteStyles.bottomBorder]}
+        >
             <View
                 style={[
                     addBottomTileMargin() && noteStyles.lastMargin,

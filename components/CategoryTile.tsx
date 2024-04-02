@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { Category, SubCategory, Note, MenuOverlay } from "../types";
+import { Category, SubCategory, Note, MenuOverlay, CatHeight } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import NoteTile from "./NoteTile";
@@ -19,9 +19,11 @@ interface TileProps {
     category: Category;
     index: number;
     isLastCategory: boolean;
+    heightData: CatHeight[];
+    setHeightData: React.Dispatch<React.SetStateAction<CatHeight[]>>;
 }
 
-const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) => {
+const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory, heightData, setHeightData }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [showSubtleMessage, setShowSubtleMessage] = useState(false);
 
@@ -29,17 +31,6 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
     const notes = useSelector((state: RootState) => state.memory.notes);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const dispatch = useDispatch<AppDispatch>();
-
-    const renderNote = ({ item, index }: { item: Note; index: Number }) => (
-        <NoteTile
-            index={Number(index)}
-            note={item}
-            category={category}
-            isLastCategory={isLastCategory}
-            isLastNote={index === notesForThisCat.length - 1}
-            isInSubCategory={false}
-        />
-    );
 
     // TODO - Change these to forEachs so can have error handling if it doesnt find
     // a ct or not (cos it was deleted) it doesnt add it to the array, like this it adds undefined to array.
@@ -67,15 +58,6 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         }
         setIsExpanded(!isExpanded);
     };
-
-    const renderSubCategory = ({ item, index }: { item: SubCategory; index: number }) => (
-        <SubCategoryTile
-            parentCategory={category}
-            isLastCategory={isLastCategory}
-            subCategory={item}
-            isLastSubCategory={index === subCatsForThisCat.length - 1}
-        />
-    );
 
     const handleAddNote = () => {
         const noteToAdd: Note = {
@@ -146,6 +128,9 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                 noteID: "",
                 categoryID: category.id,
                 subCategoryID: "",
+                categoryIndex: index,
+                subCategoryIndex: null,
+                noteIndex: null,
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
@@ -175,8 +160,28 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         return false;
     };
 
+    const handleCategoryLayout = (event: any) => {
+        const { height } = event.nativeEvent.layout;
+
+        setHeightData((prevState) => {
+            const newState = [...prevState];
+
+            if (newState[index]) {
+                newState[index].catHeight = height;
+            } else {
+                const newCatHeightItem: CatHeight = {
+                    catHeight: height,
+                    subHeights: [],
+                    noteHeights: [],
+                };
+
+                newState[index] = newCatHeightItem;
+            }
+            return newState;
+        });
+    };
     return (
-        <>
+        <View onLayout={handleCategoryLayout}>
             <TouchableWithoutFeedback onPress={toggleExpansion} onLongPress={handleMenuPress}>
                 <View
                     style={[
@@ -217,24 +222,42 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                     setSubtleMessage={setShowSubtleMessage}
                 />
             )}
-            {isExpanded && category.subCategories.length > 0 && (
-                <FlatList
-                    removeClippedSubviews={false}
-                    style={categoryStyles.subCategoryContainer}
-                    data={subCatsForThisCat}
-                    renderItem={renderSubCategory}
-                    keyExtractor={(cat) => cat.id}
-                />
-            )}
-            {isExpanded && category.subCategories.length == 0 && (
-                <FlatList
-                    removeClippedSubviews={false}
-                    data={notesForThisCat}
-                    renderItem={renderNote}
-                    keyExtractor={(note) => note.id}
-                />
-            )}
-        </>
+            {isExpanded &&
+                category.subCategories.length > 0 &&
+                subCatsForThisCat.map((subCat, subCatIndex) => {
+                    return (
+                        <SubCategoryTile
+                            parentCategory={category}
+                            isLastCategory={isLastCategory}
+                            subCategory={subCat}
+                            isLastSubCategory={subCatIndex === subCatsForThisCat.length - 1}
+                            key={subCat.id}
+                            heightData={heightData}
+                            setHeightData={setHeightData}
+                            index={subCatIndex}
+                            parentCategoryIndex={index}
+                        />
+                    );
+                })}
+            {isExpanded &&
+                category.subCategories.length == 0 &&
+                notesForThisCat.map((note, noteIndex) => {
+                    return (
+                        <NoteTile
+                            index={Number(noteIndex)}
+                            parentCategoryIndex={index}
+                            note={note}
+                            category={category}
+                            isLastCategory={isLastCategory}
+                            isLastNote={noteIndex === notesForThisCat.length - 1}
+                            isInSubCategory={false}
+                            key={note.id}
+                            heightData={heightData}
+                            setHeightData={setHeightData}
+                        />
+                    );
+                })}
+        </View>
     );
 };
 

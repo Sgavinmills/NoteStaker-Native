@@ -12,11 +12,12 @@ import AdjustingCategories from "./AdjustingCategories";
 
 interface TileProps {
     overlay: MenuOverlay;
+    setScrollTo: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // TODO - Move menu config componenets into own folder.
 
-const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
+const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo }) => {
     const dispatch = useDispatch<AppDispatch>();
     // const memory = useSelector((state: RootState) => state.memory);
     const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
@@ -35,6 +36,9 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
                 noteID: "",
                 categoryID: "",
                 subCategoryID: "",
+                categoryIndex: null,
+                subCategoryIndex: null,
+                noteIndex: null,
             },
         };
 
@@ -60,13 +64,18 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
         <View style={menuOverlayStyles.container}>
             <View style={menuOverlayStyles.contentContainer}>
                 {isCatsMainMenu && (
-                    <CategoryMainMenu setIsMoveArrows={setIsMoveArrows} setIsCategoryMainMenu={setIsCatsMainMenu} />
+                    <CategoryMainMenu
+                        setScrollTo={setScrollTo}
+                        setIsMoveArrows={setIsMoveArrows}
+                        setIsCategoryMainMenu={setIsCatsMainMenu}
+                    />
                 )}
                 {isNoteMainMenu && (
                     <NoteMainMenu
                         setIsAdjustingCategories={setIsAdjustingCategories}
                         setIsMoveArrows={setIsMoveArrows}
                         setIsNoteMainMenu={setIsNoteMainMenu}
+                        setScrollTo={setScrollTo}
                     />
                 )}
                 {isMoveArrows && <MoveArrows />}

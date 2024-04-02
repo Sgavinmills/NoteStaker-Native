@@ -15,10 +15,16 @@ import { DeleteInfo } from "../types";
 interface TileProps {
     setIsMoveArrows: React.Dispatch<React.SetStateAction<boolean>>;
     setIsNoteMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
+    setScrollTo: React.Dispatch<React.SetStateAction<string>>;
     setIsAdjustingCategories: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu, setIsAdjustingCategories }) => {
+const NoteMainMenu: React.FC<TileProps> = ({
+    setScrollTo,
+    setIsMoveArrows,
+    setIsNoteMainMenu,
+    setIsAdjustingCategories,
+}) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const memory = useSelector((state: RootState) => state.memory);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -88,6 +94,10 @@ const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu,
         setIsNoteMainMenu(false);
     };
 
+    const handleScrollToNote = () => {
+        setScrollTo("note");
+    };
+
     const dispatch = useDispatch<AppDispatch>();
     return (
         <>
@@ -111,7 +121,7 @@ const NoteMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsNoteMainMenu,
                 <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
                 <Text style={menuOverlayStyles.text}>Delete note</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer}>
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleScrollToNote}>
                 <FontAwesome name="times" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>See additional note info</Text>
             </TouchableOpacity>

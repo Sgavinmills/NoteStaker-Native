@@ -45,9 +45,23 @@ export interface MenuData {
     noteID: string;
     categoryID: string;
     subCategoryID: string;
+    categoryIndex: number | null;
+    subCategoryIndex: number | null;
+    noteIndex: number | null;
 }
 
 export interface DeleteInfo {
     deleteType: "removeAll" | "deleteCategory" | "deleteNote" | "deleteImage" | "";
     deleteMessage: string;
+}
+
+export interface SubHeight {
+    subHeight: number;
+    noteHeights: number[];
+}
+
+export interface CatHeight {
+    catHeight: number;
+    subHeights: SubHeight[];
+    noteHeights: number[];
 }

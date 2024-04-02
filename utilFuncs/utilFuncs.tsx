@@ -8,6 +8,9 @@ export const getEmptyOverlay = () => {
             noteID: "",
             categoryID: "",
             subCategoryID: "",
+            noteIndex: null,
+            categoryIndex: null,
+            subCategoryIndex: null,
         },
     };
 
