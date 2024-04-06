@@ -1,8 +1,8 @@
 // slice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Category, Note, SubCategory, MenuOverlay } from "../types";
+import { Category, Note, SubCategory, MenuOverlay, CatHeight, HeightUpdateInfo } from "../types";
 import { memory } from "../mockMemory";
-
+import { produce } from "immer";
 interface AppState {
     notes: { [id: string]: Note };
     categories: { [id: string]: Category };
@@ -10,7 +10,7 @@ interface AppState {
     categoryList: string[];
 
     menuOverlay: MenuOverlay;
-
+    heightData: CatHeight[];
     // want to separate menu from memory
     // but also since generally update notes, categoies and subcategories separately
     // can they be separate states as well? Does it matter?
@@ -28,8 +28,12 @@ const initialState: AppState = {
             noteID: "",
             categoryID: "",
             subCategoryID: "",
+            categoryIndex: null,
+            subCategoryIndex: null,
+            noteIndex: null,
         },
     },
+    heightData: [],
 };
 // i think these should be refactored so all
 // the reducer funcs just take what the state should be
@@ -41,10 +45,73 @@ const initialState: AppState = {
 
 // defo do this, can add some unit tests as we refactor the functions too, pretty important at this stage i think.
 
+// ALSO need to be refactored using immer properly.
 const notesSlice = createSlice({
     name: "notes",
     initialState,
     reducers: {
+        // TODO - REMAKE USING IMMER.
+        updateCategoryHeight(state, action: PayloadAction<HeightUpdateInfo>) {
+            if (state.heightData === undefined) {
+                return { ...state, heightData: [] };
+            }
+            const { newHeight, categoryIndex, subCategoryIndex, noteIndex } = action.payload;
+            let newHeightData = [...state.heightData];
+
+            if (newHeightData[categoryIndex]) {
+                const newCategoryData = { ...newHeightData[categoryIndex] };
+                newCategoryData.catHeight = newHeight;
+                newHeightData[categoryIndex] = newCategoryData;
+            } else {
+                const newCatHeightItem: CatHeight = {
+                    catHeight: newHeight,
+                    subHeights: [],
+                    noteHeights: [],
+                };
+                newHeightData[categoryIndex] = newCatHeightItem;
+            }
+
+            return { ...state, heightData: newHeightData };
+        },
+        updateNoteHeight: (state, action: PayloadAction<HeightUpdateInfo>) => {
+            return produce(state, (draft) => {
+                const { newHeight, categoryIndex, subCategoryIndex, noteIndex } = action.payload;
+
+                if (subCategoryIndex >= 0) {
+                    if (draft.heightData[categoryIndex]) {
+                        // Ensure the subCategoryIndex is valid
+                        if (draft.heightData[categoryIndex].subHeights[subCategoryIndex]) {
+                            // Update the noteHeight at the specified indices
+                            draft.heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[noteIndex] =
+                                newHeight;
+                        }
+                    }
+                } else {
+                    if (draft.heightData[categoryIndex]) {
+                        draft.heightData[categoryIndex].noteHeights[noteIndex] = newHeight;
+                    }
+                }
+            });
+        },
+        updateSubCategoryHeight: (state, action: PayloadAction<HeightUpdateInfo>) => {
+            return produce(state, (draft) => {
+                const { newHeight, categoryIndex, subCategoryIndex, noteIndex } = action.payload;
+
+                if (draft.heightData[categoryIndex]) {
+                    // Ensure the subCategoryIndex is valid
+                    if (draft.heightData[categoryIndex].subHeights[subCategoryIndex]) {
+                        // Update the noteHeight at the specified indices
+                        draft.heightData[categoryIndex].subHeights[subCategoryIndex].subHeight = newHeight;
+                    } else {
+                        const newSubCatHeightItem: SubHeight = {
+                            subHeight: newHeight,
+                            noteHeights: [],
+                        };
+                        draft.heightData[categoryIndex].subHeights[subCategoryIndex] = newSubCatHeightItem;
+                    }
+                }
+            });
+        },
         updateMenuOverlay(state, action: PayloadAction<MenuOverlay>) {
             const newOverlay = { ...action.payload };
 
@@ -222,6 +289,9 @@ export const {
     updateMenuOverlay,
     updateCategories,
     updateSubCategories,
+    updateCategoryHeight,
+    updateSubCategoryHeight,
+    updateNoteHeight,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;
@@ -229,4 +299,5 @@ export default notesSlice.reducer;
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "./store/store";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
+import { SubHeight } from "../types";
 export const useAppDispatch = () => useDispatch<AppDispatch>();

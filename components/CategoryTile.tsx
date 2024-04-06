@@ -1,46 +1,33 @@
-import { Text, View, FlatList, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent } from "react-native";
-import { useRef, useState } from "react";
+import { Text, View, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent } from "react-native";
+import { useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { Category, SubCategory, Note, MenuOverlay, CatHeight } from "../types";
+import { Note, MenuOverlay, CatHeight, HeightUpdateInfo } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import NoteTile from "./NoteTile";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";
-import { addNewNoteToNotes, updateCategory, updateMenuOverlay, updateNote } from "../redux/slice";
+import { addNewNoteToNotes, updateCategory, updateCategoryHeight, updateMenuOverlay, updateNote } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import * as ImagePicker from "expo-image-picker";
 import SubtleMessage from "./SubtleMessage";
-
 interface TileProps {
-    category: Category;
+    categoryID: string;
     index: number;
     isLastCategory: boolean;
-    heightData: CatHeight[];
-    setHeightData: React.Dispatch<React.SetStateAction<CatHeight[]>>;
 }
 
-const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory, heightData, setHeightData }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
-
-    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
-    const notes = useSelector((state: RootState) => state.memory.notes);
+const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }) => {
+    const categories = useSelector((state: RootState) => state.memory.categories);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const category = categories[categoryID];
     const dispatch = useDispatch<AppDispatch>();
 
-    // TODO - Change these to forEachs so can have error handling if it doesnt find
-    // a ct or not (cos it was deleted) it doesnt add it to the array, like this it adds undefined to array.
-    const subCatsForThisCat = category.subCategories.map((subCat) => {
-        return subCategories[subCat];
-    });
-
-    const notesForThisCat = category.notes.map((note) => {
-        return notes[note];
-    });
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
 
     const toggleExpansion = () => {
         if (overlay.isShowing) {
@@ -162,23 +149,13 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory, he
 
     const handleCategoryLayout = (event: any) => {
         const { height } = event.nativeEvent.layout;
-
-        setHeightData((prevState) => {
-            const newState = [...prevState];
-
-            if (newState[index]) {
-                newState[index].catHeight = height;
-            } else {
-                const newCatHeightItem: CatHeight = {
-                    catHeight: height,
-                    subHeights: [],
-                    noteHeights: [],
-                };
-
-                newState[index] = newCatHeightItem;
-            }
-            return newState;
-        });
+        const update: HeightUpdateInfo = {
+            newHeight: height,
+            categoryIndex: index,
+            subCategoryIndex: -1,
+            noteIndex: -1,
+        };
+        dispatch(updateCategoryHeight(update));
     };
     return (
         <View onLayout={handleCategoryLayout}>
@@ -224,16 +201,14 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory, he
             )}
             {isExpanded &&
                 category.subCategories.length > 0 &&
-                subCatsForThisCat.map((subCat, subCatIndex) => {
+                category.subCategories.map((subCatID, subCatIndex) => {
                     return (
                         <SubCategoryTile
                             parentCategory={category}
                             isLastCategory={isLastCategory}
-                            subCategory={subCat}
-                            isLastSubCategory={subCatIndex === subCatsForThisCat.length - 1}
-                            key={subCat.id}
-                            heightData={heightData}
-                            setHeightData={setHeightData}
+                            subCategoryID={subCatID}
+                            isLastSubCategory={subCatIndex === category.subCategories.length - 1}
+                            key={subCatID}
                             index={subCatIndex}
                             parentCategoryIndex={index}
                         />
@@ -241,19 +216,18 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory, he
                 })}
             {isExpanded &&
                 category.subCategories.length == 0 &&
-                notesForThisCat.map((note, noteIndex) => {
+                category.notes.map((noteID, noteIndex) => {
                     return (
                         <NoteTile
                             index={Number(noteIndex)}
                             parentCategoryIndex={index}
-                            note={note}
+                            noteID={noteID}
                             category={category}
                             isLastCategory={isLastCategory}
-                            isLastNote={noteIndex === notesForThisCat.length - 1}
+                            isLastNote={noteIndex === category.notes.length - 1}
                             isInSubCategory={false}
-                            key={note.id}
-                            heightData={heightData}
-                            setHeightData={setHeightData}
+                            key={noteID}
+                            subCategoryIndex={-1}
                         />
                     );
                 })}

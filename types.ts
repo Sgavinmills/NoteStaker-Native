@@ -65,3 +65,10 @@ export interface CatHeight {
     subHeights: SubHeight[];
     noteHeights: number[];
 }
+
+export interface HeightUpdateInfo {
+    newHeight: number;
+    categoryIndex: number;
+    subCategoryIndex: number;
+    noteIndex: number;
+}

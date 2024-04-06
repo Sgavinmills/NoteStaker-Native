@@ -5,48 +5,38 @@ import { useState } from "react";
 import { RootState } from "../redux/reducers/reducers";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
-import { Note, SubCategory, MenuOverlay, Category, CatHeight, SubHeight } from "../types";
+import { Note, MenuOverlay, Category, HeightUpdateInfo } from "../types";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
-import { addNewNoteToNotes, updateMenuOverlay, updateSubCategory } from "../redux/slice";
+import { addNewNoteToNotes, updateMenuOverlay, updateSubCategory, updateSubCategoryHeight } from "../redux/slice";
 import { AppDispatch } from "../redux/store/store";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import * as ImagePicker from "expo-image-picker";
 import SubtleMessage from "./SubtleMessage";
 
 interface TileProps {
-    subCategory: SubCategory;
+    subCategoryID: string;
     isLastCategory: boolean;
     isLastSubCategory: boolean;
     parentCategory: Category;
-    heightData: CatHeight[];
-    setHeightData: React.Dispatch<React.SetStateAction<CatHeight[]>>;
     index: number;
     parentCategoryIndex: number;
 }
 
 const SubCategoryTile: React.FC<TileProps> = ({
-    heightData,
-    setHeightData,
-    subCategory,
+    subCategoryID,
     isLastCategory,
     isLastSubCategory,
     parentCategory,
     parentCategoryIndex,
     index: index,
 }) => {
-    const notes = useSelector((state: RootState) => state.memory.notes);
-    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
-
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [isAddingNewNote, setAddingNewNote] = useState(false);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
+    const subCategory = subCategories[subCategoryID];
     const dispatch = useDispatch<AppDispatch>();
-    const notesForThisSubCat: Note[] = [];
-    subCategory.notes.forEach((note) => {
-        if (notes[note]) {
-            notesForThisSubCat.push(notes[note]);
-        }
-    });
+
+    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     const toggleExpansion = () => {
         if (overlay.isShowing) {
@@ -92,7 +82,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
         }
 
         const isEmpty = subCategory.notes.length === 0;
-        if (isEmpty && !isAddingNewNote) {
+        if (isEmpty) {
             return true;
         }
 
@@ -117,11 +107,6 @@ const SubCategoryTile: React.FC<TileProps> = ({
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
-
-        // might be able to put this back tbh
-        // if (!isExpanded) {
-        //     setIsExpanded(true);
-        // }
     };
 
     const handleAddNote = () => {
@@ -182,26 +167,13 @@ const SubCategoryTile: React.FC<TileProps> = ({
 
     const handleCategoryLayout = (event: any) => {
         const { height } = event.nativeEvent.layout;
-
-        setHeightData((prevState) => {
-            const newState = [...prevState];
-
-            const newCatHeight = { ...newState[parentCategoryIndex] };
-
-            if (newCatHeight.subHeights[index]) {
-                newCatHeight.subHeights[index].subHeight = height;
-            } else {
-                const newSubCatHeightItem: SubHeight = {
-                    subHeight: height,
-                    noteHeights: [],
-                };
-
-                newCatHeight.subHeights[index] = newSubCatHeightItem;
-            }
-            newState[parentCategoryIndex] = newCatHeight;
-
-            return newState;
-        });
+        const update: HeightUpdateInfo = {
+            newHeight: height,
+            categoryIndex: parentCategoryIndex,
+            subCategoryIndex: index,
+            noteIndex: -1,
+        };
+        dispatch(updateSubCategoryHeight(update));
     };
 
     return (
@@ -244,7 +216,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
                 />
             )}
             {isExpanded &&
-                notesForThisSubCat.map((note, noteIndex) => {
+                subCategory.notes.map((noteID, noteIndex) => {
                     return (
                         <NoteTile
                             index={noteIndex}
@@ -252,14 +224,12 @@ const SubCategoryTile: React.FC<TileProps> = ({
                             parentCategoryIndex={parentCategoryIndex}
                             subCategory={subCategory}
                             category={parentCategory}
-                            note={note}
-                            isLastNote={noteIndex === notesForThisSubCat.length - 1}
+                            noteID={noteID}
+                            isLastNote={noteIndex === subCategory.notes.length - 1}
                             isLastCategory={isLastCategory}
                             isLastSubCategory={isLastSubCategory}
                             isInSubCategory={true}
-                            key={note.id}
-                            heightData={heightData}
-                            setHeightData={setHeightData}
+                            key={noteID}
                         />
                     );
                 })}

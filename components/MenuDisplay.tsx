@@ -12,14 +12,13 @@ import AdjustingCategories from "./AdjustingCategories";
 
 interface TileProps {
     overlay: MenuOverlay;
-    setScrollTo: React.Dispatch<React.SetStateAction<string>>;
+    setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 // TODO - Move menu config componenets into own folder.
 
 const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo }) => {
     const dispatch = useDispatch<AppDispatch>();
-    // const memory = useSelector((state: RootState) => state.memory);
     const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
 
     const [isCatsMainMenu, setIsCatsMainMenu] = useState(

@@ -3,11 +3,10 @@ import menuOverlayStyles from "../styles/menuOverlayStyles";
 import { FontAwesome, Entypo } from "@expo/vector-icons";
 import { Text, TouchableOpacity, GestureResponderEvent } from "react-native";
 import { AppDispatch } from "../redux/store/store";
-import CategoryModal from "./CategoryModal";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import * as ImagePicker from "expo-image-picker";
-import { deleteNoteFromAllCategories, updateMenuOverlay, updateNote } from "../redux/slice";
+import { updateMenuOverlay, updateNote } from "../redux/slice";
 import { getEmptyOverlay, noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
 import DeleteModal from "./DeleteModal";
 import { DeleteInfo } from "../types";
@@ -15,7 +14,7 @@ import { DeleteInfo } from "../types";
 interface TileProps {
     setIsMoveArrows: React.Dispatch<React.SetStateAction<boolean>>;
     setIsNoteMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    setScrollTo: React.Dispatch<React.SetStateAction<string>>;
+    setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
     setIsAdjustingCategories: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -26,7 +25,12 @@ const NoteMainMenu: React.FC<TileProps> = ({
     setIsAdjustingCategories,
 }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const memory = useSelector((state: RootState) => state.memory);
+    // if we extract more logic into the reducer/slice then prob wont need all these
+    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
+    const categories = useSelector((state: RootState) => state.memory.categories);
+    const notes = useSelector((state: RootState) => state.memory.notes);
+    const heightData = useSelector((state: RootState) => state.memory.heightData);
+
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteType: "", deleteMessage: "" });
 
@@ -47,19 +51,19 @@ const NoteMainMenu: React.FC<TileProps> = ({
             quality: 1,
         });
 
-        if (memory.menuOverlay.isShowing) {
+        if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
         }
 
         if (!result.canceled) {
             const imageURI = result.assets[0].uri;
-            const noteCopy = { ...memory.notes[overlay.menuData.noteID] };
+            const noteCopy = { ...notes[overlay.menuData.noteID] };
             dispatch(updateNote({ ...noteCopy, imageURI: imageURI }));
         }
     };
 
     const handleHighPriorityPress = () => {
-        const noteCopy = { ...memory.notes[overlay.menuData.noteID] };
+        const noteCopy = { ...notes[overlay.menuData.noteID] };
         noteCopy.priority = noteCopy.priority !== "high" ? "high" : "normal";
         dispatch(updateNote(noteCopy));
     };
@@ -75,13 +79,7 @@ const NoteMainMenu: React.FC<TileProps> = ({
         const subCatsToSkip = overlay.menuData.subCategoryID ? [overlay.menuData.subCategoryID] : [];
 
         if (
-            noteExistsInOtherCategories(
-                memory.categories,
-                memory.subCategories,
-                overlay.menuData.noteID,
-                catsToSkip,
-                subCatsToSkip
-            )
+            noteExistsInOtherCategories(categories, subCategories, overlay.menuData.noteID, catsToSkip, subCatsToSkip)
         ) {
             deleteInfo.deleteMessage =
                 "The note you are about to delete exists in other categories. If you delete, it will be removed from those too. If you only want to remove it from this category then use the move between categories option instead.";
@@ -95,7 +93,43 @@ const NoteMainMenu: React.FC<TileProps> = ({
     };
 
     const handleScrollToNote = () => {
-        setScrollTo("note");
+        let offset = 0;
+        // to scroll to offset for all cats up to and inc this one
+        // if there are subcats
+        // then subtract the subcts below and any notes in the sub cat we're in below... (done)
+
+        // if there are not subcats then just subtract the notes below...
+        const categoryIndex = overlay.menuData.categoryIndex;
+        if (categoryIndex != null && categoryIndex >= 0) {
+            for (let i = 0; i <= categoryIndex; i++) {
+                offset += heightData[i].catHeight;
+            }
+
+            const subCategoryIndex = overlay.menuData.subCategoryIndex;
+            if (subCategoryIndex != null && subCategoryIndex >= 0) {
+                const numOfSubs = categories[overlay.menuData.categoryID].subCategories.length;
+                for (let j = subCategoryIndex + 1; j < numOfSubs; j++) {
+                    offset -= heightData[categoryIndex].subHeights[j].subHeight;
+                }
+
+                const noteIndex = overlay.menuData.noteIndex;
+                if (noteIndex != null && noteIndex >= 0) {
+                    const numOfNotes = subCategories[overlay.menuData.subCategoryID].notes.length;
+                    for (let k = noteIndex; k < numOfNotes; k++) {
+                        offset -= heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[noteIndex];
+                    }
+                }
+            } else {
+                const noteIndex = overlay.menuData.noteIndex;
+                if (noteIndex != null && noteIndex >= 0) {
+                    const numOfNotes = categories[overlay.menuData.categoryID].notes.length;
+                    for (let k = noteIndex; k < numOfNotes; k++) {
+                        offset -= heightData[categoryIndex].noteHeights[noteIndex];
+                    }
+                }
+            }
+        }
+        setScrollTo(offset);
     };
 
     const dispatch = useDispatch<AppDispatch>();

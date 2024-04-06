@@ -10,7 +10,7 @@ import {
 import noteStyles from "../styles/noteStyles";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
-import { Category, MenuOverlay, Note, SubCategory, CatHeight, SubHeight } from "../types";
+import { Category, MenuOverlay, Note, SubCategory, HeightUpdateInfo } from "../types";
 import { useDispatch } from "react-redux";
 import {
     addNewNoteToNotes,
@@ -19,6 +19,7 @@ import {
     updateMenuOverlay,
     updateNote,
     updateSubCategory,
+    updateNoteHeight,
 } from "../redux/slice";
 import { useEffect, useRef, useState } from "react";
 import ImageModal from "./ImageModal";
@@ -27,9 +28,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
-
+import React from "react";
 interface TileProps {
-    note: Note;
+    noteID: string;
     isLastCategory: boolean;
     isLastSubCategory?: boolean;
     isLastNote: boolean;
@@ -37,16 +38,13 @@ interface TileProps {
     subCategory?: SubCategory;
     category: Category;
     index: number;
-    subCategoryIndex?: number;
+    subCategoryIndex: number;
     parentCategoryIndex: number;
-    heightData: CatHeight[];
-    setHeightData: React.Dispatch<React.SetStateAction<CatHeight[]>>;
 }
 
 const NoteTile: React.FC<TileProps> = ({
-    note,
+    noteID,
     isLastCategory,
-    isInSubCategory, //p prob wont need with passing the IDs too
     isLastNote,
     isLastSubCategory,
     category,
@@ -54,14 +52,15 @@ const NoteTile: React.FC<TileProps> = ({
     index,
     subCategoryIndex,
     parentCategoryIndex,
-    heightData,
-    setHeightData,
 }) => {
-    const dispatch = useDispatch<AppDispatch>();
     const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
+    const notes = useSelector((state: RootState) => state.memory.notes);
+    const note = notes[noteID];
+    const dispatch = useDispatch<AppDispatch>();
 
+    const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
     const [isShowingImage, setIsShowingImage] = useState(false);
+
     const handleNoteChange = (text: string) => {
         const noteCopy = { ...note, note: text };
         if (noteCopy.isNewNote) {
@@ -70,36 +69,10 @@ const NoteTile: React.FC<TileProps> = ({
         dispatch(updateNote(noteCopy));
     };
 
-    const menuOverlayRef = useRef(menuOverlay);
-
-    // allows cleanup method to access current state
-    useEffect(() => {
-        menuOverlayRef.current = menuOverlay;
-    }, [menuOverlay]);
-
-    // this cleanup method closes the menu overlay if the tile its related to gets disposed of. Originally was for if the category got closed (which is no longer possible)
-    // and then for when removing from category, but we've now taken that out. GUnna leave code in for now incase it does need to be actioned but atm doesnt do anything.
-    useEffect(() => {
-        return () => {
-            // cleanup method. Turns off arrow overlay if connected to this note
-            if (menuOverlayRef.current && menuOverlayRef.current.menuData.noteID === note.id) {
-                const closeOverlay = subCategory?.id
-                    ? menuOverlayRef.current.menuData.categoryID === category.id &&
-                      menuOverlayRef.current.menuData.subCategoryID === subCategory.id
-                    : menuOverlayRef.current.menuData.categoryID === category.id;
-                if (closeOverlay) {
-                    // dispatch(updateMenuOverlay(getEmptyOverlay())); // or actually, make turnoffmeuoverlay reducer that just sets all menu data to empty
-                }
-            }
-        };
-    }, []);
-
     const handleNoteBlur = () => {
         if (note.note === "" && note.imageURI === "") {
             const id = note.id;
             dispatch(deleteNoteFromAllCategories(id));
-            // should give option to delete from just the category or sub category
-            //   " you are about to remove note from all cats and sub cats, would you prefer to just delete from this one?"
         }
 
         if (note.isNewNote) {
@@ -143,7 +116,7 @@ const NoteTile: React.FC<TileProps> = ({
             return false;
         }
 
-        if (!isInSubCategory) {
+        if (!subCategory) {
             return isLastNote;
         }
         return isLastSubCategory && isLastNote;
@@ -178,26 +151,14 @@ const NoteTile: React.FC<TileProps> = ({
     const handleCategoryLayout = (event: any) => {
         const { height } = event.nativeEvent.layout;
 
-        setHeightData((prevState: CatHeight[]) => {
-            const newState = [...prevState];
+        const update: HeightUpdateInfo = {
+            newHeight: height,
+            categoryIndex: parentCategoryIndex,
+            subCategoryIndex: subCategoryIndex >= -1 ? subCategoryIndex : -1, // should prob allow null
+            noteIndex: index,
+        };
 
-            const newCatHeight = { ...newState[parentCategoryIndex] };
-            if (subCategoryIndex !== undefined && subCategoryIndex >= 0) {
-                const newSubCatHeight = { ...newCatHeight.subHeights[subCategoryIndex] };
-                newSubCatHeight.noteHeights[index] = height;
-                newCatHeight.subHeights[subCategoryIndex] = newSubCatHeight;
-
-                newState[parentCategoryIndex] = newCatHeight;
-
-                return newState;
-            } else {
-                const newNoteHeights = [...newCatHeight.noteHeights];
-                newNoteHeights[index] = height;
-                newCatHeight.noteHeights = newNoteHeights;
-                newState[parentCategoryIndex] = newCatHeight;
-                return newState;
-            }
-        });
+        dispatch(updateNoteHeight(update));
     };
 
     return (
