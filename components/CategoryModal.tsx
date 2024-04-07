@@ -121,6 +121,7 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
                         placeholder="Enter category name"
                         onChangeText={(text) => handleChange(text)}
                         value={newCategoryName}
+                        autoFocus
                     />
                     <View style={modalStyles.modalButtonContainer}>
                         <Button title="Submit" onPress={handleSubmit} />

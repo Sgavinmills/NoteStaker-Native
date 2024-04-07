@@ -1,5 +1,5 @@
 import { Text, View, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
@@ -17,9 +17,17 @@ interface TileProps {
     categoryID: string;
     index: number;
     isLastCategory: boolean;
+    setCloseAllCategories: React.Dispatch<React.SetStateAction<boolean>>;
+    closeAllCategories: boolean;
 }
 
-const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }) => {
+const CategoryTile: React.FC<TileProps> = ({
+    categoryID,
+    index,
+    isLastCategory,
+    closeAllCategories,
+    setCloseAllCategories,
+}) => {
     const categories = useSelector((state: RootState) => state.memory.categories);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const category = categories[categoryID];
@@ -27,6 +35,13 @@ const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [showSubtleMessage, setShowSubtleMessage] = useState(false);
+
+    useEffect(() => {
+        if (closeAllCategories && isExpanded) {
+            setIsExpanded(false);
+            setCloseAllCategories(false);
+        }
+    }, [closeAllCategories]);
 
     const toggleExpansion = () => {
         setIsExpanded(!isExpanded);
@@ -110,9 +125,6 @@ const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
-        if (!isExpanded) {
-            setIsExpanded(true);
-        }
     };
 
     const addBottomTileMartin = () => {

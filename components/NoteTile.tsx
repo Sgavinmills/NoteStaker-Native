@@ -17,7 +17,7 @@ import { useState } from "react";
 import ImageModal from "./ImageModal";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import React from "react";
 interface TileProps {

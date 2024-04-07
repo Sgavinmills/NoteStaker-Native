@@ -1,4 +1,13 @@
-import { FlatList, TouchableOpacity, Text, View, StatusBar, TouchableWithoutFeedback, Button } from "react-native";
+import {
+    FlatList,
+    TouchableOpacity,
+    Text,
+    View,
+    StatusBar,
+    TouchableWithoutFeedback,
+    Button,
+    Touchable,
+} from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
@@ -18,6 +27,7 @@ const HomeScreen: React.FC = () => {
 
     const [newCatModalVisible, setNewCatModalVisible] = useState(false);
     const [scrollTo, setScrollTo] = useState<null | number>(null);
+    const [closeAllCategories, setCloseAllCategories] = useState(false);
 
     const flatListRef = useRef<FlatList>(null);
 
@@ -29,6 +39,11 @@ const HomeScreen: React.FC = () => {
 
         setNewCatModalVisible(true);
     };
+
+    const handleCloseAllCategoriesPress = () => {
+        setCloseAllCategories(true);
+    };
+
     useEffect(() => {
         if (scrollTo) {
             flatListRef.current?.scrollToOffset({ offset: scrollTo, animated: true });
@@ -41,6 +56,8 @@ const HomeScreen: React.FC = () => {
             categoryID={item}
             index={index}
             isLastCategory={index === categoryList.length - 1 ? true : false}
+            closeAllCategories={closeAllCategories}
+            setCloseAllCategories={setCloseAllCategories}
         />
     );
 
@@ -62,9 +79,14 @@ const HomeScreen: React.FC = () => {
                         catInfo={{ currentName: "", parentCat: "" }}
                     ></CategoryModal>
                 )}
-                <TouchableOpacity onPress={handleNewCategoryPress}>
-                    <Text style={categoryStyles.newCategoryText}>+</Text>
-                </TouchableOpacity>
+                <View style={styles.homeScreenButtonContainer}>
+                    <TouchableOpacity onPress={handleCloseAllCategoriesPress}>
+                        <Text style={categoryStyles.newCategoryText}>-</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleNewCategoryPress}>
+                        <Text style={categoryStyles.newCategoryText}>+</Text>
+                    </TouchableOpacity>
+                </View>
 
                 <FlatList
                     ref={flatListRef}
