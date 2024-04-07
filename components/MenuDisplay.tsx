@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Button, BackHandler } from "react-native";
+import { View, Button, BackHandler, TouchableWithoutFeedback } from "react-native";
 import menuOverlayStyles from "../styles/menuOverlayStyles";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch } from "react-redux";
@@ -60,28 +60,30 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo }) => {
     }, []);
 
     return (
-        <View style={menuOverlayStyles.container}>
-            <View style={menuOverlayStyles.contentContainer}>
-                {isCatsMainMenu && (
-                    <CategoryMainMenu
-                        setScrollTo={setScrollTo}
-                        setIsMoveArrows={setIsMoveArrows}
-                        setIsCategoryMainMenu={setIsCatsMainMenu}
-                    />
-                )}
-                {isNoteMainMenu && (
-                    <NoteMainMenu
-                        setIsAdjustingCategories={setIsAdjustingCategories}
-                        setIsMoveArrows={setIsMoveArrows}
-                        setIsNoteMainMenu={setIsNoteMainMenu}
-                        setScrollTo={setScrollTo}
-                    />
-                )}
-                {isMoveArrows && <MoveArrows />}
-                {isAdjustingCategories && <AdjustingCategories />}
+        <TouchableWithoutFeedback>
+            <View style={menuOverlayStyles.container}>
+                <View style={menuOverlayStyles.contentContainer}>
+                    {isCatsMainMenu && (
+                        <CategoryMainMenu
+                            setScrollTo={setScrollTo}
+                            setIsMoveArrows={setIsMoveArrows}
+                            setIsCategoryMainMenu={setIsCatsMainMenu}
+                        />
+                    )}
+                    {isNoteMainMenu && (
+                        <NoteMainMenu
+                            setIsAdjustingCategories={setIsAdjustingCategories}
+                            setIsMoveArrows={setIsMoveArrows}
+                            setIsNoteMainMenu={setIsNoteMainMenu}
+                            setScrollTo={setScrollTo}
+                        />
+                    )}
+                    {isMoveArrows && <MoveArrows />}
+                    {isAdjustingCategories && <AdjustingCategories />}
+                </View>
+                <Button title="Close" onPress={handleClose} />
             </View>
-            <Button title="Close" onPress={handleClose} />
-        </View>
+        </TouchableWithoutFeedback>
     );
 };
 
