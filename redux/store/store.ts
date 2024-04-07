@@ -15,6 +15,7 @@ const memoryPersistConfig = {
     key: "memory",
     storage: AsyncStorage,
     blacklist: ["heightData", "menuOverlay"],
+    // blacklist: ["heightData", "menuOverlay", "categories", "subCategories", "notes", "categoryList"],
 };
 
 const rootReducer = combineReducers({

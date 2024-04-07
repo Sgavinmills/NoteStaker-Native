@@ -3,7 +3,7 @@ import { useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { Note, MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import NoteTile from "./NoteTile";
@@ -11,7 +11,6 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";
 import { createNewNote, updateCategoryHeight, updateMenuOverlay } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
-import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import * as ImagePicker from "expo-image-picker";
 import SubtleMessage from "./SubtleMessage";
 interface TileProps {
@@ -30,6 +29,10 @@ const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }
     const [showSubtleMessage, setShowSubtleMessage] = useState(false);
 
     const toggleExpansion = () => {
+        setIsExpanded(!isExpanded);
+    };
+
+    const handleTilePress = () => {
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;
@@ -37,16 +40,16 @@ const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }
 
         const isEmpty = category.notes.length === 0 && category.subCategories.length === 0;
         if (isEmpty) {
-            setShowSubtleMessage(true);
-            setTimeout(() => {
-                setShowSubtleMessage(false);
-            }, 500);
+            addNewNote();
+            if (!isExpanded) {
+                toggleExpansion();
+            }
             return;
         }
         setIsExpanded(!isExpanded);
     };
 
-    const handleAddNote = () => {
+    const addNewNote = () => {
         const newNoteData: NewNoteData = {
             categoryID: categoryID,
             subCategoryID: "",
@@ -54,7 +57,10 @@ const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }
             noteInsertIndex: 0,
         };
         dispatch(createNewNote(newNoteData));
+    };
 
+    const handleAddNotePress = () => {
+        addNewNote();
         if (!isExpanded) {
             toggleExpansion();
         }
@@ -142,7 +148,7 @@ const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }
     };
     return (
         <View onLayout={handleCategoryLayout}>
-            <TouchableWithoutFeedback onPress={toggleExpansion} onLongPress={handleMenuPress}>
+            <TouchableWithoutFeedback onPress={handleTilePress} onLongPress={handleMenuPress}>
                 <View
                     style={[
                         categoryStyles.categoryTile,
@@ -158,7 +164,7 @@ const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
                         {category.subCategories.length === 0 && (
-                            <TouchableOpacity onPress={handleAddNote} onLongPress={handleLongPressAddNote}>
+                            <TouchableOpacity onPress={handleAddNotePress} onLongPress={handleLongPressAddNote}>
                                 <FontAwesome name="plus" style={[categoryStyles.plusIconText, categoryStyles.icons]} />
                             </TouchableOpacity>
                         )}

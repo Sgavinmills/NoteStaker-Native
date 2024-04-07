@@ -37,7 +37,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
     const [showSubtleMessage, setShowSubtleMessage] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
 
-    const toggleExpansion = () => {
+    const handleTilePress = () => {
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;
@@ -45,13 +45,16 @@ const SubCategoryTile: React.FC<TileProps> = ({
 
         const isEmpty = subCategory.notes.length === 0;
         if (isEmpty) {
-            setShowSubtleMessage(true);
-            setTimeout(() => {
-                setShowSubtleMessage(false);
-            }, 500);
+            addNewNote();
+            if (!isExpanded) {
+                toggleExpansion();
+            }
             return;
         }
 
+        toggleExpansion();
+    };
+    const toggleExpansion = () => {
         setIsExpanded(!isExpanded);
     };
 
@@ -108,7 +111,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
         dispatch(updateMenuOverlay(newOverlay));
     };
 
-    const handleAddNote = () => {
+    const addNewNote = () => {
         const newNoteData: NewNoteData = {
             categoryID: "",
             subCategoryID: subCategoryID,
@@ -117,6 +120,10 @@ const SubCategoryTile: React.FC<TileProps> = ({
         };
 
         dispatch(createNewNote(newNoteData));
+    };
+
+    const handleAddNotePress = () => {
+        addNewNote();
         if (!isExpanded) {
             toggleExpansion();
         }
@@ -161,7 +168,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
 
     return (
         <View onLayout={handleCategoryLayout}>
-            <TouchableWithoutFeedback onPress={toggleExpansion} onLongPress={handleMenuPress}>
+            <TouchableWithoutFeedback onPress={handleTilePress} onLongPress={handleMenuPress}>
                 <View
                     style={[
                         categoryStyles.subCategoryTile,
@@ -175,7 +182,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
                         </Text>
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
-                        <TouchableOpacity onPress={handleAddNote} onLongPress={handleLongPressAddNote}>
+                        <TouchableOpacity onPress={handleAddNotePress} onLongPress={handleLongPressAddNote}>
                             <FontAwesome name="plus" style={[categoryStyles.categoryText, categoryStyles.icons]} />
                         </TouchableOpacity>
                         <FontAwesome
