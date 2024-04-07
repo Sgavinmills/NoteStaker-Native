@@ -72,3 +72,10 @@ export interface HeightUpdateInfo {
     subCategoryIndex: number;
     noteIndex: number;
 }
+
+export interface NewNoteData {
+    subCategoryID: string;
+    categoryID: string;
+    imageURI: string;
+    noteInsertIndex: number;
+}

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, Text, ScrollView } from "react-native";
 import adjustCatsStyles from "../styles/adjustingCategoriesStyles";
-import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
+import { FontAwesome6 } from "@expo/vector-icons";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { updateCategory, updateCategoryList, updateMenuOverlay, updateSubCategory } from "../redux/slice";
+import { updateCategory, updateSubCategory } from "../redux/slice";
 import { RootState } from "../redux/reducers/reducers";
 import { noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
 import theme from "../styles/constants";
@@ -12,27 +12,26 @@ import SubtleMessage from "./SubtleMessage";
 
 interface TileProps {}
 
-// since menuoverlay data wont change we can just extract to easily readable and reusuable consts.
-
+// AdjustingCategories is the menu view for moving notes between categories
 const AdjustingCategories: React.FC<TileProps> = ({}) => {
+    const categories = useSelector((state: RootState) => state.memory.categories);
+    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
+    const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const categoryList = useSelector((state: RootState) => state.memory.categoryList);
+    const dispatch = useDispatch<AppDispatch>();
+
+    const [parentCatToDisplaySubsOf, setParentCatToDisplaySubsOf] = useState(overlay.menuData.categoryID);
     const [showSubtleMessage, setShowSubtleMessage] = useState(false);
+    const [displayMainCategories, setDisplayMainCategories] = useState(overlay.menuData.subCategoryID ? false : true);
 
     const handleSubCategoryClick = (subCategoryID: string) => {
-        // basically just check if it is in the notes array and add/remove it accordingly?
-        // we still need the check to make sue it exists else where... but we will also need that in cats too.
-        const subCategoryCopy = { ...memory.subCategories[subCategoryID] };
+        const subCategoryCopy = { ...subCategories[subCategoryID] };
         const notesCopy = [...subCategoryCopy.notes];
-        const index = notesCopy.indexOf(memory.menuOverlay.menuData.noteID);
+        const index = notesCopy.indexOf(overlay.menuData.noteID);
         if (index > -1) {
             // since were taking out, just check it exists elsewhere first and dont o anything if not
             if (
-                !noteExistsInOtherCategories(
-                    memory.categories,
-                    memory.subCategories,
-                    memory.menuOverlay.menuData.noteID,
-                    null,
-                    [subCategoryID]
-                )
+                !noteExistsInOtherCategories(categories, subCategories, overlay.menuData.noteID, null, [subCategoryID])
             ) {
                 setShowSubtleMessage(true);
                 setTimeout(() => {
@@ -43,7 +42,7 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
 
             notesCopy.splice(index, 1);
         } else {
-            notesCopy.push(memory.menuOverlay.menuData.noteID);
+            notesCopy.push(overlay.menuData.noteID);
         }
         subCategoryCopy.notes = notesCopy;
         dispatch(updateSubCategory(subCategoryCopy));
@@ -51,20 +50,12 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
 
     const handleParentCategoryClick = (categoryID: string) => {
         // if category does not have sub cats then just do a state update to put the note into this category.
-        if (memory.categories[categoryID].subCategories.length === 0) {
-            const categoryCopy = { ...memory.categories[categoryID] };
+        if (categories[categoryID].subCategories.length === 0) {
+            const categoryCopy = { ...categories[categoryID] };
             const notesCopy = [...categoryCopy.notes];
-            const index = notesCopy.indexOf(memory.menuOverlay.menuData.noteID);
+            const index = notesCopy.indexOf(overlay.menuData.noteID);
             if (index > -1) {
-                if (
-                    !noteExistsInOtherCategories(
-                        memory.categories,
-                        memory.subCategories,
-                        memory.menuOverlay.menuData.noteID,
-                        categoryID,
-                        []
-                    )
-                ) {
+                if (!noteExistsInOtherCategories(categories, subCategories, overlay.menuData.noteID, categoryID, [])) {
                     setShowSubtleMessage(true);
                     setTimeout(() => {
                         setShowSubtleMessage(false);
@@ -73,7 +64,7 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                 }
                 notesCopy.splice(index, 1);
             } else {
-                notesCopy.push(memory.menuOverlay.menuData.noteID);
+                notesCopy.push(overlay.menuData.noteID);
             }
             categoryCopy.notes = notesCopy;
             dispatch(updateCategory(categoryCopy));
@@ -82,31 +73,21 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
 
         setParentCatToDisplaySubsOf(categoryID);
         setDisplayMainCategories(false);
-
-        // if category does have subcats then we will turn off displaymaincategories (so presumably switch to displaying subs)
-        // will need to tell it which subcats are on display
     };
 
-    const dispatch = useDispatch<AppDispatch>();
-    const memory = useSelector((state: RootState) => state.memory);
-    const [displayMainCategories, setDisplayMainCategories] = useState(
-        memory.menuOverlay.menuData.subCategoryID ? false : true
-    );
-    memory.menuOverlay.menuData;
-    const [parentCatToDisplaySubsOf, setParentCatToDisplaySubsOf] = useState(memory.menuOverlay.menuData.categoryID);
     const isInMainCategory = (categoryID: string): boolean => {
         // TODO: This also needs to check the categories subcats to see if its in there.
-        if (memory.categories[categoryID].notes.includes(memory.menuOverlay.menuData.noteID)) {
+        if (categories[categoryID].notes.includes(overlay.menuData.noteID)) {
             return true;
         }
 
-        return memory.categories[categoryID].subCategories.some((subCatID) => {
-            return memory.subCategories[subCatID].notes.includes(memory.menuOverlay.menuData.noteID);
+        return categories[categoryID].subCategories.some((subCatID) => {
+            return subCategories[subCatID].notes.includes(overlay.menuData.noteID);
         });
     };
 
     const isInSubCategory = (subCategoryID: string): boolean => {
-        if (memory.subCategories[subCategoryID].notes.includes(memory.menuOverlay.menuData.noteID)) {
+        if (subCategories[subCategoryID].notes.includes(overlay.menuData.noteID)) {
             return true;
         }
         return false;
@@ -120,7 +101,7 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
         <View style={adjustCatsStyles.container}>
             {displayMainCategories && (
                 <>
-                    {memory.categoryList.map((categoryID) => {
+                    {categoryList.map((categoryID) => {
                         return (
                             <TouchableOpacity
                                 key={categoryID}
@@ -132,7 +113,7 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                                     handleParentCategoryClick(categoryID);
                                 }}
                             >
-                                <Text style={adjustCatsStyles.text}>{memory.categories[categoryID].name}</Text>
+                                <Text style={adjustCatsStyles.text}>{categories[categoryID].name}</Text>
                             </TouchableOpacity>
                         );
                     })}
@@ -140,7 +121,7 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
             )}
             {!displayMainCategories && (
                 <>
-                    {memory.categories[parentCatToDisplaySubsOf].subCategories.map((subCategoryID) => {
+                    {categories[parentCatToDisplaySubsOf].subCategories.map((subCategoryID) => {
                         return (
                             <TouchableOpacity
                                 key={subCategoryID}
@@ -152,7 +133,7 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                                     handleSubCategoryClick(subCategoryID);
                                 }}
                             >
-                                <Text style={adjustCatsStyles.text}>{memory.subCategories[subCategoryID].name}</Text>
+                                <Text style={adjustCatsStyles.text}>{subCategories[subCategoryID].name}</Text>
                             </TouchableOpacity>
                         );
                     })}

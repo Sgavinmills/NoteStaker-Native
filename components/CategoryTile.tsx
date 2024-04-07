@@ -3,13 +3,13 @@ import { useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { Note, MenuOverlay, CatHeight, HeightUpdateInfo } from "../types";
+import { Note, MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import NoteTile from "./NoteTile";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";
-import { addNewNoteToNotes, updateCategory, updateCategoryHeight, updateMenuOverlay, updateNote } from "../redux/slice";
+import { createNewNote, updateCategoryHeight, updateMenuOverlay } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import * as ImagePicker from "expo-image-picker";
@@ -47,22 +47,13 @@ const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }
     };
 
     const handleAddNote = () => {
-        const noteToAdd: Note = {
-            id: getRandomID(),
-            note: "",
-            additionalInfo: "",
-            dateAdded: "",
-            dateUpdated: "",
-            priority: "normal",
-            completed: false,
+        const newNoteData: NewNoteData = {
+            categoryID: categoryID,
+            subCategoryID: "",
             imageURI: "",
-            isNewNote: true,
+            noteInsertIndex: 0,
         };
-        dispatch(addNewNoteToNotes(noteToAdd));
-
-        const categoryNotes = [...category.notes];
-        categoryNotes.unshift(noteToAdd.id);
-        dispatch(updateCategory({ ...category, notes: categoryNotes }));
+        dispatch(createNewNote(newNoteData));
 
         if (!isExpanded) {
             toggleExpansion();
@@ -83,22 +74,14 @@ const CategoryTile: React.FC<TileProps> = ({ categoryID, index, isLastCategory }
 
         if (!result.canceled) {
             const imageURI = result.assets[0].uri;
-            const noteToAdd: Note = {
-                id: getRandomID(),
-                note: "",
-                additionalInfo: "",
-                dateAdded: "",
-                dateUpdated: "",
-                priority: "normal",
-                completed: false,
-                imageURI: imageURI,
-                isNewNote: true,
-            };
-            dispatch(addNewNoteToNotes(noteToAdd));
 
-            const categoryNotes = [...category.notes];
-            categoryNotes.unshift(noteToAdd.id);
-            dispatch(updateCategory({ ...category, notes: categoryNotes }));
+            const newNoteData: NewNoteData = {
+                categoryID: categoryID,
+                subCategoryID: "",
+                imageURI: imageURI,
+                noteInsertIndex: 0,
+            };
+            dispatch(createNewNote(newNoteData));
         }
         setIsExpanded(true);
     };

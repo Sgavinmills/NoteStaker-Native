@@ -10,24 +10,15 @@ import {
 import noteStyles from "../styles/noteStyles";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
-import { Category, MenuOverlay, Note, SubCategory, HeightUpdateInfo } from "../types";
+import { Category, MenuOverlay, Note, SubCategory, HeightUpdateInfo, NewNoteData } from "../types";
 import { useDispatch } from "react-redux";
-import {
-    addNewNoteToNotes,
-    deleteNoteFromAllCategories,
-    updateCategory,
-    updateMenuOverlay,
-    updateNote,
-    updateSubCategory,
-    updateNoteHeight,
-} from "../redux/slice";
-import { useEffect, useRef, useState } from "react";
+import { createNewNote, deleteNote, updateMenuOverlay, updateNote, updateNoteHeight } from "../redux/slice";
+import { useState } from "react";
 import ImageModal from "./ImageModal";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
-import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import React from "react";
 interface TileProps {
     noteID: string;
@@ -72,7 +63,7 @@ const NoteTile: React.FC<TileProps> = ({
     const handleNoteBlur = () => {
         if (note.note === "" && note.imageURI === "") {
             const id = note.id;
-            dispatch(deleteNoteFromAllCategories(id));
+            dispatch(deleteNote(id));
         }
 
         if (note.isNewNote) {
@@ -231,7 +222,7 @@ const NoteTile: React.FC<TileProps> = ({
 
 interface Props {
     subCategory?: SubCategory;
-    category?: Category;
+    category: Category;
     index: number;
 }
 
@@ -241,32 +232,13 @@ const InsertNote: React.FC<Props> = ({ subCategory, category, index }) => {
     const dispatch = useDispatch<AppDispatch>();
 
     const handleAddNoteToBottom = () => {
-        const noteToAdd: Note = {
-            id: getRandomID(),
-            note: "",
-            additionalInfo: "",
-            dateAdded: "",
-            dateUpdated: "",
-            priority: "normal",
-            completed: false,
+        const newNoteData: NewNoteData = {
+            categoryID: category.id,
+            subCategoryID: subCategory ? subCategory.id : "",
             imageURI: "",
-            isNewNote: true,
+            noteInsertIndex: index + 1,
         };
-        dispatch(addNewNoteToNotes(noteToAdd));
-
-        if (subCategory) {
-            const subCategoryNotes = [...subCategory.notes];
-            subCategoryNotes.splice(index + 1, 0, noteToAdd.id);
-            dispatch(updateSubCategory({ ...subCategory, notes: subCategoryNotes }));
-            return;
-        }
-
-        if (category) {
-            const categoryNotes = [...category.notes];
-            categoryNotes.splice(index + 1, 0, noteToAdd.id);
-
-            dispatch(updateCategory({ ...category, notes: categoryNotes }));
-        }
+        dispatch(createNewNote(newNoteData));
     };
     return (
         <View style={noteStyles.addToBottomContainer}>

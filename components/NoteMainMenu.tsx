@@ -25,7 +25,6 @@ const NoteMainMenu: React.FC<TileProps> = ({
     setIsAdjustingCategories,
 }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    // if we extract more logic into the reducer/slice then prob wont need all these
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
     const categories = useSelector((state: RootState) => state.memory.categories);
     const notes = useSelector((state: RootState) => state.memory.notes);

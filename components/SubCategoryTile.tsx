@@ -5,11 +5,10 @@ import { useState } from "react";
 import { RootState } from "../redux/reducers/reducers";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
-import { Note, MenuOverlay, Category, HeightUpdateInfo } from "../types";
+import { MenuOverlay, Category, HeightUpdateInfo, NewNoteData } from "../types";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
-import { addNewNoteToNotes, updateMenuOverlay, updateSubCategory, updateSubCategoryHeight } from "../redux/slice";
+import { createNewNote, updateMenuOverlay, updateSubCategoryHeight } from "../redux/slice";
 import { AppDispatch } from "../redux/store/store";
-import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import * as ImagePicker from "expo-image-picker";
 import SubtleMessage from "./SubtleMessage";
 
@@ -110,22 +109,14 @@ const SubCategoryTile: React.FC<TileProps> = ({
     };
 
     const handleAddNote = () => {
-        const noteToAdd: Note = {
-            id: getRandomID(),
-            note: "",
-            additionalInfo: "",
-            dateAdded: "",
-            dateUpdated: "",
-            priority: "normal",
-            completed: false,
+        const newNoteData: NewNoteData = {
+            categoryID: "",
+            subCategoryID: subCategoryID,
             imageURI: "",
-            isNewNote: true,
+            noteInsertIndex: 0,
         };
-        dispatch(addNewNoteToNotes(noteToAdd));
 
-        const subCategoryNotes = [...subCategory.notes];
-        subCategoryNotes.unshift(noteToAdd.id);
-        dispatch(updateSubCategory({ ...subCategory, notes: subCategoryNotes }));
+        dispatch(createNewNote(newNoteData));
         if (!isExpanded) {
             toggleExpansion();
         }
@@ -145,22 +136,14 @@ const SubCategoryTile: React.FC<TileProps> = ({
 
         if (!result.canceled) {
             const imageURI = result.assets[0].uri;
-            const noteToAdd: Note = {
-                id: getRandomID(),
-                note: "",
-                additionalInfo: "",
-                dateAdded: "",
-                dateUpdated: "",
-                priority: "normal",
-                completed: false,
+            const newNoteData: NewNoteData = {
+                categoryID: "",
+                subCategoryID: subCategoryID,
                 imageURI: imageURI,
-                isNewNote: true,
+                noteInsertIndex: 0,
             };
-            dispatch(addNewNoteToNotes(noteToAdd));
 
-            const subCategoryNotes = [...subCategory.notes];
-            subCategoryNotes.unshift(noteToAdd.id);
-            dispatch(updateSubCategory({ ...subCategory, notes: subCategoryNotes }));
+            dispatch(createNewNote(newNoteData));
         }
         setIsExpanded(true);
     };

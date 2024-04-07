@@ -4,7 +4,6 @@ import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
 import { RootState } from "../redux/reducers/reducers";
 import CategoryTile from "./CategoryTile";
-import { Category, CatHeight } from "../types";
 import { useEffect, useRef, useState } from "react";
 import CategoryModal from "./CategoryModal";
 import MenuDisplay from "./MenuDisplay";

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Modal, View, Text, Button, TouchableOpacity, BackHandler } from "react-native";
+import { View, Button, BackHandler } from "react-native";
 import menuOverlayStyles from "../styles/menuOverlayStyles";
 import { AppDispatch } from "../redux/store/store";
-import { useDispatch, useSelector } from "react-redux";
-import { updateCategory, updateMenuOverlay, updateSubCategory } from "../redux/slice";
+import { useDispatch } from "react-redux";
+import { updateMenuOverlay } from "../redux/slice";
 import { MenuOverlay } from "../types";
 import CategoryMainMenu from "./CategoryMainMenu";
 import MoveArrows from "./MoveArrows";

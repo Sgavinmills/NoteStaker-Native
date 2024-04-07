@@ -2,11 +2,9 @@ import { Button, Modal, Text, TextInput, TouchableOpacity, View } from "react-na
 import modalStyles from "../styles/modalStyles";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/reducers/reducers";
 import { addCategory, addSubCategory, updateMenuOverlay, updateSubCategory } from "../redux/slice";
-import { Category, MenuOverlay, SubCategory } from "../types";
 import { AppDispatch } from "../redux/store/store";
 import { updateCategory } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
@@ -24,10 +22,11 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const parentCatHasNotes = catInfo.parentCat ? categories[catInfo.parentCat].notes.length > 0 : false;
+    const dispatch = useDispatch<AppDispatch>();
+
     const [newCategoryName, setNewCategoryName] = useState(catInfo.currentName);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const dispatch = useDispatch<AppDispatch>();
 
     const handleChange = (text: string) => {
         if (error) {
@@ -51,20 +50,11 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
 
     const addNewCategory = () => {
         if (catInfo.parentCat) {
-            dispatch(addSubCategory({ subCatName: newCategoryName, parentCatID: overlay.menuData.categoryID }));
+            dispatch(addSubCategory({ name: newCategoryName, parentCategoryID: overlay.menuData.categoryID }));
             return;
         }
 
-        const newCategory: Category = {
-            id: getRandomID(),
-            name: newCategoryName,
-            subCategories: [],
-            notes: [],
-            dateAdded: "",
-            dateUpdated: "",
-        };
-
-        dispatch(addCategory(newCategory));
+        dispatch(addCategory(newCategoryName));
     };
 
     const validCatName = () => {
