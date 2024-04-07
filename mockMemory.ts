@@ -23,6 +23,7 @@ export const memory: Memory = {
             priority: "normal",
             completed: true,
             imageURI: "",
+            isNewNote: false,
         },
         "16821881dfsdg37607ngw9drtxxxxxxxx": {
             id: "16821881dfsdg37607ngw9drtxxxxxxxx",
@@ -33,6 +34,7 @@ export const memory: Memory = {
             priority: "normal",
             completed: false,
             imageURI: "",
+            isNewNote: false,
         },
         "1682188rgerghre1dfsdg37607ngw9drtxxxxxxxx": {
             id: "1682188rgerghre1dfsdg37607ngw9drtxxxxxxxx",
@@ -43,6 +45,7 @@ export const memory: Memory = {
             priority: "normal",
             completed: false,
             imageURI: "",
+            isNewNote: false,
         },
     },
     categories: {

@@ -3,7 +3,7 @@ import modalStyles from "../styles/modalStyles";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import { addCategory, addSubCategory, updateMenuOverlay, updateSubCategory } from "../redux/slice";
 import { AppDispatch } from "../redux/store/store";
 import { updateCategory } from "../redux/slice";

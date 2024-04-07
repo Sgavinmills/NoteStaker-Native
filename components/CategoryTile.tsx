@@ -5,7 +5,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
 import { Note, MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
 import { useSelector } from "react-redux";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import NoteTile from "./NoteTile";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";

@@ -2,7 +2,7 @@ import { GestureResponderEvent, Text, View, TouchableWithoutFeedback, FlatList, 
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
 import { MenuOverlay, Category, HeightUpdateInfo, NewNoteData } from "../types";

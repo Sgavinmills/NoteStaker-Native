@@ -2,7 +2,7 @@ import { FlatList, TouchableOpacity, Text, View, StatusBar, TouchableWithoutFeed
 import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import CategoryTile from "./CategoryTile";
 import { useEffect, useRef, useState } from "react";
 import CategoryModal from "./CategoryModal";
