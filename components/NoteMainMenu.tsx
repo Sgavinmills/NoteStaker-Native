@@ -16,6 +16,7 @@ interface TileProps {
     setIsNoteMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
     setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
     setIsAdjustingCategories: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsAdditionalInfo: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const NoteMainMenu: React.FC<TileProps> = ({
@@ -23,6 +24,7 @@ const NoteMainMenu: React.FC<TileProps> = ({
     setIsMoveArrows,
     setIsNoteMainMenu,
     setIsAdjustingCategories,
+    setIsAdditionalInfo,
 }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
@@ -91,6 +93,11 @@ const NoteMainMenu: React.FC<TileProps> = ({
         setIsNoteMainMenu(false);
     };
 
+    const handleAdditionalInfoPress = () => {
+        setIsAdditionalInfo(true);
+        setIsNoteMainMenu(false);
+    };
+
     const handleScrollToNote = () => {
         let offset = 0;
         // to scroll to offset for all cats up to and inc this one
@@ -155,6 +162,10 @@ const NoteMainMenu: React.FC<TileProps> = ({
                 <Text style={menuOverlayStyles.text}>Delete note</Text>
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleScrollToNote}>
+                <FontAwesome name="times" style={menuOverlayStyles.icons} />
+                <Text style={menuOverlayStyles.text}>Scroll To</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAdditionalInfoPress}>
                 <FontAwesome name="times" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>See additional note info</Text>
             </TouchableOpacity>

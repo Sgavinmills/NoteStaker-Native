@@ -5,7 +5,7 @@ import { FontAwesome, Entypo } from "@expo/vector-icons";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { updateCategory, updateCategoryList, updateMenuOverlay, updateSubCategory } from "../redux/slice";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 
 interface TileProps {}
 

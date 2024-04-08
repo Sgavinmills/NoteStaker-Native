@@ -9,6 +9,7 @@ import CategoryMainMenu from "./CategoryMainMenu";
 import MoveArrows from "./MoveArrows";
 import NoteMainMenu from "./NoteMainMenu";
 import AdjustingCategories from "./AdjustingCategories";
+import AdditionalInfo from "./AdditionalInfo";
 
 interface TileProps {
     overlay: MenuOverlay;
@@ -20,12 +21,12 @@ interface TileProps {
 const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo }) => {
     const dispatch = useDispatch<AppDispatch>();
     const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
-
+    const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
+    const [isNoteMainMenu, setIsNoteMainMenu] = useState(overlay.menuType === "note");
+    const [isMoveArrows, setIsMoveArrows] = useState(false);
     const [isCatsMainMenu, setIsCatsMainMenu] = useState(
         overlay.menuType === "category" || overlay.menuType === "subCategory"
     );
-    const [isNoteMainMenu, setIsNoteMainMenu] = useState(overlay.menuType === "note");
-    const [isMoveArrows, setIsMoveArrows] = useState(false);
 
     const handleClose = () => {
         const overlay: MenuOverlay = {
@@ -76,10 +77,12 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo }) => {
                             setIsMoveArrows={setIsMoveArrows}
                             setIsNoteMainMenu={setIsNoteMainMenu}
                             setScrollTo={setScrollTo}
+                            setIsAdditionalInfo={setIsAdditionalInfo}
                         />
                     )}
                     {isMoveArrows && <MoveArrows />}
                     {isAdjustingCategories && <AdjustingCategories />}
+                    {isAdditionalInfo && <AdditionalInfo />}
                 </View>
                 <Button title="Close" onPress={handleClose} />
             </View>

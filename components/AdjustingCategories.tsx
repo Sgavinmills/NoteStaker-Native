@@ -5,7 +5,7 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { updateCategory, updateSubCategory } from "../redux/slice";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import { noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
 import theme from "../styles/constants";
 import SubtleMessage from "./SubtleMessage";

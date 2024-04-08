@@ -24,6 +24,9 @@ export const memory: Memory = {
             completed: true,
             imageURI: "",
             isNewNote: false,
+            secureNote: "",
+            lastUpdatedBy: "",
+            createdBy: "mockMemory",
         },
         "16821881dfsdg37607ngw9drtxxxxxxxx": {
             id: "16821881dfsdg37607ngw9drtxxxxxxxx",
@@ -35,6 +38,9 @@ export const memory: Memory = {
             completed: false,
             imageURI: "",
             isNewNote: false,
+            secureNote: "",
+            lastUpdatedBy: "",
+            createdBy: "mockMemory",
         },
         "1682188rgerghre1dfsdg37607ngw9drtxxxxxxxx": {
             id: "1682188rgerghre1dfsdg37607ngw9drtxxxxxxxx",
@@ -46,6 +52,9 @@ export const memory: Memory = {
             completed: false,
             imageURI: "",
             isNewNote: false,
+            secureNote: "",
+            lastUpdatedBy: "",
+            createdBy: "mockMemory",
         },
     },
     categories: {
@@ -56,6 +65,8 @@ export const memory: Memory = {
             notes: [],
             dateAdded: "",
             dateUpdated: "",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randomcatid2: {
             id: "randomcatid2",
@@ -64,6 +75,8 @@ export const memory: Memory = {
             notes: [],
             dateAdded: "",
             dateUpdated: "",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randomcatid3: {
             id: "randomcatid3",
@@ -72,6 +85,8 @@ export const memory: Memory = {
             notes: [],
             dateAdded: "",
             dateUpdated: "",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randomcatidgsgagergre3: {
             id: "randomcatidgsgagergre3",
@@ -84,6 +99,8 @@ export const memory: Memory = {
             subCategories: [],
             dateAdded: "",
             dateUpdated: "",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randogefewfmcatid3: {
             id: "randogefewfmcatid3",
@@ -96,6 +113,8 @@ export const memory: Memory = {
             subCategories: [],
             dateAdded: "",
             dateUpdated: "",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randomcwefwdatid3: {
             id: "randomcwefwdatid3",
@@ -108,6 +127,8 @@ export const memory: Memory = {
             subCategories: [],
             dateAdded: "",
             dateUpdated: "",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randtwertgwfomcatid3: {
             id: "randtwertgwfomcatid3",
@@ -120,6 +141,8 @@ export const memory: Memory = {
             subCategories: [],
             dateAdded: "",
             dateUpdated: "",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randomcfsegsaxcsafgerhratid3: {
             id: "randomcfsegsaxcsafgerhratid3",
@@ -132,6 +155,8 @@ export const memory: Memory = {
             subCategories: [],
             dateAdded: "",
             dateUpdated: "",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randefewgryhrtjhomcatid3: {
             id: "randefewgryhrtjhomcatid3",
@@ -144,6 +169,8 @@ export const memory: Memory = {
             subCategories: [],
             dateAdded: "",
             dateUpdated: "",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randomcatidgggggggggg3: {
             id: "randomcatidgggggggggg3",
@@ -156,6 +183,8 @@ export const memory: Memory = {
             subCategories: [],
             dateAdded: "",
             dateUpdated: "",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
     },
 
@@ -171,6 +200,8 @@ export const memory: Memory = {
             dateAdded: "",
             dateUpdated: "",
             parentCategory: "randomcatidgggggggggg3",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         othernewsubby22: {
             id: "othernewsubby22",
@@ -183,6 +214,8 @@ export const memory: Memory = {
             dateAdded: "",
             dateUpdated: "",
             parentCategory: "randomcatidgggggggggg3",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randomsubcatid1: {
             id: "randomsubcatid1",
@@ -195,6 +228,8 @@ export const memory: Memory = {
             dateAdded: "",
             dateUpdated: "",
             parentCategory: "randomcatid1",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randomsubcatid2: {
             id: "randomsubcatid2",
@@ -207,6 +242,8 @@ export const memory: Memory = {
             dateAdded: "",
             dateUpdated: "",
             parentCategory: "randomcatid1",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randomsubcatid21: {
             id: "randomsubcatid21",
@@ -219,6 +256,8 @@ export const memory: Memory = {
             dateAdded: "",
             dateUpdated: "",
             parentCategory: "randomcatid2",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
         randomsubcatid22: {
             id: "randomsubcatid22",
@@ -231,6 +270,8 @@ export const memory: Memory = {
             dateAdded: "",
             dateUpdated: "",
             parentCategory: "randomcatid2",
+            createdBy: "mockMemory",
+            lastUpdatedBy: "",
         },
     },
 };

@@ -15,6 +15,9 @@ export interface Note {
     completed: boolean;
     imageURI: string;
     isNewNote: boolean;
+    secureNote: string;
+    createdBy: string;
+    lastUpdatedBy: string;
 }
 
 export interface Category {
@@ -24,6 +27,8 @@ export interface Category {
     subCategories: string[];
     dateAdded: string;
     dateUpdated: string;
+    createdBy: string;
+    lastUpdatedBy: string;
 }
 
 export interface SubCategory {
@@ -33,6 +38,8 @@ export interface SubCategory {
     parentCategory: string;
     dateAdded: string;
     dateUpdated: string;
+    createdBy: string;
+    lastUpdatedBy: string;
 }
 
 export interface MenuOverlay {

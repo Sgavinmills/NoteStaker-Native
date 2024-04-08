@@ -3,6 +3,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Category, Note, SubCategory, MenuOverlay, CatHeight, HeightUpdateInfo, NewNoteData } from "../types";
 import { memory } from "../mockMemory";
 import { produce } from "immer";
+import * as Device from "expo-device";
+
 interface AppState {
     notes: { [id: string]: Note };
     categories: { [id: string]: Category };
@@ -116,12 +118,15 @@ const notesSlice = createSlice({
                     id: getRandomID(),
                     note: "",
                     additionalInfo: "",
-                    dateAdded: "",
+                    dateAdded: new Date().toISOString(),
                     dateUpdated: "",
                     priority: "normal",
                     completed: false,
                     imageURI: imageURI,
                     isNewNote: true,
+                    secureNote: "",
+                    createdBy: Device.deviceName ? Device.deviceName : "Annoymous",
+                    lastUpdatedBy: "",
                 };
 
                 draft.notes[noteToAdd.id] = noteToAdd;
@@ -256,7 +261,8 @@ const notesSlice = createSlice({
         // updateCategory updates a single category
         updateCategory(state, action: PayloadAction<Category>) {
             const categoryCopy = action.payload;
-
+            categoryCopy.dateUpdated = new Date().toISOString();
+            categoryCopy.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
             const categoriesCopy = { ...state.categories };
             if (categoriesCopy[categoryCopy.id]) {
                 categoriesCopy[categoryCopy.id] = { ...categoryCopy };
@@ -268,6 +274,8 @@ const notesSlice = createSlice({
         // updateSubCategory updates a single subCategory
         updateSubCategory(state, action: PayloadAction<SubCategory>) {
             const subCategoryCopy = action.payload;
+            subCategoryCopy.dateUpdated = new Date().toISOString();
+            subCategoryCopy.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
             const subCategoryId = subCategoryCopy.id;
 
             const subCategoriesCopy = { ...state.subCategories };
@@ -313,9 +321,11 @@ const notesSlice = createSlice({
                     id: getRandomID(),
                     name: name,
                     notes: [],
-                    dateAdded: "",
+                    dateAdded: new Date().toISOString(),
                     dateUpdated: "",
                     parentCategory: parentCategoryID,
+                    createdBy: Device.deviceName ? Device.deviceName : "Annoynmous",
+                    lastUpdatedBy: "",
                 };
 
                 const parentCategory = draft.categories[parentCategoryID];
@@ -337,8 +347,10 @@ const notesSlice = createSlice({
                     name: action.payload,
                     notes: [],
                     subCategories: [],
-                    dateAdded: "",
+                    dateAdded: new Date().toISOString(),
                     dateUpdated: "",
+                    createdBy: Device.deviceName ? Device.deviceName : "Annoynmous",
+                    lastUpdatedBy: "",
                 };
 
                 draft.categories[newCategory.id] = newCategory;
@@ -349,6 +361,10 @@ const notesSlice = createSlice({
         // updateNote updates a single note
         updateNote(state, action: PayloadAction<Note>) {
             const newNote = action.payload;
+
+            newNote.dateUpdated = new Date().toISOString();
+            newNote.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
+
             const newNotes = { ...state.notes };
             newNotes[newNote.id] = newNote;
             return { ...state, notes: newNotes };

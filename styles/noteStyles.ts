@@ -1,6 +1,9 @@
 import { StyleSheet } from "react-native";
 import theme from "./constants";
 
+// TODO, REMove Styles from exported value name.
+// also remove 'note' from the style descriptor. APply to all css sheets.
+// move menu css sheets into ther own folder.
 const noteStyles = StyleSheet.create({
     noteTile: {
         backgroundColor: theme.colors.tileBackground,

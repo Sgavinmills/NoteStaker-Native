@@ -2,7 +2,7 @@ import { Button, Modal, Text, TouchableOpacity, View } from "react-native";
 import modalStyles from "../styles/modalStyles";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import {
     deleteCategory,
     deleteNote,

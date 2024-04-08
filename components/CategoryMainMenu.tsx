@@ -6,7 +6,7 @@ import CategoryModal from "./CategoryModal";
 import { DeleteInfo } from "../types";
 
 import { useSelector } from "react-redux";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import {} from "../redux/slice";
 import DeleteModal from "./DeleteModal";
 
