@@ -4,7 +4,7 @@ import { FontAwesome, Entypo } from "@expo/vector-icons";
 import { Text, TouchableOpacity, GestureResponderEvent } from "react-native";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import * as ImagePicker from "expo-image-picker";
 import { updateMenuOverlay, updateNote } from "../redux/slice";
 import { getEmptyOverlay, noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
