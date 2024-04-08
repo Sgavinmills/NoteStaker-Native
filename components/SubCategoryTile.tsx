@@ -5,9 +5,9 @@ import { useState } from "react";
 import { RootState } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
-import { MenuOverlay, Category, HeightUpdateInfo, NewNoteData } from "../types";
+import { MenuOverlay, Category, HeightUpdateInfo, NewNoteData, Note } from "../types";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
-import { createNewNote, updateMenuOverlay, updateSubCategoryHeight } from "../redux/slice";
+import { createNewNote, removeFromShowSecureNote, updateMenuOverlay, updateSubCategoryHeight } from "../redux/slice";
 import { AppDispatch } from "../redux/store/store";
 import * as ImagePicker from "expo-image-picker";
 import SubtleMessage from "./SubtleMessage";
@@ -30,11 +30,22 @@ const SubCategoryTile: React.FC<TileProps> = ({
     index: index,
 }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const showSecureNotes = useSelector((state: RootState) => state.memory.showSecureNote);
+    const notes = useSelector((state: RootState) => state.memory.notes);
+
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
     const subCategory = subCategories[subCategoryID];
+    const showingSecureNotes = showSecureNotes.includes(subCategoryID);
+    const notesForSubCat: Note[] = [];
+    subCategory.notes.forEach((noteID) => {
+        const note = notes[noteID];
+        if (!note.isSecureNote || showingSecureNotes) {
+            notesForSubCat.push(notes[noteID]);
+        }
+    });
+
     const dispatch = useDispatch<AppDispatch>();
 
-    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
 
     const handleTilePress = () => {
@@ -43,7 +54,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
             return;
         }
 
-        const isEmpty = subCategory.notes.length === 0;
+        const isEmpty = notesForSubCat.length === 0;
         if (isEmpty) {
             addNewNote();
             if (!isExpanded) {
@@ -55,6 +66,11 @@ const SubCategoryTile: React.FC<TileProps> = ({
         toggleExpansion();
     };
     const toggleExpansion = () => {
+        if (isExpanded) {
+            if (showingSecureNotes) {
+                dispatch(removeFromShowSecureNote(subCategoryID));
+            }
+        }
         setIsExpanded(!isExpanded);
     };
 
@@ -198,15 +214,8 @@ const SubCategoryTile: React.FC<TileProps> = ({
                     </View>
                 </View>
             </TouchableWithoutFeedback>
-            {showSubtleMessage && (
-                <SubtleMessage
-                    message="This sub-category is empty"
-                    visible={showSubtleMessage}
-                    setSubtleMessage={setShowSubtleMessage}
-                />
-            )}
             {isExpanded &&
-                subCategory.notes.map((noteID, noteIndex) => {
+                notesForSubCat.map((note, noteIndex) => {
                     return (
                         <NoteTile
                             index={noteIndex}
@@ -214,12 +223,13 @@ const SubCategoryTile: React.FC<TileProps> = ({
                             parentCategoryIndex={parentCategoryIndex}
                             subCategory={subCategory}
                             category={parentCategory}
-                            noteID={noteID}
-                            isLastNote={noteIndex === subCategory.notes.length - 1}
+                            note={note}
+                            isLastNote={noteIndex === notesForSubCat.length - 1}
                             isLastCategory={isLastCategory}
                             isLastSubCategory={isLastSubCategory}
                             isInSubCategory={true}
-                            key={noteID}
+                            key={note.id}
+                            showingSecureNotes={showingSecureNotes}
                         />
                     );
                 })}

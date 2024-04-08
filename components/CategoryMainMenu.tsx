@@ -4,11 +4,14 @@ import { FontAwesome, Entypo } from "@expo/vector-icons";
 import { Text, TouchableOpacity } from "react-native";
 import CategoryModal from "./CategoryModal";
 import { DeleteInfo } from "../types";
-
+import { AppDispatch } from "../redux/store/store";
+import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
-import {} from "../redux/slice";
+import { addToShowSecureNote, updateMenuOverlay } from "../redux/slice";
 import DeleteModal from "./DeleteModal";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import * as LocalAuthentication from "expo-local-authentication";
 
 interface TileProps {
     setIsMoveArrows: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,14 +25,18 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
     const categories = useSelector((state: RootState) => state.memory.categories);
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
     const heightData = useSelector((state: RootState) => state.memory.heightData);
+    const dispatch = useDispatch<AppDispatch>();
 
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteMessage: "", deleteType: "" });
 
     const catName = overlay.menuType === "category" ? "category" : "sub-category";
+    const openCategoryID =
+        overlay.menuType === "category" ? overlay.menuData.categoryID : overlay.menuData.subCategoryID;
 
-    const showRemoveAllOption = () => {
+    // whether to show any options that depend on the category having notes or not
+    const showNoteSpecificOptions = () => {
         if (overlay.menuType === "subCategory") {
             return true;
         }
@@ -103,6 +110,26 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
         setDeleteModalVisible(true);
     };
 
+    const handleShowSecureNote = () => {
+        showSecureNotes();
+    };
+
+    const showSecureNotes = async () => {
+        const compatible = await LocalAuthentication.hasHardwareAsync();
+        if (compatible) {
+            const enrolled = await LocalAuthentication.isEnrolledAsync();
+            if (enrolled) {
+                const result = await LocalAuthentication.authenticateAsync({
+                    promptMessage: "Authenticate to continue",
+                });
+                if (result.success) {
+                    dispatch(addToShowSecureNote(openCategoryID));
+                    dispatch(updateMenuOverlay(getEmptyOverlay()));
+                }
+            }
+        }
+    };
+
     const handleScrollTo = () => {
         if (overlay.menuType === "category") {
             let offset = 0;
@@ -151,10 +178,16 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
                 <Entypo name="select-arrows" style={[menuOverlayStyles.icons]} />
                 <Text style={menuOverlayStyles.text}>Move {catName}</Text>
             </TouchableOpacity>
-            {showRemoveAllOption() && (
+            {showNoteSpecificOptions() && (
                 <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleRemoveAllNotes}>
                     <FontAwesome name="trash" style={menuOverlayStyles.icons} />
                     <Text style={menuOverlayStyles.text}>Remove all notes from {catName}</Text>
+                </TouchableOpacity>
+            )}
+            {showNoteSpecificOptions() && (
+                <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleShowSecureNote}>
+                    <FontAwesome name="lock" style={menuOverlayStyles.icons} />
+                    <Text style={menuOverlayStyles.text}>Show secure notes</Text>
                 </TouchableOpacity>
             )}
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDeleteCategory}>

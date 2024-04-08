@@ -6,7 +6,6 @@ import { RootState } from "../redux/store/store";
 
 interface TileProps {}
 
-// AdjustingCategories is the menu view for moving notes between categories
 const AdditionalInfo: React.FC<TileProps> = ({}) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const notes = useSelector((state: RootState) => state.memory.notes);
@@ -41,7 +40,6 @@ const AdditionalInfo: React.FC<TileProps> = ({}) => {
                 <Text style={additionalInfo.text}>Image: </Text>
                 <Text style={additionalInfo.text}>{note.imageURI}</Text>
             </View>
-            <Text style={additionalInfo.text}>Secure note</Text>
         </View>
     );
 };

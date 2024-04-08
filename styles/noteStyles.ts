@@ -50,6 +50,11 @@ const noteStyles = StyleSheet.create({
         color: theme.colors.noteText,
     },
 
+    padlock: {
+        fontSize: 18,
+        color: theme.colors.noteText,
+    },
+
     completedCheckbox: {
         fontSize: 14,
     },

@@ -10,6 +10,7 @@ import { updateMenuOverlay, updateNote } from "../redux/slice";
 import { getEmptyOverlay, noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
 import DeleteModal from "./DeleteModal";
 import { DeleteInfo } from "../types";
+import * as LocalAuthentication from "expo-local-authentication";
 
 interface TileProps {
     setIsMoveArrows: React.Dispatch<React.SetStateAction<boolean>>;
@@ -31,6 +32,8 @@ const NoteMainMenu: React.FC<TileProps> = ({
     const categories = useSelector((state: RootState) => state.memory.categories);
     const notes = useSelector((state: RootState) => state.memory.notes);
     const heightData = useSelector((state: RootState) => state.memory.heightData);
+
+    const note = notes[overlay.menuData.noteID];
 
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteType: "", deleteMessage: "" });
@@ -67,6 +70,30 @@ const NoteMainMenu: React.FC<TileProps> = ({
         const noteCopy = { ...notes[overlay.menuData.noteID] };
         noteCopy.priority = noteCopy.priority !== "high" ? "high" : "normal";
         dispatch(updateNote(noteCopy));
+    };
+
+    const handleMakeSecure = () => {
+        adjustNoteSecurity();
+    };
+
+    const adjustNoteSecurity = async () => {
+        const compatible = await LocalAuthentication.hasHardwareAsync();
+        if (compatible) {
+            const enrolled = await LocalAuthentication.isEnrolledAsync();
+            if (enrolled) {
+                const result = await LocalAuthentication.authenticateAsync({
+                    promptMessage: "Authenticate to continue",
+                });
+                if (result.success) {
+                    const noteCopy = { ...notes[overlay.menuData.noteID] };
+                    noteCopy.isSecureNote = !noteCopy.isSecureNote;
+                    if (overlay.isShowing) {
+                        dispatch(updateMenuOverlay(getEmptyOverlay()));
+                    }
+                    dispatch(updateNote(noteCopy));
+                }
+            }
+        }
     };
 
     const handleDelete = () => {
@@ -161,9 +188,10 @@ const NoteMainMenu: React.FC<TileProps> = ({
                 <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
                 <Text style={menuOverlayStyles.text}>Delete note</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleScrollToNote}>
-                <FontAwesome name="times" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>Scroll To</Text>
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecure}>
+                <FontAwesome name="lock" style={menuOverlayStyles.icons} />
+                {!note.isSecureNote && <Text style={menuOverlayStyles.text}>Make secure note</Text>}
+                {note.isSecureNote && <Text style={menuOverlayStyles.text}>Unsecure note</Text>}
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAdditionalInfoPress}>
                 <FontAwesome name="times" style={menuOverlayStyles.icons} />

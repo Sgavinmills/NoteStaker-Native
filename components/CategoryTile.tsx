@@ -3,16 +3,15 @@ import { useEffect, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData, Note } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import NoteTile from "./NoteTile";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";
-import { createNewNote, updateCategoryHeight, updateMenuOverlay } from "../redux/slice";
+import { createNewNote, removeFromShowSecureNote, updateCategoryHeight, updateMenuOverlay } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import * as ImagePicker from "expo-image-picker";
-import SubtleMessage from "./SubtleMessage";
 interface TileProps {
     categoryID: string;
     index: number;
@@ -29,12 +28,23 @@ const CategoryTile: React.FC<TileProps> = ({
     setCloseAllCategories,
 }) => {
     const categories = useSelector((state: RootState) => state.memory.categories);
+    const notes = useSelector((state: RootState) => state.memory.notes);
+    const showSecureNotes = useSelector((state: RootState) => state.memory.showSecureNote);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const showingSecureNotes = showSecureNotes.includes(categoryID);
+
     const category = categories[categoryID];
+    const notesForCat: Note[] = [];
+    category.notes.forEach((noteID) => {
+        const note = notes[noteID];
+        if (!note.isSecureNote || showingSecureNotes) {
+            notesForCat.push(notes[noteID]);
+        }
+    });
+
     const dispatch = useDispatch<AppDispatch>();
 
     const [isExpanded, setIsExpanded] = useState(false);
-    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
 
     useEffect(() => {
         if (closeAllCategories && isExpanded) {
@@ -44,6 +54,11 @@ const CategoryTile: React.FC<TileProps> = ({
     }, [closeAllCategories]);
 
     const toggleExpansion = () => {
+        if (isExpanded) {
+            if (showingSecureNotes) {
+                dispatch(removeFromShowSecureNote(categoryID));
+            }
+        }
         setIsExpanded(!isExpanded);
     };
 
@@ -53,7 +68,7 @@ const CategoryTile: React.FC<TileProps> = ({
             return;
         }
 
-        const isEmpty = category.notes.length === 0 && category.subCategories.length === 0;
+        const isEmpty = notesForCat.length === 0 && category.subCategories.length === 0;
         if (isEmpty) {
             addNewNote();
             if (!isExpanded) {
@@ -61,7 +76,7 @@ const CategoryTile: React.FC<TileProps> = ({
             }
             return;
         }
-        setIsExpanded(!isExpanded);
+        toggleExpansion();
     };
 
     const addNewNote = () => {
@@ -193,13 +208,6 @@ const CategoryTile: React.FC<TileProps> = ({
                     </View>
                 </View>
             </TouchableWithoutFeedback>
-            {showSubtleMessage && (
-                <SubtleMessage
-                    message="This category is empty"
-                    visible={showSubtleMessage}
-                    setSubtleMessage={setShowSubtleMessage}
-                />
-            )}
             {isExpanded &&
                 category.subCategories.length > 0 &&
                 category.subCategories.map((subCatID, subCatIndex) => {
@@ -217,18 +225,19 @@ const CategoryTile: React.FC<TileProps> = ({
                 })}
             {isExpanded &&
                 category.subCategories.length == 0 &&
-                category.notes.map((noteID, noteIndex) => {
+                notesForCat.map((note, noteIndex) => {
                     return (
                         <NoteTile
                             index={Number(noteIndex)}
                             parentCategoryIndex={index}
-                            noteID={noteID}
+                            note={note}
                             category={category}
                             isLastCategory={isLastCategory}
-                            isLastNote={noteIndex === category.notes.length - 1}
+                            isLastNote={noteIndex === notesForCat.length - 1}
                             isInSubCategory={false}
-                            key={noteID}
+                            key={note.id}
                             subCategoryIndex={-1}
+                            showingSecureNotes={showingSecureNotes}
                         />
                     );
                 })}

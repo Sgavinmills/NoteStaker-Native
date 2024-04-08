@@ -21,7 +21,7 @@ import { RootState } from "../redux/store/store";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import React from "react";
 interface TileProps {
-    noteID: string;
+    note: Note;
     isLastCategory: boolean;
     isLastSubCategory?: boolean;
     isLastNote: boolean;
@@ -31,10 +31,11 @@ interface TileProps {
     index: number;
     subCategoryIndex: number;
     parentCategoryIndex: number;
+    showingSecureNotes: boolean;
 }
 
 const NoteTile: React.FC<TileProps> = ({
-    noteID,
+    note,
     isLastCategory,
     isLastNote,
     isLastSubCategory,
@@ -46,7 +47,6 @@ const NoteTile: React.FC<TileProps> = ({
 }) => {
     const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const notes = useSelector((state: RootState) => state.memory.notes);
-    const note = notes[noteID];
     const dispatch = useDispatch<AppDispatch>();
 
     const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
@@ -151,7 +151,6 @@ const NoteTile: React.FC<TileProps> = ({
 
         dispatch(updateNoteHeight(update));
     };
-
     return (
         <View
             onLayout={handleCategoryLayout}
@@ -186,6 +185,10 @@ const NoteTile: React.FC<TileProps> = ({
                     {!noteEditMode && (
                         <TouchableWithoutFeedback onPress={handleTouchNote} onLongPress={handleMenuPress}>
                             <Text style={[noteStyles.noteText, note.priority === "high" && noteStyles.highPriority]}>
+                                {note.isSecureNote && (
+                                    <FontAwesome name="lock" style={noteStyles.padlock}></FontAwesome>
+                                )}
+                                {note.isSecureNote && "  "}
                                 {note.note}
                             </Text>
                         </TouchableWithoutFeedback>

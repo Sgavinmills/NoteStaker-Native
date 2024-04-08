@@ -15,9 +15,9 @@ export interface Note {
     completed: boolean;
     imageURI: string;
     isNewNote: boolean;
-    secureNote: string;
     createdBy: string;
     lastUpdatedBy: string;
+    isSecureNote: boolean;
 }
 
 export interface Category {

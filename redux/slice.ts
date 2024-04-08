@@ -13,6 +13,7 @@ interface AppState {
 
     menuOverlay: MenuOverlay;
     heightData: CatHeight[];
+    showSecureNote: string[];
 }
 
 const initialState: AppState = {
@@ -33,11 +34,29 @@ const initialState: AppState = {
         },
     },
     heightData: [],
+    showSecureNote: [],
 };
 const notesSlice = createSlice({
     name: "notes",
     initialState,
     reducers: {
+        addToShowSecureNote(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const id = action.payload; // shouldwe use maps instead?! quicker..
+                if (!draft.showSecureNote.includes(id)) {
+                    draft.showSecureNote.push(id);
+                }
+            });
+        },
+        removeFromShowSecureNote(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const id = action.payload; // shouldwe use maps instead?! quicker..
+                const index = draft.showSecureNote.indexOf(id);
+                if (index > -1) {
+                    draft.showSecureNote.splice(index, 1);
+                }
+            });
+        },
         // updateCategoryHeight adds or updates a category height in the height data, for use with scrollTo
         updateCategoryHeight(state, action: PayloadAction<HeightUpdateInfo>) {
             return produce(state, (draft) => {
@@ -124,9 +143,9 @@ const notesSlice = createSlice({
                     completed: false,
                     imageURI: imageURI,
                     isNewNote: true,
-                    secureNote: "",
                     createdBy: Device.deviceName ? Device.deviceName : "Annoymous",
                     lastUpdatedBy: "",
+                    isSecureNote: false,
                 };
 
                 draft.notes[noteToAdd.id] = noteToAdd;
@@ -390,6 +409,8 @@ export const {
     deleteSubCategory,
     removeAllNotesFromCategory,
     removeAllNotesFromSubCategory,
+    addToShowSecureNote,
+    removeFromShowSecureNote,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;
