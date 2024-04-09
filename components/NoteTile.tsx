@@ -46,12 +46,12 @@ const NoteTile: React.FC<TileProps> = ({
     parentCategoryIndex,
 }) => {
     const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const notes = useSelector((state: RootState) => state.memory.notes);
     const dispatch = useDispatch<AppDispatch>();
 
     const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
     const [isShowingImage, setIsShowingImage] = useState(false);
 
+    // console.log("----Note: " + note.note);
     const handleNoteChange = (text: string) => {
         const noteCopy = { ...note, note: text };
         if (noteCopy.isNewNote) {

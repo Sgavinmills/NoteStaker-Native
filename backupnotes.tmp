@@ -1,0 +1,43 @@
+- Building a version with + button as memory backup.
+- Have already commented that out, so assuming it works ready to make changes.
+
+Pre changes:
+INitial open loads renders homescreen followed by all categories. 
+-- Actually it renders the first 10 twice.. i suspect its when the rest are loaded on screen? No biggie anyway.
+
+Opening/closing category: just reerenders the category and notes/subcats inside 
+Same with subcategory. Nothing else gets rerendered, just the one we clicked on + whats inside it.
+
+Editting a note rerenders everything on screen. Blurring off the note just rerenders the note only.
+
+OPening category modal rerenders everything on the screen. Presumably cos homescreen render? 
+submitting the new category rerenders everything addBottomTileMargin
+
+any menuoverlay rerenders everything (inc closing it)
+any action such a make high priority or mark checked also rerenders everything on screen
+move note rerenders everything 
+
+
+
+General performance:
+Tested in prob, all other apps closed. 
+
+When all categories closed except one:
+
+ Ticking note checkbox is clean, fast,  instantaneous.
+ Opening closing categories is snappy
+ Add new note snappy instantaneousn
+ No discernible lag when editting notes
+ Editting note in multiple locations appears instantenous 
+
+
+ With all categories open:
+ still scrolls adjustsFontSizeToFit
+ checkboxes very noticeable take a bit longer to change when tapped (this may be easiest benchmark to see)
+ closing categories still feels sharp but maybe not all registered as quickly 
+ noticeable delay adding a new note
+ noticeable lag editting notes that appear elsewhere
+noticeable delay when opening menu overlay or modal
+
+Its not huge but there is a small delay on most actions at the momeny when all categories are open. 
+

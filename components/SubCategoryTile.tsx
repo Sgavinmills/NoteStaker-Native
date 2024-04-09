@@ -37,6 +37,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
     const subCategory = subCategories[subCategoryID];
     const showingSecureNotes = showSecureNotes.includes(subCategoryID);
     const notesForSubCat: Note[] = [];
+    // console.log("----SubCategory: " + subCategory.name);
     subCategory.notes.forEach((noteID) => {
         const note = notes[noteID];
         if (!note.isSecureNote || showingSecureNotes) {

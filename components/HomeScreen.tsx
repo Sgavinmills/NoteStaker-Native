@@ -1,13 +1,4 @@
-import {
-    FlatList,
-    TouchableOpacity,
-    Text,
-    View,
-    StatusBar,
-    TouchableWithoutFeedback,
-    Button,
-    Touchable,
-} from "react-native";
+import { FlatList, TouchableOpacity, Text, View, StatusBar, TouchableWithoutFeedback, AppState } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
@@ -40,6 +31,7 @@ const HomeScreen: React.FC = () => {
         setNewCatModalVisible(true);
     };
 
+    // console.log("----Homescreen render----");
     const handleCloseAllCategoriesPress = () => {
         setCloseAllCategories(true);
     };
@@ -62,6 +54,7 @@ const HomeScreen: React.FC = () => {
     );
 
     const handleOutsideMenuPress = () => {
+        // console.log("---------------");
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;

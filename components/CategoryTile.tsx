@@ -45,6 +45,7 @@ const CategoryTile: React.FC<TileProps> = ({
     const dispatch = useDispatch<AppDispatch>();
 
     const [isExpanded, setIsExpanded] = useState(false);
+    // console.log("--Category: " + category.name);
 
     useEffect(() => {
         if (closeAllCategories && isExpanded) {
