@@ -1,8 +1,35 @@
 export interface Memory {
     categoryList: string[];
-    notes: { [id: string]: Note };
     categories: { [id: string]: Category };
+    // notes: { [id: string]: Note };
+    // subCategories: { [id: string]: SubCategory };
+}
+
+// export type Memory = Category[];
+
+export interface Category {
+    id: string;
+    name: string;
+    noteList: string[];
+    notes: { [id: string]: Note };
+    subCategoryList: string[];
     subCategories: { [id: string]: SubCategory };
+    dateAdded: string;
+    dateUpdated: string;
+    createdBy: string;
+    lastUpdatedBy: string;
+}
+
+export interface SubCategory {
+    id: string;
+    name: string;
+    noteList: string[];
+    notes: { [id: string]: Note };
+    dateAdded: string;
+    dateUpdated: string;
+    createdBy: string;
+    lastUpdatedBy: string;
+    parents: Parents;
 }
 
 export interface Note {
@@ -18,29 +45,11 @@ export interface Note {
     createdBy: string;
     lastUpdatedBy: string;
     isSecureNote: boolean;
+    parents: Parents;
+    otherLocations: Parents[];
 }
 
-export interface Category {
-    id: string;
-    name: string;
-    notes: string[];
-    subCategories: string[];
-    dateAdded: string;
-    dateUpdated: string;
-    createdBy: string;
-    lastUpdatedBy: string;
-}
-
-export interface SubCategory {
-    id: string;
-    name: string;
-    notes: string[];
-    parentCategory: string;
-    dateAdded: string;
-    dateUpdated: string;
-    createdBy: string;
-    lastUpdatedBy: string;
-}
+export type Parents = [string, string];
 
 export interface MenuOverlay {
     isShowing: boolean;

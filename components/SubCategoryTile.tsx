@@ -5,7 +5,7 @@ import { useState } from "react";
 import { RootState } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
-import { MenuOverlay, Category, HeightUpdateInfo, NewNoteData, Note } from "../types";
+import { MenuOverlay, Category, HeightUpdateInfo, NewNoteData, Note, SubCategory } from "../types";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { createNewNote, removeFromShowSecureNote, updateMenuOverlay, updateSubCategoryHeight } from "../redux/slice";
 import { AppDispatch } from "../redux/store/store";
@@ -13,7 +13,7 @@ import * as ImagePicker from "expo-image-picker";
 import SubtleMessage from "./SubtleMessage";
 
 interface TileProps {
-    subCategoryID: string;
+    subCategory: SubCategory;
     isLastCategory: boolean;
     isLastSubCategory: boolean;
     parentCategory: Category;
@@ -22,7 +22,7 @@ interface TileProps {
 }
 
 const SubCategoryTile: React.FC<TileProps> = ({
-    subCategoryID,
+    subCategory,
     isLastCategory,
     isLastSubCategory,
     parentCategory,
@@ -31,17 +31,16 @@ const SubCategoryTile: React.FC<TileProps> = ({
 }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const showSecureNotes = useSelector((state: RootState) => state.memory.showSecureNote);
-    const notes = useSelector((state: RootState) => state.memory.notes);
+    // const notes = useSelector((state: RootState) => state.memory.notes)
 
-    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
-    const subCategory = subCategories[subCategoryID];
-    const showingSecureNotes = showSecureNotes.includes(subCategoryID);
+    // const subCategories = useSelector((state: RootState) => state.memory.subCategories);
+    const showingSecureNotes = showSecureNotes.includes(subCategory.id);
     const notesForSubCat: Note[] = [];
-    // console.log("----SubCategory: " + subCategory.name);
-    subCategory.notes.forEach((noteID) => {
-        const note = notes[noteID];
+    console.log("----SubCategory: " + subCategory.name);
+    subCategory.noteList.forEach((noteID) => {
+        const note = subCategory.notes[noteID];
         if (!note.isSecureNote || showingSecureNotes) {
-            notesForSubCat.push(notes[noteID]);
+            notesForSubCat.push(note);
         }
     });
 
@@ -69,7 +68,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
     const toggleExpansion = () => {
         if (isExpanded) {
             if (showingSecureNotes) {
-                dispatch(removeFromShowSecureNote(subCategoryID));
+                dispatch(removeFromShowSecureNote(subCategory.id));
             }
         }
         setIsExpanded(!isExpanded);
@@ -100,7 +99,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
             return true;
         }
 
-        const isEmpty = subCategory.notes.length === 0;
+        const isEmpty = subCategory.noteList.length === 0;
         if (isEmpty) {
             return true;
         }
@@ -131,7 +130,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
     const addNewNote = () => {
         const newNoteData: NewNoteData = {
             categoryID: "",
-            subCategoryID: subCategoryID,
+            subCategoryID: subCategory.id,
             imageURI: "",
             noteInsertIndex: 0,
         };
@@ -162,7 +161,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
             const imageURI = result.assets[0].uri;
             const newNoteData: NewNoteData = {
                 categoryID: "",
-                subCategoryID: subCategoryID,
+                subCategoryID: subCategory.id,
                 imageURI: imageURI,
                 noteInsertIndex: 0,
             };

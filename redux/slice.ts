@@ -6,10 +6,8 @@ import { produce } from "immer";
 import * as Device from "expo-device";
 
 interface AppState {
-    notes: { [id: string]: Note };
-    categories: { [id: string]: Category };
-    subCategories: { [id: string]: SubCategory };
     categoryList: string[];
+    categories: { [id: string]: Category };
 
     menuOverlay: MenuOverlay;
     heightData: CatHeight[];
@@ -17,9 +15,7 @@ interface AppState {
 }
 
 const initialState: AppState = {
-    notes: memory.notes,
     categories: memory.categories,
-    subCategories: memory.subCategories,
     categoryList: memory.categoryList,
     menuOverlay: {
         isShowing: false,
@@ -115,6 +111,16 @@ const notesSlice = createSlice({
                         draft.heightData[categoryIndex].subHeights[subCategoryIndex] = newSubCatHeightItem;
                     }
                 }
+            });
+        },
+
+        // Used this to purge memory. BUt we might be better off just uninstalling app....
+        // initial state might even load kindly then.
+        resetMemory: (state, action: PayloadAction) => {
+            console.log("trying reset");
+            return produce(state, (draft) => {
+                draft.categories = [];
+                // draft.categoryList = [];
             });
         },
 
@@ -377,16 +383,33 @@ const notesSlice = createSlice({
             });
         },
 
+        // need to add lastupsated etc back here
         // updateNote updates a single note
         updateNote(state, action: PayloadAction<Note>) {
-            const newNote = action.payload;
+            return produce(state, (draft) => {
+                const note = action.payload;
+                // const parentIndex = draft.categories.findIndex((cat) => note.parents[0] === cat.id);
+                draft.categories[note.parents[0]].notes[note.id] = note;
+            });
 
-            newNote.dateUpdated = new Date().toISOString();
-            newNote.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
+            // const newNote = action.payload;
 
-            const newNotes = { ...state.notes };
-            newNotes[newNote.id] = newNote;
-            return { ...state, notes: newNotes };
+            // newNote.dateUpdated = new Date().toISOString();
+            // newNote.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
+            // const parentIndex = state.categories.findIndex((cat) => newNote.parents[0] === cat.id);
+
+            // //     draft.categories[parentIndex].notes[note.id] = note;
+            // const newCats = [...state.categories];
+
+            // const newCat = { ...newCats[parentIndex] };
+            // const newNotes = { ...newCat.notes };
+            // newNotes[newNote.id] = { ...newNote };
+            // newCat.notes = newNotes;
+            // newCats[parentIndex] = newCat;
+            // console.log(newCats);
+            // // const newNotes = { ...state.notes };
+            // // newNotes[newNote.id] = newNote;
+            // return { ...state, categories: newCats };
         },
 
         // Define other reducers here if needed
@@ -411,6 +434,7 @@ export const {
     removeAllNotesFromSubCategory,
     addToShowSecureNote,
     removeFromShowSecureNote,
+    resetMemory,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

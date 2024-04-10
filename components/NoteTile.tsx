@@ -51,7 +51,7 @@ const NoteTile: React.FC<TileProps> = ({
     const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
     const [isShowingImage, setIsShowingImage] = useState(false);
 
-    // console.log("----Note: " + note.note);
+    console.log("----Note: " + note.note);
     const handleNoteChange = (text: string) => {
         const noteCopy = { ...note, note: text };
         if (noteCopy.isNewNote) {

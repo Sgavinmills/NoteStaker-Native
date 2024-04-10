@@ -1,9 +1,9 @@
 import { Text, View, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { MenuOverlay, HeightUpdateInfo, NewNoteData, Note } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData, Note, SubCategory, Category } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import NoteTile from "./NoteTile";
@@ -12,6 +12,7 @@ import { AppDispatch } from "../redux/store/store";
 import { createNewNote, removeFromShowSecureNote, updateCategoryHeight, updateMenuOverlay } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import * as ImagePicker from "expo-image-picker";
+import React from "react";
 interface TileProps {
     categoryID: string;
     index: number;
@@ -27,25 +28,40 @@ const CategoryTile: React.FC<TileProps> = ({
     closeAllCategories,
     setCloseAllCategories,
 }) => {
-    const categories = useSelector((state: RootState) => state.memory.categories);
-    const notes = useSelector((state: RootState) => state.memory.notes);
+    // const categories = useSelector((state: RootState) => state.memory.categories);
+    const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
+    // const notes = useSelector((state: RootState) => state.memory.notes);
     const showSecureNotes = useSelector((state: RootState) => state.memory.showSecureNote);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const showingSecureNotes = showSecureNotes.includes(categoryID);
+    const showingSecureNotes = showSecureNotes.includes(category.id);
 
-    const category = categories[categoryID];
+    // const category = categories[categoryID];
+    // const notesForCat: Note[] = [];
+    // category.notes.forEach((noteID) => {
+    //     const note = notes[noteID];
+    //     if (!note.isSecureNote || showingSecureNotes) {
+    //         notesForCat.push(notes[noteID]);
+    //     }
+    // });
+    // const memoizedCategories = useMemo(() => categories, [categories]);
     const notesForCat: Note[] = [];
-    category.notes.forEach((noteID) => {
-        const note = notes[noteID];
+    category.noteList.forEach((noteID) => {
+        const note = category.notes[noteID];
         if (!note.isSecureNote || showingSecureNotes) {
-            notesForCat.push(notes[noteID]);
+            notesForCat.push(note);
         }
+    });
+
+    const subCatsForCat: SubCategory[] = [];
+    category.subCategoryList.forEach((subCategoryID) => {
+        const subCategory = category.subCategories[subCategoryID];
+        subCatsForCat.push(subCategory);
     });
 
     const dispatch = useDispatch<AppDispatch>();
 
     const [isExpanded, setIsExpanded] = useState(false);
-    // console.log("--Category: " + category.name);
+    console.log("--Category: " + category.name);
 
     useEffect(() => {
         if (closeAllCategories && isExpanded) {
@@ -57,7 +73,7 @@ const CategoryTile: React.FC<TileProps> = ({
     const toggleExpansion = () => {
         if (isExpanded) {
             if (showingSecureNotes) {
-                dispatch(removeFromShowSecureNote(categoryID));
+                dispatch(removeFromShowSecureNote(category.id));
             }
         }
         setIsExpanded(!isExpanded);
@@ -69,7 +85,7 @@ const CategoryTile: React.FC<TileProps> = ({
             return;
         }
 
-        const isEmpty = notesForCat.length === 0 && category.subCategories.length === 0;
+        const isEmpty = category.noteList.length === 0 && category.subCategoryList.length === 0;
         if (isEmpty) {
             addNewNote();
             if (!isExpanded) {
@@ -82,7 +98,7 @@ const CategoryTile: React.FC<TileProps> = ({
 
     const addNewNote = () => {
         const newNoteData: NewNoteData = {
-            categoryID: categoryID,
+            categoryID: category.id,
             subCategoryID: "",
             imageURI: "",
             noteInsertIndex: 0,
@@ -113,7 +129,7 @@ const CategoryTile: React.FC<TileProps> = ({
             const imageURI = result.assets[0].uri;
 
             const newNoteData: NewNoteData = {
-                categoryID: categoryID,
+                categoryID: category.id,
                 subCategoryID: "",
                 imageURI: imageURI,
                 noteInsertIndex: 0,
@@ -144,6 +160,7 @@ const CategoryTile: React.FC<TileProps> = ({
     };
 
     const addBottomTileMartin = () => {
+        console.log("also counting: " + category.name);
         if (!isLastCategory) {
             return false;
         }
@@ -152,7 +169,7 @@ const CategoryTile: React.FC<TileProps> = ({
             return true;
         }
 
-        const isEmpty = category.notes.length === 0 && category.subCategories.length === 0;
+        const isEmpty = category.noteList.length === 0 && category.subCategoryList.length === 0;
         return isEmpty;
     };
 
@@ -191,7 +208,7 @@ const CategoryTile: React.FC<TileProps> = ({
                         </Text>
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
-                        {category.subCategories.length === 0 && (
+                        {category.subCategoryList.length === 0 && (
                             <TouchableOpacity onPress={handleAddNotePress} onLongPress={handleLongPressAddNote}>
                                 <FontAwesome name="plus" style={[categoryStyles.plusIconText, categoryStyles.icons]} />
                             </TouchableOpacity>
@@ -210,22 +227,22 @@ const CategoryTile: React.FC<TileProps> = ({
                 </View>
             </TouchableWithoutFeedback>
             {isExpanded &&
-                category.subCategories.length > 0 &&
-                category.subCategories.map((subCatID, subCatIndex) => {
+                category.subCategoryList.length > 0 &&
+                subCatsForCat.map((subCat, subCatIndex) => {
                     return (
                         <SubCategoryTile
                             parentCategory={category}
                             isLastCategory={isLastCategory}
-                            subCategoryID={subCatID}
-                            isLastSubCategory={subCatIndex === category.subCategories.length - 1}
-                            key={subCatID}
+                            subCategory={subCat}
+                            isLastSubCategory={subCatIndex === category.subCategoryList.length - 1}
+                            key={subCat.id}
                             index={subCatIndex}
                             parentCategoryIndex={index}
                         />
                     );
                 })}
             {isExpanded &&
-                category.subCategories.length == 0 &&
+                category.subCategoryList.length == 0 &&
                 notesForCat.map((note, noteIndex) => {
                     return (
                         <NoteTile
