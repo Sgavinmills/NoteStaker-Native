@@ -22,8 +22,12 @@ interface TileProps {
 // CategoryMainMenu provides main menu for parent categories and sub categories
 const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryMainMenu, setScrollTo }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const categories = useSelector((state: RootState) => state.memory.categories);
-    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
+
+    const isCategory = overlay.menuType === "category" ? true : false;
+    const category = useSelector((state: RootState) => state.memory.categories[overlay.menuData.categoryID]);
+    const subCategory = isCategory
+        ? null
+        : useSelector((state: RootState) => state.memory.subCategories[overlay.menuData.subCategoryID]);
     const heightData = useSelector((state: RootState) => state.memory.heightData);
     const dispatch = useDispatch<AppDispatch>();
 
@@ -31,17 +35,16 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteMessage: "", deleteType: "" });
 
-    const catName = overlay.menuType === "category" ? "category" : "sub-category";
-    const openCategoryID =
-        overlay.menuType === "category" ? overlay.menuData.categoryID : overlay.menuData.subCategoryID;
+    const catName = isCategory ? "category" : "sub-category";
+    const openCategoryID = isCategory ? overlay.menuData.categoryID : overlay.menuData.subCategoryID;
 
     // whether to show any options that depend on the category having notes or not
     const showNoteSpecificOptions = () => {
-        if (overlay.menuType === "subCategory") {
+        if (!isCategory) {
             return true;
         }
 
-        return categories[overlay.menuData.categoryID].subCategories.length === 0;
+        return category.subCategories.length === 0;
     };
     const handleEditName = () => {
         setCatModalInfo({
@@ -52,12 +55,12 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
     };
 
     const getNameOfMenu = () => {
-        if (overlay.menuType === "category") {
-            return categories[overlay.menuData.categoryID].name;
+        if (!subCategory) {
+            return category.name;
         }
 
-        if (overlay.menuType === "subCategory") {
-            return subCategories[overlay.menuData.subCategoryID].name;
+        if (subCategory) {
+            return subCategory.name;
         }
 
         return "";
@@ -80,10 +83,10 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
         };
 
         let catName: string;
-        if (overlay.menuType === "category") {
-            catName = categories[overlay.menuData.categoryID].name;
+        if (!subCategory) {
+            catName = category.name;
         } else {
-            catName = subCategories[overlay.menuData.subCategoryID].name;
+            catName = subCategory.name;
         }
 
         deleteInfo.deleteMessage = `Are you sure you want to remove all notes from ${catName}? All notes not within other categories will be permenantly deleted`;
@@ -98,10 +101,10 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
         };
 
         let catName: string;
-        if (overlay.menuType === "category") {
-            catName = categories[overlay.menuData.categoryID].name;
+        if (!subCategory) {
+            catName = category.name;
         } else {
-            catName = subCategories[overlay.menuData.subCategoryID].name;
+            catName = subCategory.name;
         }
 
         deleteInfo.deleteMessage = `Are you sure you want to delete the category ${catName}? All notes not within other categories will be permenantly deleted`;
@@ -131,7 +134,7 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
     };
 
     const handleScrollTo = () => {
-        if (overlay.menuType === "category") {
+        if (!subCategory) {
             let offset = 0;
             const categoryIndex = overlay.menuData.categoryIndex;
             if (categoryIndex != null && categoryIndex >= 0) {
@@ -150,7 +153,7 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
                 }
                 const subCategoryIndex = overlay.menuData.subCategoryIndex;
                 if (subCategoryIndex != undefined && subCategoryIndex >= 0) {
-                    const numOfSubs = categories[overlay.menuData.categoryID].subCategories.length;
+                    const numOfSubs = category.subCategories.length;
                     for (let j = subCategoryIndex; j < numOfSubs; j++) {
                         offset -= heightData[categoryIndex].subHeights[j].subHeight;
                     }

@@ -1,13 +1,4 @@
-import {
-    FlatList,
-    TouchableOpacity,
-    Text,
-    View,
-    StatusBar,
-    TouchableWithoutFeedback,
-    Button,
-    Touchable,
-} from "react-native";
+import { FlatList, TouchableOpacity, Text, View, StatusBar, TouchableWithoutFeedback } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
@@ -18,7 +9,7 @@ import CategoryModal from "./CategoryModal";
 import MenuDisplay from "./MenuDisplay";
 import { AppDispatch } from "../redux/store/store";
 import { updateMenuOverlay } from "../redux/slice";
-import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { getEmptyOverlay, printCategories, printNotes, printSubCategories } from "../utilFuncs/utilFuncs";
 
 const HomeScreen: React.FC = () => {
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
@@ -62,6 +53,11 @@ const HomeScreen: React.FC = () => {
     );
 
     const handleOutsideMenuPress = () => {
+        // console.log("-------------------------------");
+        // printCategories(categories);
+        // printSubCategories(subCategories);
+        // printNotes(notes);
+
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;

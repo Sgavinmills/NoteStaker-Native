@@ -18,12 +18,13 @@ export interface Note {
     createdBy: string;
     lastUpdatedBy: string;
     isSecureNote: boolean;
+    locations: Location[];
 }
 
 export interface Category {
     id: string;
     name: string;
-    notes: string[];
+    notes: NoteRef[];
     subCategories: string[];
     dateAdded: string;
     dateUpdated: string;
@@ -34,13 +35,21 @@ export interface Category {
 export interface SubCategory {
     id: string;
     name: string;
-    notes: string[];
+    notes: NoteRef[];
     parentCategory: string;
     dateAdded: string;
     dateUpdated: string;
     createdBy: string;
     lastUpdatedBy: string;
+    location: Location;
 }
+
+export type NoteRef = {
+    id: string;
+    isSecure: boolean;
+};
+
+export type Location = [string, string];
 
 export interface MenuOverlay {
     isShowing: boolean;
@@ -85,4 +94,10 @@ export interface NewNoteData {
     categoryID: string;
     imageURI: string;
     noteInsertIndex: number;
+}
+
+export interface IDs {
+    categoryID: string;
+    subCategoryID: string;
+    noteID: string;
 }

@@ -10,7 +10,7 @@ import {
 import noteStyles from "../styles/noteStyles";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
-import { Category, MenuOverlay, Note, SubCategory, HeightUpdateInfo, NewNoteData } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
 import { useDispatch } from "react-redux";
 import { createNewNote, deleteNote, updateMenuOverlay, updateNote, updateNoteHeight } from "../redux/slice";
 import { useState } from "react";
@@ -21,37 +21,35 @@ import { RootState } from "../redux/store/store";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import React from "react";
 interface TileProps {
-    note: Note;
+    noteID: string;
     isLastCategory: boolean;
     isLastSubCategory?: boolean;
     isLastNote: boolean;
-    isInSubCategory: boolean; // prob dont need this as well as ID, but leaving for now
-    subCategory?: SubCategory;
-    category: Category;
+    subCategoryID: string;
+    categoryID: string;
     index: number;
     subCategoryIndex: number;
     parentCategoryIndex: number;
-    showingSecureNotes: boolean;
 }
 
 const NoteTile: React.FC<TileProps> = ({
-    note,
+    noteID,
     isLastCategory,
     isLastNote,
     isLastSubCategory,
-    category,
-    subCategory,
+    categoryID,
+    subCategoryID,
     index,
     subCategoryIndex,
     parentCategoryIndex,
 }) => {
     const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const notes = useSelector((state: RootState) => state.memory.notes);
+    const note = useSelector((state: RootState) => state.memory.notes[noteID]);
     const dispatch = useDispatch<AppDispatch>();
 
     const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
     const [isShowingImage, setIsShowingImage] = useState(false);
-
+    // console.log("re render note: " + note.note);
     const handleNoteChange = (text: string) => {
         const noteCopy = { ...note, note: text };
         if (noteCopy.isNewNote) {
@@ -61,16 +59,18 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleNoteBlur = () => {
+        setNoteEditMode(false);
+
         if (note.note === "" && note.imageURI === "") {
             const id = note.id;
             dispatch(deleteNote(id));
+            return;
         }
 
         if (note.isNewNote) {
             const noteCopy = { ...note, isNewNote: false };
             dispatch(updateNote(noteCopy));
         }
-        setNoteEditMode(false);
     };
 
     const handleMenuPress = (event: GestureResponderEvent) => {
@@ -83,8 +83,8 @@ const NoteTile: React.FC<TileProps> = ({
             menuType: "note",
             menuData: {
                 noteID: note.id,
-                categoryID: category ? category.id : "",
-                subCategoryID: subCategory ? subCategory.id : "",
+                categoryID: categoryID ? categoryID : "",
+                subCategoryID: subCategoryID ? subCategoryID : "",
                 categoryIndex: parentCategoryIndex,
                 subCategoryIndex: subCategoryIndex !== undefined ? subCategoryIndex : null,
                 noteIndex: index,
@@ -107,7 +107,7 @@ const NoteTile: React.FC<TileProps> = ({
             return false;
         }
 
-        if (!subCategory) {
+        if (!subCategoryID) {
             return isLastNote;
         }
         return isLastSubCategory && isLastNote;
@@ -129,11 +129,11 @@ const NoteTile: React.FC<TileProps> = ({
 
     const tileHasMenuOpen = () => {
         if (menuOverlay.isShowing && menuOverlay.menuType === "note" && menuOverlay.menuData.noteID === note.id) {
-            if (menuOverlay.menuData.subCategoryID && subCategory) {
-                return menuOverlay.menuData.subCategoryID === subCategory.id;
+            if (menuOverlay.menuData.subCategoryID && subCategoryID) {
+                return menuOverlay.menuData.subCategoryID === subCategoryID;
             }
 
-            return menuOverlay.menuData.categoryID === category.id;
+            return menuOverlay.menuData.categoryID === categoryID;
         }
 
         return false;
@@ -145,7 +145,7 @@ const NoteTile: React.FC<TileProps> = ({
         const update: HeightUpdateInfo = {
             newHeight: height,
             categoryIndex: parentCategoryIndex,
-            subCategoryIndex: subCategoryIndex >= -1 ? subCategoryIndex : -1, // should prob allow null
+            subCategoryIndex: subCategoryIndex >= -1 ? subCategoryIndex : -1,
             noteIndex: index,
         };
 
@@ -207,7 +207,7 @@ const NoteTile: React.FC<TileProps> = ({
                         <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
                     </TouchableOpacity>
                 </View>
-                {<InsertNote subCategory={subCategory} category={category} index={index} />}
+                {<InsertNote subCategoryID={subCategoryID} categoryID={categoryID} index={index} />}
             </View>
             {isShowingImage && (
                 <ImageModal
@@ -224,20 +224,20 @@ const NoteTile: React.FC<TileProps> = ({
 };
 
 interface Props {
-    subCategory?: SubCategory;
-    category: Category;
+    subCategoryID?: string;
+    categoryID: string;
     index: number;
 }
 
 // InsertNote is an invisible symbol at the bottom left of each note tile to allow a clickable space
 // for inserting notes into specific places in the note list.
-const InsertNote: React.FC<Props> = ({ subCategory, category, index }) => {
+const InsertNote: React.FC<Props> = ({ subCategoryID, categoryID, index }) => {
     const dispatch = useDispatch<AppDispatch>();
 
     const handleAddNoteToBottom = () => {
         const newNoteData: NewNoteData = {
-            categoryID: category.id,
-            subCategoryID: subCategory ? subCategory.id : "",
+            categoryID: categoryID,
+            subCategoryID: subCategoryID ? subCategoryID : "",
             imageURI: "",
             noteInsertIndex: index + 1,
         };

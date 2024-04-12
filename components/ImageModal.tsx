@@ -15,7 +15,7 @@ interface TileProps {
     note: Note;
 }
 
-const ImageModal: React.FC<TileProps> = ({ note, height, width, isShowingImage, setIsShowingImage, imageURI }) => {
+const ImageModal: React.FC<TileProps> = ({ note, isShowingImage, setIsShowingImage, imageURI }) => {
     const screenWidth = Dimensions.get("window").width;
     const screenHeight = Dimensions.get("window").height;
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);

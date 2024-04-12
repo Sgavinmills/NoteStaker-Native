@@ -17,6 +17,9 @@ interface TileProps {
     };
 }
 
+// TODO - See if can remove some state from here. At the moment does need all category acces to compare names, but could we pass it a
+// static list since they cant change until after modal is closed? - no, where would we even get said list.
+
 const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModalVisible, catInfo }) => {
     const categories = useSelector((state: RootState) => state.memory.categories);
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);

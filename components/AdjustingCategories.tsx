@@ -1,16 +1,24 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, ScrollView } from "react-native";
+import { View, TouchableOpacity, Text } from "react-native";
 import adjustCatsStyles from "../styles/adjustingCategoriesStyles";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { updateCategory, updateSubCategory } from "../redux/slice";
+import {
+    addNoteToCategory,
+    addNoteToSubCategory,
+    removeNoteFromCategory,
+    removeNoteFromSubCategory,
+} from "../redux/slice";
 import { RootState } from "../redux/store/store";
-import { noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
 import theme from "../styles/constants";
 import SubtleMessage from "./SubtleMessage";
+import { IDs } from "../types";
 
 interface TileProps {}
+
+// TODO  - WE can remove dependency on subCategories as we can get the info off the note now
+// Harder to remove categories though so not urgent to do atm.
 
 // AdjustingCategories is the menu view for moving notes between categories
 const AdjustingCategories: React.FC<TileProps> = ({}) => {
@@ -19,75 +27,83 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
     const dispatch = useDispatch<AppDispatch>();
-
+    const note = useSelector((state: RootState) => state.memory.notes[overlay.menuData.noteID]);
     const [parentCatToDisplaySubsOf, setParentCatToDisplaySubsOf] = useState(overlay.menuData.categoryID);
     const [showSubtleMessage, setShowSubtleMessage] = useState(false);
     const [displayMainCategories, setDisplayMainCategories] = useState(overlay.menuData.subCategoryID ? false : true);
 
     const handleSubCategoryClick = (subCategoryID: string) => {
-        const subCategoryCopy = { ...subCategories[subCategoryID] };
-        const notesCopy = [...subCategoryCopy.notes];
-        const index = notesCopy.indexOf(overlay.menuData.noteID);
-        if (index > -1) {
-            // since were taking out, just check it exists elsewhere first and dont o anything if not
-            if (
-                !noteExistsInOtherCategories(categories, subCategories, overlay.menuData.noteID, null, [subCategoryID])
-            ) {
-                setShowSubtleMessage(true);
-                setTimeout(() => {
-                    setShowSubtleMessage(false);
-                }, 500);
-                return;
+        // check if note exists in subcategory we've clicked on
+        const noteAlreadyInThisSubCategory = note.locations.some((loc) => loc[1] === subCategoryID);
+        // means we're doing a removal
+        if (noteAlreadyInThisSubCategory) {
+            // does it exist in other categories or sub categories?
+            const existsElsewhere = note.locations.length > 1;
+            if (existsElsewhere) {
+                const ids: IDs = {
+                    noteID: note.id,
+                    subCategoryID: subCategoryID,
+                    categoryID: "",
+                };
+                dispatch(removeNoteFromSubCategory(ids));
             }
-
-            notesCopy.splice(index, 1);
         } else {
-            notesCopy.push(overlay.menuData.noteID);
+            // add the note
+            const ids: IDs = {
+                noteID: note.id,
+                subCategoryID: subCategoryID,
+                categoryID: parentCatToDisplaySubsOf,
+            };
+            dispatch(addNoteToSubCategory(ids));
         }
-        subCategoryCopy.notes = notesCopy;
-        dispatch(updateSubCategory(subCategoryCopy));
     };
 
-    const handleParentCategoryClick = (categoryID: string) => {
+    const handleMainCategoryClick = (categoryID: string) => {
         // if category does not have sub cats then just do a state update to put the note into this category.
         if (categories[categoryID].subCategories.length === 0) {
-            const categoryCopy = { ...categories[categoryID] };
-            const notesCopy = [...categoryCopy.notes];
-            const index = notesCopy.indexOf(overlay.menuData.noteID);
-            if (index > -1) {
-                if (!noteExistsInOtherCategories(categories, subCategories, overlay.menuData.noteID, categoryID, [])) {
-                    setShowSubtleMessage(true);
-                    setTimeout(() => {
-                        setShowSubtleMessage(false);
-                    }, 500);
-                    return;
+            // check if note exists in subcategory we've clicked on
+            const noteAlreadyInThisCategory = note.locations.some((loc) => loc[0] === categoryID);
+            // means we're doing a removal
+            if (noteAlreadyInThisCategory) {
+                // does it exist in other categories or sub categories?
+                const existsElsewhere = note.locations.length > 1;
+                if (existsElsewhere) {
+                    const ids: IDs = {
+                        noteID: note.id,
+                        subCategoryID: "",
+                        categoryID: categoryID,
+                    };
+                    dispatch(removeNoteFromCategory(ids));
                 }
-                notesCopy.splice(index, 1);
             } else {
-                notesCopy.push(overlay.menuData.noteID);
+                // add the note
+                const ids: IDs = {
+                    noteID: note.id,
+                    subCategoryID: "",
+                    categoryID: categoryID,
+                };
+                dispatch(addNoteToCategory(ids));
             }
-            categoryCopy.notes = notesCopy;
-            dispatch(updateCategory(categoryCopy));
             return;
         }
 
+        // if it does have sub cats then display those instead
         setParentCatToDisplaySubsOf(categoryID);
         setDisplayMainCategories(false);
     };
 
     const isInMainCategory = (categoryID: string): boolean => {
-        // TODO: This also needs to check the categories subcats to see if its in there.
-        if (categories[categoryID].notes.includes(overlay.menuData.noteID)) {
+        if (categories[categoryID].notes.some((noteRef) => noteRef.id === overlay.menuData.noteID)) {
             return true;
         }
 
         return categories[categoryID].subCategories.some((subCatID) => {
-            return subCategories[subCatID].notes.includes(overlay.menuData.noteID);
+            return subCategories[subCatID].notes.some((noteRef) => noteRef.id === overlay.menuData.noteID);
         });
     };
 
     const isInSubCategory = (subCategoryID: string): boolean => {
-        if (subCategories[subCategoryID].notes.includes(overlay.menuData.noteID)) {
+        if (subCategories[subCategoryID].notes.some((noteRef) => noteRef.id === overlay.menuData.noteID)) {
             return true;
         }
         return false;
@@ -110,7 +126,7 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                                     isInMainCategory(categoryID) && adjustCatsStyles.tabSelected,
                                 ]}
                                 onPress={() => {
-                                    handleParentCategoryClick(categoryID);
+                                    handleMainCategoryClick(categoryID);
                                 }}
                             >
                                 <Text style={adjustCatsStyles.text}>{categories[categoryID].name}</Text>

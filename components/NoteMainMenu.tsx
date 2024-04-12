@@ -6,8 +6,8 @@ import { AppDispatch } from "../redux/store/store";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../redux/store/store";
 import * as ImagePicker from "expo-image-picker";
-import { updateMenuOverlay, updateNote } from "../redux/slice";
-import { getEmptyOverlay, noteExistsInOtherCategories } from "../utilFuncs/utilFuncs";
+import { updateMenuOverlay, updateNote, updateNoteSecureStatus } from "../redux/slice";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import DeleteModal from "./DeleteModal";
 import { DeleteInfo } from "../types";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -28,12 +28,11 @@ const NoteMainMenu: React.FC<TileProps> = ({
     setIsAdditionalInfo,
 }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
-    const categories = useSelector((state: RootState) => state.memory.categories);
-    const notes = useSelector((state: RootState) => state.memory.notes);
     const heightData = useSelector((state: RootState) => state.memory.heightData);
 
-    const note = notes[overlay.menuData.noteID];
+    const note = useSelector((state: RootState) => state.memory.notes[overlay.menuData.noteID]);
+    const subCategory = useSelector((state: RootState) => state.memory.subCategories[overlay.menuData.subCategoryID]);
+    const category = useSelector((state: RootState) => state.memory.categories[overlay.menuData.categoryID]);
 
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteType: "", deleteMessage: "" });
@@ -61,13 +60,13 @@ const NoteMainMenu: React.FC<TileProps> = ({
 
         if (!result.canceled) {
             const imageURI = result.assets[0].uri;
-            const noteCopy = { ...notes[overlay.menuData.noteID] };
+            const noteCopy = { ...note };
             dispatch(updateNote({ ...noteCopy, imageURI: imageURI }));
         }
     };
 
     const handleHighPriorityPress = () => {
-        const noteCopy = { ...notes[overlay.menuData.noteID] };
+        const noteCopy = { ...note };
         noteCopy.priority = noteCopy.priority !== "high" ? "high" : "normal";
         dispatch(updateNote(noteCopy));
     };
@@ -85,12 +84,10 @@ const NoteMainMenu: React.FC<TileProps> = ({
                     promptMessage: "Authenticate to continue",
                 });
                 if (result.success) {
-                    const noteCopy = { ...notes[overlay.menuData.noteID] };
-                    noteCopy.isSecureNote = !noteCopy.isSecureNote;
                     if (overlay.isShowing) {
                         dispatch(updateMenuOverlay(getEmptyOverlay()));
                     }
-                    dispatch(updateNote(noteCopy));
+                    dispatch(updateNoteSecureStatus(note.id));
                 }
             }
         }
@@ -103,15 +100,11 @@ const NoteMainMenu: React.FC<TileProps> = ({
             deleteMessage: "Are you sure you want to delete?",
         };
 
-        const catsToSkip = overlay.menuData.subCategoryID ? null : overlay.menuData.categoryID;
-        const subCatsToSkip = overlay.menuData.subCategoryID ? [overlay.menuData.subCategoryID] : [];
-
-        if (
-            noteExistsInOtherCategories(categories, subCategories, overlay.menuData.noteID, catsToSkip, subCatsToSkip)
-        ) {
+        if (note.locations.length > 1) {
             deleteInfo.deleteMessage =
                 "The note you are about to delete exists in other categories. If you delete, it will be removed from those too. If you only want to remove it from this category then use the move between categories option instead.";
         }
+
         setDeleteInfo(deleteInfo);
     };
 
@@ -140,14 +133,14 @@ const NoteMainMenu: React.FC<TileProps> = ({
 
             const subCategoryIndex = overlay.menuData.subCategoryIndex;
             if (subCategoryIndex != null && subCategoryIndex >= 0) {
-                const numOfSubs = categories[overlay.menuData.categoryID].subCategories.length;
+                const numOfSubs = category.subCategories.length;
                 for (let j = subCategoryIndex + 1; j < numOfSubs; j++) {
                     offset -= heightData[categoryIndex].subHeights[j].subHeight;
                 }
 
                 const noteIndex = overlay.menuData.noteIndex;
                 if (noteIndex != null && noteIndex >= 0) {
-                    const numOfNotes = subCategories[overlay.menuData.subCategoryID].notes.length;
+                    const numOfNotes = subCategory.notes.length;
                     for (let k = noteIndex; k < numOfNotes; k++) {
                         offset -= heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[noteIndex];
                     }
@@ -155,7 +148,7 @@ const NoteMainMenu: React.FC<TileProps> = ({
             } else {
                 const noteIndex = overlay.menuData.noteIndex;
                 if (noteIndex != null && noteIndex >= 0) {
-                    const numOfNotes = categories[overlay.menuData.categoryID].notes.length;
+                    const numOfNotes = category.notes.length;
                     for (let k = noteIndex; k < numOfNotes; k++) {
                         offset -= heightData[categoryIndex].noteHeights[noteIndex];
                     }

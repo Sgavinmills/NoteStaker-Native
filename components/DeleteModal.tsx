@@ -25,9 +25,6 @@ interface TileProps {
 
 // TODO  repurpose this as ConfirmModal ? See if can reuse for 'rmove all notes from categoris' first.
 
-// TODO - reffactor reducers and util funcs so dont need to have full delete funcs etc. Should be able to just call
-// relevasnt util func and then dispatch.
-
 const DeleteModal: React.FC<TileProps> = ({
     setDeleteModalVisible,
     deleteModalVisible,

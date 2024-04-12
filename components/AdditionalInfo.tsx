@@ -8,9 +8,7 @@ interface TileProps {}
 
 const AdditionalInfo: React.FC<TileProps> = ({}) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const notes = useSelector((state: RootState) => state.memory.notes);
-
-    const note = notes[overlay.menuData.noteID];
+    const note = useSelector((state: RootState) => state.memory.notes[overlay.menuData.noteID]);
 
     return (
         <View style={additionalInfo.container}>

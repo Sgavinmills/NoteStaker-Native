@@ -27,18 +27,16 @@ const CategoryTile: React.FC<TileProps> = ({
     closeAllCategories,
     setCloseAllCategories,
 }) => {
-    const categories = useSelector((state: RootState) => state.memory.categories);
-    const notes = useSelector((state: RootState) => state.memory.notes);
+    const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
     const showSecureNotes = useSelector((state: RootState) => state.memory.showSecureNote);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const showingSecureNotes = showSecureNotes.includes(categoryID);
+    // console.log("re render category: " + category.name);
 
-    const category = categories[categoryID];
-    const notesForCat: Note[] = [];
-    category.notes.forEach((noteID) => {
-        const note = notes[noteID];
-        if (!note.isSecureNote || showingSecureNotes) {
-            notesForCat.push(notes[noteID]);
+    const notesForCat: string[] = [];
+    category.notes.forEach((noteRef) => {
+        if (showingSecureNotes || !noteRef.isSecure) {
+            notesForCat.push(noteRef.id);
         }
     });
 
@@ -213,7 +211,7 @@ const CategoryTile: React.FC<TileProps> = ({
                 category.subCategories.map((subCatID, subCatIndex) => {
                     return (
                         <SubCategoryTile
-                            parentCategory={category}
+                            parentCategoryID={category.id}
                             isLastCategory={isLastCategory}
                             subCategoryID={subCatID}
                             isLastSubCategory={subCatIndex === category.subCategories.length - 1}
@@ -225,19 +223,18 @@ const CategoryTile: React.FC<TileProps> = ({
                 })}
             {isExpanded &&
                 category.subCategories.length == 0 &&
-                notesForCat.map((note, noteIndex) => {
+                notesForCat.map((noteID, noteIndex) => {
                     return (
                         <NoteTile
                             index={Number(noteIndex)}
                             parentCategoryIndex={index}
-                            note={note}
-                            category={category}
+                            noteID={noteID}
+                            categoryID={categoryID}
+                            subCategoryID={""}
                             isLastCategory={isLastCategory}
                             isLastNote={noteIndex === notesForCat.length - 1}
-                            isInSubCategory={false}
-                            key={note.id}
+                            key={noteID}
                             subCategoryIndex={-1}
-                            showingSecureNotes={showingSecureNotes}
                         />
                     );
                 })}

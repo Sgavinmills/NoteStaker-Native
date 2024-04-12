@@ -1,22 +1,21 @@
-import { GestureResponderEvent, Text, View, TouchableWithoutFeedback, FlatList, TouchableOpacity } from "react-native";
+import { GestureResponderEvent, Text, View, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
 import { RootState } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
-import { MenuOverlay, Category, HeightUpdateInfo, NewNoteData, Note } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { createNewNote, removeFromShowSecureNote, updateMenuOverlay, updateSubCategoryHeight } from "../redux/slice";
 import { AppDispatch } from "../redux/store/store";
 import * as ImagePicker from "expo-image-picker";
-import SubtleMessage from "./SubtleMessage";
 
 interface TileProps {
     subCategoryID: string;
     isLastCategory: boolean;
     isLastSubCategory: boolean;
-    parentCategory: Category;
+    parentCategoryID: string;
     index: number;
     parentCategoryIndex: number;
 }
@@ -25,22 +24,21 @@ const SubCategoryTile: React.FC<TileProps> = ({
     subCategoryID,
     isLastCategory,
     isLastSubCategory,
-    parentCategory,
+    parentCategoryID,
     parentCategoryIndex,
     index: index,
 }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const showSecureNotes = useSelector((state: RootState) => state.memory.showSecureNote);
-    const notes = useSelector((state: RootState) => state.memory.notes);
+    const subCategory = useSelector((state: RootState) => state.memory.subCategories[subCategoryID]);
 
-    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
-    const subCategory = subCategories[subCategoryID];
+    // console.log("re render subcategory: " + subCategory.name);
+
     const showingSecureNotes = showSecureNotes.includes(subCategoryID);
-    const notesForSubCat: Note[] = [];
-    subCategory.notes.forEach((noteID) => {
-        const note = notes[noteID];
-        if (!note.isSecureNote || showingSecureNotes) {
-            notesForSubCat.push(notes[noteID]);
+    const notesForSubCat: string[] = [];
+    subCategory.notes.forEach((noteRef) => {
+        if (showingSecureNotes || !noteRef.isSecure) {
+            notesForSubCat.push(noteRef.id);
         }
     });
 
@@ -65,6 +63,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
 
         toggleExpansion();
     };
+
     const toggleExpansion = () => {
         if (isExpanded) {
             if (showingSecureNotes) {
@@ -117,7 +116,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
             menuType: "subCategory",
             menuData: {
                 noteID: "",
-                categoryID: parentCategory.id,
+                categoryID: parentCategoryID,
                 subCategoryID: subCategory.id,
                 noteIndex: null,
                 subCategoryIndex: index,
@@ -129,7 +128,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
 
     const addNewNote = () => {
         const newNoteData: NewNoteData = {
-            categoryID: "",
+            categoryID: parentCategoryID,
             subCategoryID: subCategoryID,
             imageURI: "",
             noteInsertIndex: 0,
@@ -160,7 +159,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
         if (!result.canceled) {
             const imageURI = result.assets[0].uri;
             const newNoteData: NewNoteData = {
-                categoryID: "",
+                categoryID: parentCategoryID,
                 subCategoryID: subCategoryID,
                 imageURI: imageURI,
                 noteInsertIndex: 0,
@@ -215,21 +214,19 @@ const SubCategoryTile: React.FC<TileProps> = ({
                 </View>
             </TouchableWithoutFeedback>
             {isExpanded &&
-                notesForSubCat.map((note, noteIndex) => {
+                notesForSubCat.map((noteID, noteIndex) => {
                     return (
                         <NoteTile
                             index={noteIndex}
                             subCategoryIndex={index}
                             parentCategoryIndex={parentCategoryIndex}
-                            subCategory={subCategory}
-                            category={parentCategory}
-                            note={note}
+                            subCategoryID={subCategoryID}
+                            categoryID={parentCategoryID}
+                            noteID={noteID}
                             isLastNote={noteIndex === notesForSubCat.length - 1}
                             isLastCategory={isLastCategory}
                             isLastSubCategory={isLastSubCategory}
-                            isInSubCategory={true}
-                            key={note.id}
-                            showingSecureNotes={showingSecureNotes}
+                            key={noteID}
                         />
                     );
                 })}
