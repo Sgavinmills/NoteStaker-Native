@@ -1,6 +1,16 @@
 // slice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Category, Note, SubCategory, MenuOverlay, CatHeight, HeightUpdateInfo, NewNoteData, IDs } from "../types";
+import {
+    Category,
+    Note,
+    SubCategory,
+    MenuOverlay,
+    CatHeight,
+    HeightUpdateInfo,
+    NewNoteData,
+    IDs,
+    Memory,
+} from "../types";
 import { memory } from "../mockMemory";
 import { produce } from "immer";
 import * as Device from "expo-device";
@@ -535,6 +545,21 @@ const notesSlice = createSlice({
                 });
             });
         },
+
+        // updateMemoryFromBackup replaces categories, subcategories, notes and categoryList
+        // with data received from an imported json file
+        updateMemoryFromBackup(state, action: PayloadAction<Memory>) {
+            return produce(state, (draft) => {
+                if (action.payload) {
+                    draft.categoryList = action.payload.categoryList;
+                    draft.categories = action.payload.categories;
+                    draft.subCategories = action.payload.subCategories;
+                    draft.notes = action.payload.notes;
+                } else {
+                    console.error("memory not defined in updateMemoryFromBackup");
+                }
+            });
+        },
     },
 });
 export const {
@@ -561,6 +586,7 @@ export const {
     addNoteToCategory,
     removeNoteFromCategory,
     updateNoteSecureStatus,
+    updateMemoryFromBackup,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

@@ -67,7 +67,7 @@ export interface MenuData {
 }
 
 export interface DeleteInfo {
-    deleteType: "removeAll" | "deleteCategory" | "deleteNote" | "deleteImage" | "";
+    deleteType: "removeAll" | "deleteCategory" | "deleteNote" | "deleteImage" | "backupData" | "importData" | "";
     deleteMessage: string;
 }
 

@@ -46,7 +46,7 @@ export const memory: Memory = {
             isSecureNote: false,
             lastUpdatedBy: "",
             createdBy: "mockMemory",
-            locations: [["CARROTS", "newsubby11"]],
+            locations: [["CARROTS", ""]],
         },
     },
     categories: {
@@ -66,7 +66,7 @@ export const memory: Memory = {
         CARROTS: {
             id: "CARROTS",
             name: "test cat 2",
-            subCategories: ["newsubby11"],
+            subCategories: [""],
             notes: [],
             dateAdded: "",
             dateUpdated: "",

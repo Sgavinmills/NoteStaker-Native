@@ -3,6 +3,8 @@ import menuOverlayStyles from "../styles/menuOverlayStyles";
 import { FontAwesome, Entypo } from "@expo/vector-icons";
 import { Text, TouchableOpacity } from "react-native";
 import CategoryModal from "./CategoryModal";
+import { DeleteInfo } from "../types";
+import DeleteModal from "./DeleteModal";
 
 interface TileProps {
     setIsHomeScreenMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
@@ -12,6 +14,8 @@ interface TileProps {
 const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setCloseAllCategories }) => {
     const [isCategoryModal, setIsCategoryModal] = useState(false);
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteMessage: "", deleteType: "" });
 
     const handleAddCategoryPress = () => {
         setCatModalInfo({ currentName: "", parentCat: "" });
@@ -24,11 +28,26 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setC
     const handleViewSecureCategoriesPress = () => {
         console.log("ViewSecureCategoriesPress");
     };
+
     const handleBackupDataPress = () => {
-        console.log("addBackupDataPress");
+        const deleteInfo: DeleteInfo = {
+            deleteType: "backupData",
+            deleteMessage:
+                "Save a copy of note data to phone? This will not be encrypted and technically viewable to anyone with access to your phone",
+        };
+
+        setDeleteInfo(deleteInfo);
+        setDeleteModalVisible(true);
     };
     const handleImportDataPress = () => {
-        console.log("ImportDataPress");
+        const deleteInfo: DeleteInfo = {
+            deleteType: "importData",
+            deleteMessage:
+                "You are about to import data from a backup file. All current data stored in the app will be overwritten. Ensure you have backed up data first.",
+        };
+
+        setDeleteInfo(deleteInfo);
+        setDeleteModalVisible(true);
     };
 
     return (
@@ -53,7 +72,13 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setC
                 <FontAwesome name="save" style={[menuOverlayStyles.icons]} />
                 <Text style={menuOverlayStyles.text}>Import Data</Text>
             </TouchableOpacity>
-
+            {deleteModalVisible && (
+                <DeleteModal
+                    deleteInfo={deleteInfo}
+                    deleteModalVisible={deleteModalVisible}
+                    setDeleteModalVisible={setDeleteModalVisible}
+                />
+            )}
             {isCategoryModal && (
                 <CategoryModal
                     newCatModalVisible={isCategoryModal}
