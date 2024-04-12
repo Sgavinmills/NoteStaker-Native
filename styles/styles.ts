@@ -8,9 +8,24 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.blackBackground,
     },
 
-    homeScreenButtonContainer: {
+    homeScreenTopBarContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
+    },
+
+    searchContainer: {
+        borderWidth: 1,
+        borderRadius: 10,
+        borderColor: theme.colors.tileBorder,
+        flex: 1,
+        padding: 8,
+        marginRight: 8,
+    },
+
+    searchText: {
+        color: theme.colors.noteText,
     },
 
     logState: {

@@ -34,6 +34,7 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteMessage: "", deleteType: "" });
+    const [isCategoryModal, setIsCategoryModal] = useState(false);
 
     const catName = isCategory ? "category" : "sub-category";
     const openCategoryID = isCategory ? overlay.menuData.categoryID : overlay.menuData.subCategoryID;
@@ -164,7 +165,6 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
         }
     };
 
-    const [isCategoryModal, setIsCategoryModal] = useState(false);
     return (
         <>
             {overlay.menuType === "category" && (

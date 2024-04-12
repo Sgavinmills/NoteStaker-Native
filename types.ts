@@ -53,7 +53,7 @@ export type Location = [string, string];
 
 export interface MenuOverlay {
     isShowing: boolean;
-    menuType: "category" | "subCategory" | "note" | ""; // might be able to restrict this to specific menu types later?
+    menuType: "category" | "subCategory" | "note" | "homeScreen" | "";
     menuData: MenuData;
 }
 

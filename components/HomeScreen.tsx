@@ -10,6 +10,8 @@ import MenuDisplay from "./MenuDisplay";
 import { AppDispatch } from "../redux/store/store";
 import { updateMenuOverlay } from "../redux/slice";
 import { getEmptyOverlay, printCategories, printNotes, printSubCategories } from "../utilFuncs/utilFuncs";
+import { FontAwesome } from "@expo/vector-icons";
+import { MenuOverlay } from "../types";
 
 const HomeScreen: React.FC = () => {
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
@@ -22,17 +24,25 @@ const HomeScreen: React.FC = () => {
 
     const flatListRef = useRef<FlatList>(null);
 
-    const handleNewCategoryPress = () => {
+    const handleOpenMenuPress = () => {
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;
         }
 
-        setNewCatModalVisible(true);
-    };
-
-    const handleCloseAllCategoriesPress = () => {
-        setCloseAllCategories(true);
+        const newOverlay: MenuOverlay = {
+            isShowing: true,
+            menuType: "homeScreen",
+            menuData: {
+                noteID: "",
+                categoryID: "",
+                subCategoryID: "",
+                categoryIndex: null,
+                subCategoryIndex: null,
+                noteIndex: null,
+            },
+        };
+        dispatch(updateMenuOverlay(newOverlay));
     };
 
     useEffect(() => {
@@ -75,12 +85,15 @@ const HomeScreen: React.FC = () => {
                         catInfo={{ currentName: "", parentCat: "" }}
                     ></CategoryModal>
                 )}
-                <View style={styles.homeScreenButtonContainer}>
-                    <TouchableOpacity onPress={handleCloseAllCategoriesPress}>
-                        <Text style={categoryStyles.newCategoryText}>-</Text>
+                <View style={styles.homeScreenTopBarContainer}>
+                    <TouchableOpacity style={styles.searchContainer}>
+                        <Text style={styles.searchText}>Search...</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={handleNewCategoryPress}>
-                        <Text style={categoryStyles.newCategoryText}>+</Text>
+                    <TouchableOpacity onPress={handleOpenMenuPress}>
+                        <FontAwesome
+                            name="ellipsis-v"
+                            style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
+                        />
                     </TouchableOpacity>
                 </View>
 
@@ -92,7 +105,13 @@ const HomeScreen: React.FC = () => {
                     renderItem={renderCategory}
                     keyExtractor={(cat) => cat}
                 />
-                {overlay.isShowing && <MenuDisplay setScrollTo={setScrollTo} overlay={overlay} />}
+                {overlay.isShowing && (
+                    <MenuDisplay
+                        setScrollTo={setScrollTo}
+                        overlay={overlay}
+                        setCloseAllCategories={setCloseAllCategories}
+                    />
+                )}
             </View>
         </TouchableWithoutFeedback>
     );
