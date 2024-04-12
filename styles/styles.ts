@@ -26,6 +26,7 @@ const styles = StyleSheet.create({
 
     searchText: {
         color: theme.colors.noteText,
+        height: 19,
     },
 
     logState: {

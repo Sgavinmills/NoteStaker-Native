@@ -1,4 +1,4 @@
-import { FlatList, TouchableOpacity, Text, View, StatusBar, TouchableWithoutFeedback } from "react-native";
+import { FlatList, TouchableOpacity, Text, View, StatusBar, TouchableWithoutFeedback, TextInput } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
@@ -12,6 +12,7 @@ import { updateMenuOverlay } from "../redux/slice";
 import { getEmptyOverlay, printCategories, printNotes, printSubCategories } from "../utilFuncs/utilFuncs";
 import { FontAwesome } from "@expo/vector-icons";
 import { MenuOverlay } from "../types";
+import SearchCategoryTile from "./SearchTile";
 
 const HomeScreen: React.FC = () => {
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
@@ -20,9 +21,12 @@ const HomeScreen: React.FC = () => {
 
     const [newCatModalVisible, setNewCatModalVisible] = useState(false);
     const [scrollTo, setScrollTo] = useState<null | number>(null);
+    const [searchText, setSearchText] = useState("");
     const [closeAllCategories, setCloseAllCategories] = useState(false);
+    const [isSearch, setIsSearch] = useState(false);
 
     const flatListRef = useRef<FlatList>(null);
+    const searchInputRef = useRef<TextInput>(null);
 
     const showingSecureCategories = useSelector((state: RootState) => state.memory.canShowSecure.homeScreen);
     const catsForHomeScreen: string[] = [];
@@ -32,6 +36,10 @@ const HomeScreen: React.FC = () => {
         }
     });
     const handleOpenMenuPress = () => {
+        if (isSearch) {
+            setIsSearch(false);
+            return;
+        }
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;
@@ -69,6 +77,12 @@ const HomeScreen: React.FC = () => {
         />
     );
 
+    const focusInput = () => {
+        if (searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    };
+
     const handleOutsideMenuPress = () => {
         // console.log("-------------------------------");
         // printCategories(categories);
@@ -80,6 +94,16 @@ const HomeScreen: React.FC = () => {
             return;
         }
     };
+
+    const handleSearchPress = () => {
+        setIsSearch(true);
+    };
+
+    const handleSearchTextChange = (text: string) => {
+        setSearchText(text);
+    };
+
+    const handleSearchBlur = () => {};
 
     return (
         <TouchableWithoutFeedback onPress={handleOutsideMenuPress}>
@@ -93,8 +117,20 @@ const HomeScreen: React.FC = () => {
                     ></CategoryModal>
                 )}
                 <View style={styles.homeScreenTopBarContainer}>
-                    <TouchableOpacity style={styles.searchContainer}>
-                        <Text style={styles.searchText}>Search...</Text>
+                    <TouchableOpacity style={styles.searchContainer} onPress={handleSearchPress}>
+                        {!isSearch ? (
+                            <Text style={styles.searchText}>Search...</Text>
+                        ) : (
+                            <TextInput
+                                style={styles.searchText}
+                                onChangeText={handleSearchTextChange}
+                                onBlur={handleSearchBlur}
+                                value={searchText}
+                                autoFocus
+                                ref={searchInputRef}
+                                placeholder={"Enter search text..."}
+                            ></TextInput>
+                        )}
                     </TouchableOpacity>
                     <TouchableOpacity onPress={handleOpenMenuPress}>
                         <FontAwesome
@@ -103,15 +139,18 @@ const HomeScreen: React.FC = () => {
                         />
                     </TouchableOpacity>
                 </View>
-
-                <FlatList
-                    ref={flatListRef}
-                    removeClippedSubviews={false}
-                    style={categoryStyles.categoryListContainer}
-                    data={catsForHomeScreen}
-                    renderItem={renderCategory}
-                    keyExtractor={(cat) => cat}
-                />
+                {isSearch ? (
+                    <SearchCategoryTile searchText={searchText} setIsSearch={setIsSearch} focusInput={focusInput} />
+                ) : (
+                    <FlatList
+                        ref={flatListRef}
+                        removeClippedSubviews={false}
+                        style={categoryStyles.categoryListContainer}
+                        data={catsForHomeScreen}
+                        renderItem={renderCategory}
+                        keyExtractor={(cat) => cat}
+                    />
+                )}
                 {overlay.isShowing && (
                     <MenuDisplay
                         setScrollTo={setScrollTo}

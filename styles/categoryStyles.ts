@@ -78,6 +78,12 @@ const catStyles = StyleSheet.create({
         color: theme.colors.noteText,
     },
 
+    binocularsIconText: {
+        fontSize: 24,
+        color: theme.colors.noteText,
+        marginRight: 30,
+    },
+
     subCategoryText: {
         fontSize: 20,
         color: theme.colors.categoryText,

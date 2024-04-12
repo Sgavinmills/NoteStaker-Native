@@ -32,7 +32,6 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo, setCloseAllCat
         overlay.menuType === "category" || overlay.menuType === "subCategory"
     );
     const [isHomeScreenMainMenu, setIsHomeScreenMainMenu] = useState(overlay.menuType === "homeScreen");
-    console.log("menu display rerender: " + overlay.menuType);
     const handleClose = () => {
         const overlay: MenuOverlay = {
             isShowing: false,
