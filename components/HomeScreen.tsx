@@ -1,33 +1,29 @@
-import { FlatList, TouchableOpacity, Text, View, StatusBar, TouchableWithoutFeedback, Button } from "react-native";
+import { FlatList, TouchableOpacity, Text, View, StatusBar, TouchableWithoutFeedback } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import CategoryTile from "./CategoryTile";
-import { Category } from "../types";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CategoryModal from "./CategoryModal";
 import MenuDisplay from "./MenuDisplay";
 import { AppDispatch } from "../redux/store/store";
 import { updateMenuOverlay } from "../redux/slice";
-import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { getEmptyOverlay, printCategories, printNotes, printSubCategories } from "../utilFuncs/utilFuncs";
 
-// A good refactor will extract all the memory stuff and in components just ask for "notesToRender" type stuff, so then if we change
-// the underlying data to a databse or whatever its simple enough, essentially accessing through an api.
 const HomeScreen: React.FC = () => {
-    const memory = useSelector((state: RootState) => state.memory);
-    const [newCatModalVisible, setNewCatModalVisible] = useState(false);
+    const categoryList = useSelector((state: RootState) => state.memory.categoryList);
+    const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const dispatch = useDispatch<AppDispatch>();
 
-    const catsForHomeScreen: Category[] = [];
-    memory.categoryList.forEach((cat) => {
-        if (memory.categories[cat]) {
-            catsForHomeScreen.push(memory.categories[cat]);
-        }
-    });
+    const [newCatModalVisible, setNewCatModalVisible] = useState(false);
+    const [scrollTo, setScrollTo] = useState<null | number>(null);
+    const [closeAllCategories, setCloseAllCategories] = useState(false);
+
+    const flatListRef = useRef<FlatList>(null);
 
     const handleNewCategoryPress = () => {
-        if (memory.menuOverlay.isShowing) {
+        if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;
         }
@@ -35,16 +31,34 @@ const HomeScreen: React.FC = () => {
         setNewCatModalVisible(true);
     };
 
-    const renderCategory = ({ item, index }: { item: Category; index: number }) => (
+    const handleCloseAllCategoriesPress = () => {
+        setCloseAllCategories(true);
+    };
+
+    useEffect(() => {
+        if (scrollTo) {
+            flatListRef.current?.scrollToOffset({ offset: scrollTo, animated: true });
+            setScrollTo(null);
+        }
+    }, [scrollTo]);
+
+    const renderCategory = ({ item, index }: { item: string; index: number }) => (
         <CategoryTile
-            category={item}
+            categoryID={item}
             index={index}
-            isLastCategory={index === catsForHomeScreen.length - 1 ? true : false}
+            isLastCategory={index === categoryList.length - 1 ? true : false}
+            closeAllCategories={closeAllCategories}
+            setCloseAllCategories={setCloseAllCategories}
         />
     );
 
     const handleOutsideMenuPress = () => {
-        if (memory.menuOverlay.isShowing) {
+        // console.log("-------------------------------");
+        // printCategories(categories);
+        // printSubCategories(subCategories);
+        // printNotes(notes);
+
+        if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;
         }
@@ -61,18 +75,24 @@ const HomeScreen: React.FC = () => {
                         catInfo={{ currentName: "", parentCat: "" }}
                     ></CategoryModal>
                 )}
-                <TouchableOpacity onPress={handleNewCategoryPress}>
-                    <Text style={categoryStyles.newCategoryText}>+</Text>
-                </TouchableOpacity>
+                <View style={styles.homeScreenButtonContainer}>
+                    <TouchableOpacity onPress={handleCloseAllCategoriesPress}>
+                        <Text style={categoryStyles.newCategoryText}>-</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleNewCategoryPress}>
+                        <Text style={categoryStyles.newCategoryText}>+</Text>
+                    </TouchableOpacity>
+                </View>
 
                 <FlatList
+                    ref={flatListRef}
                     removeClippedSubviews={false}
                     style={categoryStyles.categoryListContainer}
-                    data={catsForHomeScreen}
+                    data={categoryList}
                     renderItem={renderCategory}
-                    keyExtractor={(cat) => cat.id}
+                    keyExtractor={(cat) => cat}
                 />
-                {memory.menuOverlay.isShowing && <MenuDisplay overlay={memory.menuOverlay} />}
+                {overlay.isShowing && <MenuDisplay setScrollTo={setScrollTo} overlay={overlay} />}
             </View>
         </TouchableWithoutFeedback>
     );

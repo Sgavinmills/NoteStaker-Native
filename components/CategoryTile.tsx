@@ -1,100 +1,94 @@
-import { Text, View, FlatList, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent } from "react-native";
-import { useRef, useState } from "react";
+import { Text, View, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent } from "react-native";
+import { useEffect, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { Category, SubCategory, Note, MenuOverlay } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData, Note } from "../types";
 import { useSelector } from "react-redux";
-import { RootState } from "../redux/reducers/reducers";
+import { RootState } from "../redux/store/store";
 import NoteTile from "./NoteTile";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";
-import { addNewNoteToNotes, updateCategory, updateMenuOverlay, updateNote } from "../redux/slice";
+import { createNewNote, removeFromShowSecureNote, updateCategoryHeight, updateMenuOverlay } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
-import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import * as ImagePicker from "expo-image-picker";
-import SubtleMessage from "./SubtleMessage";
-
 interface TileProps {
-    category: Category;
+    categoryID: string;
     index: number;
     isLastCategory: boolean;
+    setCloseAllCategories: React.Dispatch<React.SetStateAction<boolean>>;
+    closeAllCategories: boolean;
 }
 
-const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
-
-    const subCategories = useSelector((state: RootState) => state.memory.subCategories);
-    const notes = useSelector((state: RootState) => state.memory.notes);
+const CategoryTile: React.FC<TileProps> = ({
+    categoryID,
+    index,
+    isLastCategory,
+    closeAllCategories,
+    setCloseAllCategories,
+}) => {
+    const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
+    const showSecureNotes = useSelector((state: RootState) => state.memory.showSecureNote);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const showingSecureNotes = showSecureNotes.includes(categoryID);
+    // console.log("re render category: " + category.name);
+
+    const notesForCat: string[] = [];
+    category.notes.forEach((noteRef) => {
+        if (showingSecureNotes || !noteRef.isSecure) {
+            notesForCat.push(noteRef.id);
+        }
+    });
+
     const dispatch = useDispatch<AppDispatch>();
 
-    const renderNote = ({ item, index }: { item: Note; index: Number }) => (
-        <NoteTile
-            index={Number(index)}
-            note={item}
-            category={category}
-            isLastCategory={isLastCategory}
-            isLastNote={index === notesForThisCat.length - 1}
-            isInSubCategory={false}
-        />
-    );
+    const [isExpanded, setIsExpanded] = useState(false);
 
-    // TODO - Change these to forEachs so can have error handling if it doesnt find
-    // a ct or not (cos it was deleted) it doesnt add it to the array, like this it adds undefined to array.
-    const subCatsForThisCat = category.subCategories.map((subCat) => {
-        return subCategories[subCat];
-    });
-
-    const notesForThisCat = category.notes.map((note) => {
-        return notes[note];
-    });
+    useEffect(() => {
+        if (closeAllCategories && isExpanded) {
+            setIsExpanded(false);
+            setCloseAllCategories(false);
+        }
+    }, [closeAllCategories]);
 
     const toggleExpansion = () => {
+        if (isExpanded) {
+            if (showingSecureNotes) {
+                dispatch(removeFromShowSecureNote(categoryID));
+            }
+        }
+        setIsExpanded(!isExpanded);
+    };
+
+    const handleTilePress = () => {
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;
         }
 
-        const isEmpty = category.notes.length === 0 && category.subCategories.length === 0;
+        const isEmpty = notesForCat.length === 0 && category.subCategories.length === 0;
         if (isEmpty) {
-            setShowSubtleMessage(true);
-            setTimeout(() => {
-                setShowSubtleMessage(false);
-            }, 500);
+            addNewNote();
+            if (!isExpanded) {
+                toggleExpansion();
+            }
             return;
         }
-        setIsExpanded(!isExpanded);
+        toggleExpansion();
     };
 
-    const renderSubCategory = ({ item, index }: { item: SubCategory; index: number }) => (
-        <SubCategoryTile
-            parentCategory={category}
-            isLastCategory={isLastCategory}
-            subCategory={item}
-            isLastSubCategory={index === subCatsForThisCat.length - 1}
-        />
-    );
-
-    const handleAddNote = () => {
-        const noteToAdd: Note = {
-            id: getRandomID(),
-            note: "",
-            additionalInfo: "",
-            dateAdded: "",
-            dateUpdated: "",
-            priority: "normal",
-            completed: false,
+    const addNewNote = () => {
+        const newNoteData: NewNoteData = {
+            categoryID: categoryID,
+            subCategoryID: "",
             imageURI: "",
-            isNewNote: true,
+            noteInsertIndex: 0,
         };
-        dispatch(addNewNoteToNotes(noteToAdd));
+        dispatch(createNewNote(newNoteData));
+    };
 
-        const categoryNotes = [...category.notes];
-        categoryNotes.unshift(noteToAdd.id);
-        dispatch(updateCategory({ ...category, notes: categoryNotes }));
-
+    const handleAddNotePress = () => {
+        addNewNote();
         if (!isExpanded) {
             toggleExpansion();
         }
@@ -114,22 +108,14 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
 
         if (!result.canceled) {
             const imageURI = result.assets[0].uri;
-            const noteToAdd: Note = {
-                id: getRandomID(),
-                note: "",
-                additionalInfo: "",
-                dateAdded: "",
-                dateUpdated: "",
-                priority: "normal",
-                completed: false,
-                imageURI: imageURI,
-                isNewNote: true,
-            };
-            dispatch(addNewNoteToNotes(noteToAdd));
 
-            const categoryNotes = [...category.notes];
-            categoryNotes.unshift(noteToAdd.id);
-            dispatch(updateCategory({ ...category, notes: categoryNotes }));
+            const newNoteData: NewNoteData = {
+                categoryID: categoryID,
+                subCategoryID: "",
+                imageURI: imageURI,
+                noteInsertIndex: 0,
+            };
+            dispatch(createNewNote(newNoteData));
         }
         setIsExpanded(true);
     };
@@ -146,12 +132,12 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                 noteID: "",
                 categoryID: category.id,
                 subCategoryID: "",
+                categoryIndex: index,
+                subCategoryIndex: null,
+                noteIndex: null,
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
-        if (!isExpanded) {
-            setIsExpanded(true);
-        }
     };
 
     const addBottomTileMartin = () => {
@@ -175,9 +161,19 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
         return false;
     };
 
+    const handleCategoryLayout = (event: any) => {
+        const { height } = event.nativeEvent.layout;
+        const update: HeightUpdateInfo = {
+            newHeight: height,
+            categoryIndex: index,
+            subCategoryIndex: -1,
+            noteIndex: -1,
+        };
+        dispatch(updateCategoryHeight(update));
+    };
     return (
-        <>
-            <TouchableWithoutFeedback onPress={toggleExpansion} onLongPress={handleMenuPress}>
+        <View onLayout={handleCategoryLayout}>
+            <TouchableWithoutFeedback onPress={handleTilePress} onLongPress={handleMenuPress}>
                 <View
                     style={[
                         categoryStyles.categoryTile,
@@ -193,7 +189,7 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
                         {category.subCategories.length === 0 && (
-                            <TouchableOpacity onPress={handleAddNote} onLongPress={handleLongPressAddNote}>
+                            <TouchableOpacity onPress={handleAddNotePress} onLongPress={handleLongPressAddNote}>
                                 <FontAwesome name="plus" style={[categoryStyles.plusIconText, categoryStyles.icons]} />
                             </TouchableOpacity>
                         )}
@@ -210,31 +206,39 @@ const CategoryTile: React.FC<TileProps> = ({ category, index, isLastCategory }) 
                     </View>
                 </View>
             </TouchableWithoutFeedback>
-            {showSubtleMessage && (
-                <SubtleMessage
-                    message="This category is empty"
-                    visible={showSubtleMessage}
-                    setSubtleMessage={setShowSubtleMessage}
-                />
-            )}
-            {isExpanded && category.subCategories.length > 0 && (
-                <FlatList
-                    removeClippedSubviews={false}
-                    style={categoryStyles.subCategoryContainer}
-                    data={subCatsForThisCat}
-                    renderItem={renderSubCategory}
-                    keyExtractor={(cat) => cat.id}
-                />
-            )}
-            {isExpanded && category.subCategories.length == 0 && (
-                <FlatList
-                    removeClippedSubviews={false}
-                    data={notesForThisCat}
-                    renderItem={renderNote}
-                    keyExtractor={(note) => note.id}
-                />
-            )}
-        </>
+            {isExpanded &&
+                category.subCategories.length > 0 &&
+                category.subCategories.map((subCatID, subCatIndex) => {
+                    return (
+                        <SubCategoryTile
+                            parentCategoryID={category.id}
+                            isLastCategory={isLastCategory}
+                            subCategoryID={subCatID}
+                            isLastSubCategory={subCatIndex === category.subCategories.length - 1}
+                            key={subCatID}
+                            index={subCatIndex}
+                            parentCategoryIndex={index}
+                        />
+                    );
+                })}
+            {isExpanded &&
+                category.subCategories.length == 0 &&
+                notesForCat.map((noteID, noteIndex) => {
+                    return (
+                        <NoteTile
+                            index={Number(noteIndex)}
+                            parentCategoryIndex={index}
+                            noteID={noteID}
+                            categoryID={categoryID}
+                            subCategoryID={""}
+                            isLastCategory={isLastCategory}
+                            isLastNote={noteIndex === notesForCat.length - 1}
+                            key={noteID}
+                            subCategoryIndex={-1}
+                        />
+                    );
+                })}
+        </View>
     );
 };
 

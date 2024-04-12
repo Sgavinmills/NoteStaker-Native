@@ -1,7 +1,9 @@
 // slice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Category, Note, SubCategory, MenuOverlay } from "../types";
+import { Category, Note, SubCategory, MenuOverlay, CatHeight, HeightUpdateInfo, NewNoteData, IDs } from "../types";
 import { memory } from "../mockMemory";
+import { produce } from "immer";
+import * as Device from "expo-device";
 
 interface AppState {
     notes: { [id: string]: Note };
@@ -10,10 +12,8 @@ interface AppState {
     categoryList: string[];
 
     menuOverlay: MenuOverlay;
-
-    // want to separate menu from memory
-    // but also since generally update notes, categoies and subcategories separately
-    // can they be separate states as well? Does it matter?
+    heightData: CatHeight[];
+    showSecureNote: string[];
 }
 
 const initialState: AppState = {
@@ -28,51 +28,293 @@ const initialState: AppState = {
             noteID: "",
             categoryID: "",
             subCategoryID: "",
+            categoryIndex: null,
+            subCategoryIndex: null,
+            noteIndex: null,
         },
     },
+    heightData: [],
+    showSecureNote: [],
 };
-// i think these should be refactored so all
-// the reducer funcs just take what the state should be
-// and update its bit of state accordingly
-
-// then the components will call util funcs to work out the state and then call reducers with the result
-// and util funcs are pure components that take some of the state, make copies and make it how it should be then return
-// then for some that do multple calls, ie remoaALlNotes does updateNotes and updateCategory we can haeb more general ones to just update all state?
-
-// defo do this, can add some unit tests as we refactor the functions too, pretty important at this stage i think.
-
 const notesSlice = createSlice({
     name: "notes",
     initialState,
     reducers: {
+        addToShowSecureNote(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const id = action.payload; // shouldwe use maps instead?! quicker..
+                if (!draft.showSecureNote.includes(id)) {
+                    draft.showSecureNote.push(id);
+                }
+            });
+        },
+        removeFromShowSecureNote(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const id = action.payload; // shouldwe use maps instead?! quicker..
+                const index = draft.showSecureNote.indexOf(id);
+                if (index > -1) {
+                    draft.showSecureNote.splice(index, 1);
+                }
+            });
+        },
+        // updateCategoryHeight adds or updates a category height in the height data, for use with scrollTo
+        updateCategoryHeight(state, action: PayloadAction<HeightUpdateInfo>) {
+            return produce(state, (draft) => {
+                const { newHeight, categoryIndex } = action.payload;
+
+                if (draft.heightData[categoryIndex]) {
+                    draft.heightData[categoryIndex].catHeight = newHeight;
+                } else {
+                    const newCatHeightItem: CatHeight = {
+                        catHeight: newHeight,
+                        subHeights: [],
+                        noteHeights: [],
+                    };
+                    draft.heightData[categoryIndex] = newCatHeightItem;
+                }
+            });
+        },
+
+        // updateNoteHeight adds or updates a note height in the height data, for use with scrollTo
+        updateNoteHeight: (state, action: PayloadAction<HeightUpdateInfo>) => {
+            return produce(state, (draft) => {
+                const { newHeight, categoryIndex, subCategoryIndex, noteIndex } = action.payload;
+
+                if (subCategoryIndex >= 0) {
+                    if (draft.heightData[categoryIndex]) {
+                        // Ensure the subCategoryIndex is valid
+                        if (draft.heightData[categoryIndex].subHeights[subCategoryIndex]) {
+                            // Update the noteHeight at the specified indices
+                            draft.heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[noteIndex] =
+                                newHeight;
+                        }
+                    }
+                } else {
+                    if (draft.heightData[categoryIndex]) {
+                        draft.heightData[categoryIndex].noteHeights[noteIndex] = newHeight;
+                    }
+                }
+            });
+        },
+
+        // updateSubCategoryHeight adds or updates a subCategoryHeight in the height data, for use with scrollTo
+        updateSubCategoryHeight: (state, action: PayloadAction<HeightUpdateInfo>) => {
+            return produce(state, (draft) => {
+                const { newHeight, categoryIndex, subCategoryIndex } = action.payload;
+
+                if (draft.heightData[categoryIndex]) {
+                    // Ensure the subCategoryIndex is valid
+                    if (draft.heightData[categoryIndex].subHeights[subCategoryIndex]) {
+                        // Update the noteHeight at the specified indices
+                        draft.heightData[categoryIndex].subHeights[subCategoryIndex].subHeight = newHeight;
+                    } else {
+                        const newSubCatHeightItem: SubHeight = {
+                            subHeight: newHeight,
+                            noteHeights: [],
+                        };
+                        draft.heightData[categoryIndex].subHeights[subCategoryIndex] = newSubCatHeightItem;
+                    }
+                }
+            });
+        },
+
+        // updateMenuOverlay sets a new config on the menu overlay
         updateMenuOverlay(state, action: PayloadAction<MenuOverlay>) {
             const newOverlay = { ...action.payload };
-
-            // check if we need to copy state here, might be unnecessary processing. - can we separate and have two states? one for memory/data one for menu?
             return { ...state, menuOverlay: newOverlay };
         },
+
+        // updateCategoryList updates the categoryList
         updateCategoryList(state, action: PayloadAction<string[]>) {
             return { ...state, categoryList: action.payload };
         },
 
-        // new notes all need to be added to a category. This is handled separately for now.
-        // maybe should handle together, similar to how doing addsubcategory
-        addNewNoteToNotes(state, action: PayloadAction<Note>) {
-            const newNote = action.payload;
-            const newState: AppState = {
-                ...state,
-                notes: {
-                    ...state.notes,
-                    [newNote.id]: newNote,
-                },
-            };
+        // createNewNote adds a blank note to the notes map and gives the ID to the correct category
+        createNewNote(state, action: PayloadAction<NewNoteData>) {
+            return produce(state, (draft) => {
+                const { categoryID, subCategoryID, imageURI, noteInsertIndex } = action.payload;
+                const noteToAdd: Note = {
+                    id: getRandomID(),
+                    note: "",
+                    additionalInfo: "",
+                    dateAdded: new Date().toISOString(),
+                    dateUpdated: "",
+                    priority: "normal",
+                    completed: false,
+                    imageURI: imageURI,
+                    isNewNote: true,
+                    createdBy: Device.deviceName ? Device.deviceName : "Annoymous",
+                    lastUpdatedBy: "",
+                    isSecureNote: false,
+                    locations: [[categoryID, subCategoryID]],
+                };
 
-            return newState;
+                draft.notes[noteToAdd.id] = noteToAdd;
+
+                if (!subCategoryID) {
+                    draft.categories[categoryID].notes.splice(noteInsertIndex, 0, {
+                        id: noteToAdd.id,
+                        isSecure: false,
+                    });
+                } else {
+                    draft.subCategories[subCategoryID].notes.splice(noteInsertIndex, 0, {
+                        id: noteToAdd.id,
+                        isSecure: false,
+                    });
+                }
+            });
         },
 
+        // removeAllNotesFromCategory deletes all the notes from a category
+        // If a note exists elsewhere it will have its location updated
+        // If it does not exist elsewhere it will be deleted
+        // All note refs are removed from category notes list
+        removeAllNotesFromCategory(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const categoryID = action.payload;
+
+                const notesInCategory = draft.categories[categoryID].notes;
+                notesInCategory.forEach((noteRef) => {
+                    const note = draft.notes[noteRef.id];
+                    if (note.locations.length > 1) {
+                        const locationIndex = note.locations.findIndex((loc) => loc[0] === categoryID);
+                        if (locationIndex > -1) {
+                            note.locations.splice(locationIndex, 1);
+                        }
+                    } else {
+                        delete draft.notes[noteRef.id];
+                    }
+                });
+
+                draft.categories[categoryID].notes = [];
+            });
+        },
+
+        // removeAllNotesFromSubCategory deletes all the notes from a subCtegory
+        // If a note exists elsewhere it will have its location updated
+        // If it does not exist elsewhere it will be deleted
+        // All note refs are removed from subCategory notes list
+        removeAllNotesFromSubCategory(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const subCategoryID = action.payload;
+
+                const notesInSubCategory = draft.subCategories[subCategoryID].notes;
+                notesInSubCategory.forEach((noteRef) => {
+                    const note = draft.notes[noteRef.id];
+                    if (note.locations.length > 1) {
+                        const locationIndex = note.locations.findIndex((loc) => loc[1] === subCategoryID);
+                        if (locationIndex > -1) {
+                            note.locations.splice(locationIndex, 1);
+                        }
+                    } else {
+                        delete draft.notes[noteRef.id];
+                    }
+                });
+
+                draft.subCategories[subCategoryID].notes = [];
+            });
+        },
+
+        // deleteCategory completely removes a category.
+        // Any notes in the category or its sub categories will be deleted unless they exist in other categories
+        // If the notes do exist then their location is updated accordingly
+        // Any subcategories inside will be removed from subCategories map
+        // The category is deleted and its ID removed from categoryList
+        deleteCategory(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const categoryID = action.payload;
+                const category = draft.categories[categoryID];
+
+                // delete/update notes if they exist in main category
+                const notesInCategory = category.notes;
+                notesInCategory.forEach((noteRef) => {
+                    const note = draft.notes[noteRef.id];
+                    if (note.locations.length > 1) {
+                        // exists elsewhere - update locs
+                        const locationIndex = note.locations.findIndex((loc) => loc[0] === categoryID);
+                        if (locationIndex > -1) {
+                            note.locations.splice(locationIndex, 1);
+                        }
+                    } else {
+                        delete draft.notes[noteRef.id];
+                    }
+                });
+
+                // delete/update notes if they exist in a subcategory
+                const subCatsInCategory = category.subCategories;
+                subCatsInCategory.forEach((subCatID) => {
+                    const subCategory = draft.subCategories[subCatID];
+                    const notesInSubCategory = subCategory.notes;
+                    notesInSubCategory.forEach((noteRef) => {
+                        const note = draft.notes[noteRef.id];
+                        if (note) {
+                            // may have been deleted on prev loop
+                            if (note.locations.some((loc) => loc[0] !== categoryID)) {
+                                // exists elsewhere - update locs
+                                const locationIndex = note.locations.findIndex((loc) => loc[1] === subCatID);
+                                if (locationIndex > -1) {
+                                    note.locations.splice(locationIndex, 1);
+                                }
+                            } else {
+                                delete draft.notes[noteRef.id];
+                            }
+                        }
+                    });
+                });
+
+                // delete subCategorys
+                subCatsInCategory.forEach((subCatID) => {
+                    delete draft.subCategories[subCatID];
+                });
+
+                // delete category
+                delete draft.categories[categoryID];
+
+                // remove category from list
+                const categoryIndex = draft.categoryList.indexOf(categoryID);
+                draft.categoryList.splice(categoryIndex, 1);
+            });
+        },
+
+        // deleteSubCategory completely removes a subCategory.
+        // Any notes in the subCategory will be deleted unless they exist in other categories
+        // If the notes do exist then their location is updated accordingly
+        // The subcategory is deleted and its ID removed from the category subcategories list
+        deleteSubCategory(state, action: PayloadAction<{ subCategoryID: string; parentCategoryID: string }>) {
+            return produce(state, (draft) => {
+                const { parentCategoryID, subCategoryID } = action.payload;
+
+                // delete notes
+                const subCategory = draft.subCategories[subCategoryID];
+                const notesInSubCategory = subCategory.notes;
+                notesInSubCategory.forEach((noteRef) => {
+                    const note = draft.notes[noteRef.id];
+                    if (note.locations.length > 1) {
+                        // exists elsewhere - update locs
+                        const locationIndex = note.locations.findIndex((loc) => loc[1] === subCategoryID);
+                        if (locationIndex > -1) {
+                            note.locations.splice(locationIndex, 1);
+                        }
+                    } else {
+                        delete draft.notes[noteRef.id];
+                    }
+                });
+
+                // delete subCategory
+                delete draft.subCategories[subCategoryID];
+
+                // remove subCategory from parent category list
+                const parentCategory = draft.categories[parentCategoryID];
+                const index = parentCategory.subCategories.indexOf(subCategoryID);
+                parentCategory.subCategories.splice(index, 1);
+            });
+        },
+
+        // updateCategory updates a single category
         updateCategory(state, action: PayloadAction<Category>) {
             const categoryCopy = action.payload;
-
+            categoryCopy.dateUpdated = new Date().toISOString();
+            categoryCopy.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
             const categoriesCopy = { ...state.categories };
             if (categoriesCopy[categoryCopy.id]) {
                 categoriesCopy[categoryCopy.id] = { ...categoryCopy };
@@ -81,8 +323,79 @@ const notesSlice = createSlice({
             return { ...state, categories: categoriesCopy };
         },
 
+        // removeNoteFromSubCategory removes a note from a subcategory
+        // it removes the noteRef from the subCategory notes
+        // and updates the notes locations to remove the subCategory
+        removeNoteFromSubCategory(state, action: PayloadAction<IDs>) {
+            return produce(state, (draft) => {
+                const { subCategoryID, noteID } = action.payload;
+                const subCategory = draft.subCategories[subCategoryID];
+                const noteIndex = subCategory.notes.findIndex((noteRef) => noteRef.id === noteID);
+                if (noteIndex > -1) {
+                    // will always but still got error protection
+                    subCategory.notes.splice(noteIndex, 1);
+                    // now update locations
+                    const note = draft.notes[noteID];
+                    const locationIndex = note.locations.findIndex((loc) => loc[1] === subCategoryID);
+                    if (locationIndex > -1) {
+                        note.locations.splice(locationIndex, 1);
+                    }
+                }
+            });
+        },
+
+        // removeNoteFromCategory removes a note from a main Category
+        // it removes the noteRef from the Category notes
+        // and updates the notes locations to remove the Category
+        removeNoteFromCategory(state, action: PayloadAction<IDs>) {
+            return produce(state, (draft) => {
+                const { categoryID, noteID } = action.payload;
+                const category = draft.categories[categoryID];
+                const noteIndex = category.notes.findIndex((noteRef) => noteRef.id === noteID);
+                if (noteIndex > -1) {
+                    // will always but still got error protection
+                    category.notes.splice(noteIndex, 1);
+                    // now update locations
+                    const note = draft.notes[noteID];
+                    const locationIndex = note.locations.findIndex((loc) => loc[0] === categoryID);
+                    if (locationIndex > -1) {
+                        note.locations.splice(locationIndex, 1);
+                    }
+                }
+            });
+        },
+
+        // addNoteToSUbCategory adds a single note to a subCategory
+        // it adds the note ref into the subCategory notes
+        // and adds the subCategory location to the note
+        addNoteToSubCategory(state, action: PayloadAction<IDs>) {
+            return produce(state, (draft) => {
+                const { subCategoryID, categoryID, noteID } = action.payload;
+                const subCategory = draft.subCategories[subCategoryID];
+                const note = draft.notes[noteID];
+                subCategory.notes.push({ id: noteID, isSecure: note.isSecureNote });
+                note.locations.push([categoryID, subCategoryID]);
+            });
+        },
+
+        // addNoteToCategory adds a single note to a Category
+        // it adds the note ref into the Category notes
+        // and adds the Category location to the note
+        addNoteToCategory(state, action: PayloadAction<IDs>) {
+            return produce(state, (draft) => {
+                const { categoryID, noteID } = action.payload;
+                const category = draft.categories[categoryID];
+                const note = draft.notes[noteID];
+                category.notes.push({ id: noteID, isSecure: note.isSecureNote });
+                note.locations.push([categoryID, ""]);
+            });
+        },
+
+        // updateSubCategory updates a single subCategory
         updateSubCategory(state, action: PayloadAction<SubCategory>) {
             const subCategoryCopy = action.payload;
+            subCategoryCopy.dateUpdated = new Date().toISOString();
+            subCategoryCopy.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
             const subCategoryId = subCategoryCopy.id;
 
             const subCategoriesCopy = { ...state.subCategories };
@@ -94,134 +407,160 @@ const notesSlice = createSlice({
             return { ...state, subCategories: subCategoriesCopy };
         },
 
-        updateNotes(state: AppState, action: PayloadAction<{ [id: string]: Note }>) {
-            const newNotes = { ...action.payload };
-            return { ...state, notes: newNotes };
+        // deleteNote deletes a note from all categories.
+        // It removes the note from notes and removes it's noteRef from any category/subcategory note lists
+        deleteNote(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const noteID = action.payload;
+                const note = draft.notes[noteID];
+
+                note.locations.forEach((location) => {
+                    if (location[1]) {
+                        const subCategory = draft.subCategories[location[1]];
+                        const noteIndex = subCategory.notes.findIndex((noteRef) => {
+                            return noteRef.id === noteID;
+                        });
+                        subCategory.notes.splice(noteIndex, 1);
+                        delete draft.notes[noteID];
+
+                        return;
+                    }
+
+                    const category = draft.categories[location[0]];
+                    const noteIndex = category.notes.findIndex((noteRef) => {
+                        return noteRef.id === noteID;
+                    });
+                    category.notes.splice(noteIndex, 1);
+                    delete draft.notes[noteID];
+                });
+            });
         },
 
-        updateCategories(state: AppState, action: PayloadAction<{ [id: string]: Category }>) {
-            const newCategories = { ...action.payload };
+        // addSubCategory creates a new subCategory and adds its ID to the parentcategory list
+        // if the parent category already has notes then these are moved to the new subCategory
+        addSubCategory(state, action: PayloadAction<{ name: string; parentCategoryID: string }>) {
+            return produce(state, (draft) => {
+                const { name, parentCategoryID } = action.payload;
 
-            return { ...state, categories: newCategories };
-        },
+                const newSubCategory: SubCategory = {
+                    id: getRandomID(),
+                    name: name,
+                    notes: [],
+                    dateAdded: new Date().toISOString(),
+                    dateUpdated: "",
+                    parentCategory: parentCategoryID,
+                    createdBy: Device.deviceName ? Device.deviceName : "Annoynmous",
+                    lastUpdatedBy: "",
+                    location: [parentCategoryID, ""],
+                };
 
-        updateSubCategories(state: AppState, action: PayloadAction<{ [id: string]: SubCategory }>) {
-            const newSubCategories = { ...action.payload };
-            return { ...state, subCategories: newSubCategories };
-        },
+                const parentCategory = draft.categories[parentCategoryID];
+                parentCategory.subCategories.push(newSubCategory.id);
 
-        deleteNoteFromAllCategories(state: AppState, action: PayloadAction<string>) {
-            const noteIdToDelete = action.payload;
+                // moves any existing notes from parentCat to new subCat
+                // ensures all locations are updated too
+                if (parentCategory.notes.length > 0) {
+                    newSubCategory.notes = parentCategory.notes;
+                    parentCategory.notes = [];
 
-            const updatedNotes = { ...state.notes };
-            delete updatedNotes[noteIdToDelete];
-
-            const categoriesCopy = { ...state.categories };
-            const cats = Object.values(categoriesCopy);
-
-            const newCats: { [id: string]: Category } = {};
-            cats.forEach((cat) => {
-                const index = cat.notes.indexOf(noteIdToDelete);
-                const newNotes = [...cat.notes];
-                if (index > -1) {
-                    newNotes.splice(index, 1);
+                    newSubCategory.notes.forEach((noteRef) => {
+                        // go to the note in notes.
+                        // if just one location its simple: add the subcat id
+                        // if more than one lcation ten find the index where
+                        // parent cat matches [0] and add the subcat id
+                        const note = draft.notes[noteRef.id];
+                        const locationIndex = note.locations.findIndex((loc) => loc[0] === parentCategoryID);
+                        if (locationIndex > -1) {
+                            // should always be, but shuld handle properly if not
+                            note.locations[locationIndex][1] = newSubCategory.id;
+                        }
+                    });
                 }
 
-                const newCategory = { ...cat, notes: newNotes };
-                newCats[newCategory.id] = newCategory;
+                draft.subCategories[newSubCategory.id] = newSubCategory;
             });
+        },
 
-            const subCategoriesCopy = { ...state.subCategories };
-            const subCats = Object.values(subCategoriesCopy);
+        // addCategory creates a new category and adds its ID to the categoryList
+        addCategory(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const newCategory: Category = {
+                    id: getRandomID(),
+                    name: action.payload,
+                    notes: [],
+                    subCategories: [],
+                    dateAdded: new Date().toISOString(),
+                    dateUpdated: "",
+                    createdBy: Device.deviceName ? Device.deviceName : "Annoynmous",
+                    lastUpdatedBy: "",
+                };
 
-            const newSubCats: { [id: string]: SubCategory } = {};
-            subCats.forEach((subCat) => {
-                const index = subCat.notes.indexOf(noteIdToDelete);
-                const newNotes = [...subCat.notes];
-                if (index > -1) {
-                    newNotes.splice(index, 1);
-                }
-
-                const newSubCategory = { ...subCat, notes: newNotes };
-                newSubCats[newSubCategory.id] = newSubCategory;
+                draft.categories[newCategory.id] = newCategory;
+                draft.categoryList.push(newCategory.id);
             });
-
-            return {
-                ...state,
-                categories: newCats,
-                subCategories: newSubCats,
-                notes: updatedNotes,
-            };
         },
 
-        addCategory(state, action: PayloadAction<Category>) {
-            const newCategory = action.payload;
-            const newCategories = { ...state.categories };
-            newCategories[newCategory.id] = newCategory;
-
-            const newCategoryList = [...state.categoryList];
-            newCategoryList.push(newCategory.id);
-
-            // add new categories to map.
-            return { ...state, categories: newCategories, categoryList: newCategoryList };
-        },
-
-        // when we do the refactyor, things like this will use the reducer
-        // updateCategories.
-        // the rest of the logic will be in a util function.
-        addSubCategory(state, action: PayloadAction<{ subCatName: string; parentCatID: string }>) {
-            const newSubCategory: SubCategory = {
-                id: getRandomID(),
-                name: action.payload.subCatName,
-                notes: [],
-                dateAdded: "",
-                dateUpdated: "",
-                parentCategory: action.payload.parentCatID,
-            };
-
-            // add to parent category
-            const parentCategoryCopy = { ...state.categories[action.payload.parentCatID] };
-            const parentCatSubCatsCopy = [...parentCategoryCopy.subCategories];
-            parentCatSubCatsCopy.push(newSubCategory.id);
-            parentCategoryCopy.subCategories = parentCatSubCatsCopy;
-
-            if (parentCategoryCopy.notes.length > 0) {
-                newSubCategory.notes = [...parentCategoryCopy.notes];
-                parentCategoryCopy.notes = [];
-            }
-
-            const newSubCategories = { ...state.subCategories };
-            newSubCategories[newSubCategory.id] = newSubCategory;
-
-            const categoriesCopy = { ...state.categories };
-            categoriesCopy[parentCategoryCopy.id] = parentCategoryCopy;
-
-            return { ...state, categories: categoriesCopy, subCategories: newSubCategories };
-        },
-
+        // updateNote updates a single note
+        // it takes a Note in it updated from and replaces in memory
+        // also updated lastUpdate metadata
         updateNote(state, action: PayloadAction<Note>) {
             const newNote = action.payload;
+
+            newNote.dateUpdated = new Date().toISOString();
+            newNote.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
+
             const newNotes = { ...state.notes };
             newNotes[newNote.id] = newNote;
             return { ...state, notes: newNotes };
         },
 
-        // Define other reducers here if needed
+        // updateNote secure status toggles whether a note is secure or not.
+        // it will update the noteRef in all its locations
+        updateNoteSecureStatus(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const noteID = action.payload;
+                const note = draft.notes[noteID];
+
+                note.isSecureNote = !note.isSecureNote;
+                note.locations.forEach((location) => {
+                    if (location[1]) {
+                        const subCategory = draft.subCategories[location[1]];
+                        const noteRefIndex = subCategory.notes.findIndex((noteRef) => noteRef.id === noteID);
+                        subCategory.notes[noteRefIndex].isSecure = note.isSecureNote;
+                    } else {
+                        const category = draft.categories[location[0]];
+                        const noteRefIndex = category.notes.findIndex((noteRef) => noteRef.id === noteID);
+                        category.notes[noteRefIndex].isSecure = note.isSecureNote;
+                    }
+                });
+            });
+        },
     },
 });
 export const {
     updateCategoryList,
-    updateNotes,
-    deleteNoteFromAllCategories,
-    addNewNoteToNotes,
     addCategory,
     updateNote,
     updateCategory,
     updateSubCategory,
     addSubCategory,
     updateMenuOverlay,
-    updateCategories,
-    updateSubCategories,
+    updateCategoryHeight,
+    updateSubCategoryHeight,
+    updateNoteHeight,
+    createNewNote,
+    deleteNote,
+    deleteCategory,
+    deleteSubCategory,
+    removeAllNotesFromCategory,
+    removeAllNotesFromSubCategory,
+    addToShowSecureNote,
+    removeFromShowSecureNote,
+    removeNoteFromSubCategory,
+    addNoteToSubCategory,
+    addNoteToCategory,
+    removeNoteFromCategory,
+    updateNoteSecureStatus,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;
@@ -229,4 +568,5 @@ export default notesSlice.reducer;
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "./store/store";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
+import { SubHeight } from "../types";
 export const useAppDispatch = () => useDispatch<AppDispatch>();

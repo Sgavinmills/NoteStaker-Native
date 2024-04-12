@@ -8,6 +8,11 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.blackBackground,
     },
 
+    homeScreenButtonContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+
     logState: {
         flexDirection: "row",
         justifyContent: "space-between",

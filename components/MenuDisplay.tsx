@@ -1,31 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { Modal, View, Text, Button, TouchableOpacity, BackHandler } from "react-native";
+import { View, Button, BackHandler, TouchableWithoutFeedback } from "react-native";
 import menuOverlayStyles from "../styles/menuOverlayStyles";
 import { AppDispatch } from "../redux/store/store";
-import { useDispatch, useSelector } from "react-redux";
-import { updateCategory, updateMenuOverlay, updateSubCategory } from "../redux/slice";
+import { useDispatch } from "react-redux";
+import { updateMenuOverlay } from "../redux/slice";
 import { MenuOverlay } from "../types";
 import CategoryMainMenu from "./CategoryMainMenu";
 import MoveArrows from "./MoveArrows";
 import NoteMainMenu from "./NoteMainMenu";
 import AdjustingCategories from "./AdjustingCategories";
+import AdditionalInfo from "./AdditionalInfo";
 
 interface TileProps {
     overlay: MenuOverlay;
+    setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 // TODO - Move menu config componenets into own folder.
 
-const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
+const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo }) => {
     const dispatch = useDispatch<AppDispatch>();
-    // const memory = useSelector((state: RootState) => state.memory);
     const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
-
+    const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
+    const [isNoteMainMenu, setIsNoteMainMenu] = useState(overlay.menuType === "note");
+    const [isMoveArrows, setIsMoveArrows] = useState(false);
     const [isCatsMainMenu, setIsCatsMainMenu] = useState(
         overlay.menuType === "category" || overlay.menuType === "subCategory"
     );
-    const [isNoteMainMenu, setIsNoteMainMenu] = useState(overlay.menuType === "note");
-    const [isMoveArrows, setIsMoveArrows] = useState(false);
 
     const handleClose = () => {
         const overlay: MenuOverlay = {
@@ -35,6 +36,9 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
                 noteID: "",
                 categoryID: "",
                 subCategoryID: "",
+                categoryIndex: null,
+                subCategoryIndex: null,
+                noteIndex: null,
             },
         };
 
@@ -57,23 +61,32 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay }) => {
     }, []);
 
     return (
-        <View style={menuOverlayStyles.container}>
-            <View style={menuOverlayStyles.contentContainer}>
-                {isCatsMainMenu && (
-                    <CategoryMainMenu setIsMoveArrows={setIsMoveArrows} setIsCategoryMainMenu={setIsCatsMainMenu} />
-                )}
-                {isNoteMainMenu && (
-                    <NoteMainMenu
-                        setIsAdjustingCategories={setIsAdjustingCategories}
-                        setIsMoveArrows={setIsMoveArrows}
-                        setIsNoteMainMenu={setIsNoteMainMenu}
-                    />
-                )}
-                {isMoveArrows && <MoveArrows />}
-                {isAdjustingCategories && <AdjustingCategories />}
+        <TouchableWithoutFeedback>
+            <View style={menuOverlayStyles.container}>
+                <View style={menuOverlayStyles.contentContainer}>
+                    {isCatsMainMenu && (
+                        <CategoryMainMenu
+                            setScrollTo={setScrollTo}
+                            setIsMoveArrows={setIsMoveArrows}
+                            setIsCategoryMainMenu={setIsCatsMainMenu}
+                        />
+                    )}
+                    {isNoteMainMenu && (
+                        <NoteMainMenu
+                            setIsAdjustingCategories={setIsAdjustingCategories}
+                            setIsMoveArrows={setIsMoveArrows}
+                            setIsNoteMainMenu={setIsNoteMainMenu}
+                            setScrollTo={setScrollTo}
+                            setIsAdditionalInfo={setIsAdditionalInfo}
+                        />
+                    )}
+                    {isMoveArrows && <MoveArrows />}
+                    {isAdjustingCategories && <AdjustingCategories />}
+                    {isAdditionalInfo && <AdditionalInfo />}
+                </View>
+                <Button title="Close" onPress={handleClose} />
             </View>
-            <Button title="Close" onPress={handleClose} />
-        </View>
+        </TouchableWithoutFeedback>
     );
 };
 

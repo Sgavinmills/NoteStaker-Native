@@ -3,9 +3,6 @@ import { Modal, View, Image, StyleSheet, Dimensions, TouchableOpacity, Button } 
 import modalStyles from "../styles/modalStyles";
 import { MaterialIcons } from "@expo/vector-icons"; // or your preferred icon library
 import { Note } from "../types";
-import { AppDispatch } from "../redux/store/store";
-import { useDispatch } from "react-redux";
-import { deleteNoteFromAllCategories, updateNote } from "../redux/slice";
 import { DeleteInfo } from "../types";
 import DeleteModal from "./DeleteModal";
 
@@ -18,8 +15,7 @@ interface TileProps {
     note: Note;
 }
 
-// TODO - Implement delete photo functionality, inc confirmation check.
-const ImageModal: React.FC<TileProps> = ({ note, height, width, isShowingImage, setIsShowingImage, imageURI }) => {
+const ImageModal: React.FC<TileProps> = ({ note, isShowingImage, setIsShowingImage, imageURI }) => {
     const screenWidth = Dimensions.get("window").width;
     const screenHeight = Dimensions.get("window").height;
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
