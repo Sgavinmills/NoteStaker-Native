@@ -29,15 +29,18 @@ const SubCategoryTile: React.FC<TileProps> = ({
     index: index,
 }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const showSecureNotes = useSelector((state: RootState) => state.memory.showSecureNote);
+    const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
     const subCategory = useSelector((state: RootState) => state.memory.subCategories[subCategoryID]);
 
     // console.log("re render subcategory: " + subCategory.name);
 
-    const showingSecureNotes = showSecureNotes.includes(subCategoryID);
+    const showingSecure =
+        showSecure.homeScreen ||
+        showSecure.categories.includes(subCategoryID) ||
+        showSecure.categories.includes(parentCategoryID);
     const notesForSubCat: string[] = [];
     subCategory.notes.forEach((noteRef) => {
-        if (showingSecureNotes || !noteRef.isSecure) {
+        if (showingSecure || !noteRef.isSecure) {
             notesForSubCat.push(noteRef.id);
         }
     });
@@ -66,7 +69,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
 
     const toggleExpansion = () => {
         if (isExpanded) {
-            if (showingSecureNotes) {
+            if (showingSecure) {
                 dispatch(removeFromShowSecureNote(subCategoryID));
             }
         }
@@ -193,7 +196,10 @@ const SubCategoryTile: React.FC<TileProps> = ({
                 >
                     <View style={categoryStyles.categoryTextContainer}>
                         <Text style={categoryStyles.subCategoryText} adjustsFontSizeToFit={true} numberOfLines={1}>
-                            ↳ {subCategory.name}
+                            {subCategory.isSecure && (
+                                <FontAwesome name="lock" style={categoryStyles.padlock}></FontAwesome>
+                            )}
+                            {subCategory.isSecure && "  "}↳ {subCategory.name}
                         </Text>
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>

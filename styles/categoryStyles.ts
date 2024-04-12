@@ -54,6 +54,11 @@ const catStyles = StyleSheet.create({
         fontWeight: "bold",
     },
 
+    padlock: {
+        fontSize: 18,
+        color: theme.colors.noteText,
+    },
+
     categoryTextContainer: {
         flex: 1,
     },

@@ -97,8 +97,8 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
             return true;
         }
 
-        return categories[categoryID].subCategories.some((subCatID) => {
-            return subCategories[subCatID].notes.some((noteRef) => noteRef.id === overlay.menuData.noteID);
+        return categories[categoryID].subCategories.some((subCatRef) => {
+            return subCategories[subCatRef.id].notes.some((noteRef) => noteRef.id === overlay.menuData.noteID);
         });
     };
 
@@ -117,19 +117,19 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
         <View style={adjustCatsStyles.container}>
             {displayMainCategories && (
                 <>
-                    {categoryList.map((categoryID) => {
+                    {categoryList.map((categoryRef) => {
                         return (
                             <TouchableOpacity
-                                key={categoryID}
+                                key={categoryRef.id}
                                 style={[
                                     adjustCatsStyles.tab,
-                                    isInMainCategory(categoryID) && adjustCatsStyles.tabSelected,
+                                    isInMainCategory(categoryRef.id) && adjustCatsStyles.tabSelected,
                                 ]}
                                 onPress={() => {
-                                    handleMainCategoryClick(categoryID);
+                                    handleMainCategoryClick(categoryRef.id);
                                 }}
                             >
-                                <Text style={adjustCatsStyles.text}>{categories[categoryID].name}</Text>
+                                <Text style={adjustCatsStyles.text}>{categories[categoryRef.id].name}</Text>
                             </TouchableOpacity>
                         );
                     })}
@@ -137,19 +137,19 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
             )}
             {!displayMainCategories && (
                 <>
-                    {categories[parentCatToDisplaySubsOf].subCategories.map((subCategoryID) => {
+                    {categories[parentCatToDisplaySubsOf].subCategories.map((subCategoryRef) => {
                         return (
                             <TouchableOpacity
-                                key={subCategoryID}
+                                key={subCategoryRef.id}
                                 style={[
                                     adjustCatsStyles.subTab,
-                                    isInSubCategory(subCategoryID) && adjustCatsStyles.tabSelected,
+                                    isInSubCategory(subCategoryRef.id) && adjustCatsStyles.tabSelected,
                                 ]}
                                 onPress={() => {
-                                    handleSubCategoryClick(subCategoryID);
+                                    handleSubCategoryClick(subCategoryRef.id);
                                 }}
                             >
-                                <Text style={adjustCatsStyles.text}>{subCategories[subCategoryID].name}</Text>
+                                <Text style={adjustCatsStyles.text}>{subCategories[subCategoryRef.id].name}</Text>
                             </TouchableOpacity>
                         );
                     })}

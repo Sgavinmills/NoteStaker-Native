@@ -1,5 +1,5 @@
 export interface Memory {
-    categoryList: string[];
+    categoryList: Ref[];
     notes: { [id: string]: Note };
     categories: { [id: string]: Category };
     subCategories: { [id: string]: SubCategory };
@@ -24,27 +24,29 @@ export interface Note {
 export interface Category {
     id: string;
     name: string;
-    notes: NoteRef[];
-    subCategories: string[];
+    notes: Ref[];
+    subCategories: Ref[];
     dateAdded: string;
     dateUpdated: string;
     createdBy: string;
     lastUpdatedBy: string;
+    isSecure: boolean;
 }
 
 export interface SubCategory {
     id: string;
     name: string;
-    notes: NoteRef[];
+    notes: Ref[];
     parentCategory: string;
     dateAdded: string;
     dateUpdated: string;
     createdBy: string;
     lastUpdatedBy: string;
     location: Location;
+    isSecure: boolean;
 }
 
-export type NoteRef = {
+export type Ref = {
     id: string;
     isSecure: boolean;
 };

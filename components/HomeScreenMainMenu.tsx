@@ -5,6 +5,13 @@ import { Text, TouchableOpacity } from "react-native";
 import CategoryModal from "./CategoryModal";
 import { DeleteInfo } from "../types";
 import DeleteModal from "./DeleteModal";
+import * as LocalAuthentication from "expo-local-authentication";
+import { toggleHomeScreenShowingSecureCategories, updateMenuOverlay } from "../redux/slice";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../redux/store/store";
+import { RootState } from "../redux/store/store";
+import { useSelector } from "react-redux";
 
 interface TileProps {
     setIsHomeScreenMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
@@ -12,10 +19,13 @@ interface TileProps {
 }
 
 const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setCloseAllCategories }) => {
+    const homeScreenShowSecure = useSelector((state: RootState) => state.memory.canShowSecure.homeScreen);
+
     const [isCategoryModal, setIsCategoryModal] = useState(false);
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteMessage: "", deleteType: "" });
+    const dispatch = useDispatch<AppDispatch>();
 
     const handleAddCategoryPress = () => {
         setCatModalInfo({ currentName: "", parentCat: "" });
@@ -26,7 +36,23 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setC
         setCloseAllCategories(true);
     };
     const handleViewSecureCategoriesPress = () => {
-        console.log("ViewSecureCategoriesPress");
+        showSecureCategories();
+    };
+
+    const showSecureCategories = async () => {
+        const compatible = await LocalAuthentication.hasHardwareAsync();
+        if (compatible) {
+            const enrolled = await LocalAuthentication.isEnrolledAsync();
+            if (enrolled) {
+                const result = await LocalAuthentication.authenticateAsync({
+                    promptMessage: "Authenticate to continue",
+                });
+                if (result.success) {
+                    dispatch(toggleHomeScreenShowingSecureCategories());
+                    dispatch(updateMenuOverlay(getEmptyOverlay()));
+                }
+            }
+        }
     };
 
     const handleBackupDataPress = () => {
@@ -60,9 +86,11 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setC
                 <FontAwesome name="minus" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>Close all categories</Text>
             </TouchableOpacity>
+            {/* // TODO MAKE THIS TEXT GOGGLE */}
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleViewSecureCategoriesPress}>
                 <FontAwesome name="lock" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>View secure categories</Text>
+                {homeScreenShowSecure && <Text style={menuOverlayStyles.text}>Hide secure categories</Text>}
+                {!homeScreenShowSecure && <Text style={menuOverlayStyles.text}>View secure categories</Text>}
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleBackupDataPress}>
                 <Entypo name="save" style={menuOverlayStyles.icons} />

@@ -10,6 +10,7 @@ import {
     NewNoteData,
     IDs,
     Memory,
+    Ref,
 } from "../types";
 import { memory } from "../mockMemory";
 import { produce } from "immer";
@@ -19,11 +20,14 @@ interface AppState {
     notes: { [id: string]: Note };
     categories: { [id: string]: Category };
     subCategories: { [id: string]: SubCategory };
-    categoryList: string[];
+    categoryList: Ref[];
 
     menuOverlay: MenuOverlay;
     heightData: CatHeight[];
-    showSecureNote: string[];
+    canShowSecure: {
+        homeScreen: boolean;
+        categories: string[];
+    };
 }
 
 const initialState: AppState = {
@@ -44,26 +48,30 @@ const initialState: AppState = {
         },
     },
     heightData: [],
-    showSecureNote: [],
+    canShowSecure: {
+        homeScreen: false,
+        categories: [],
+    },
 };
 const notesSlice = createSlice({
     name: "notes",
     initialState,
     reducers: {
+        // rename this more generic since applies to cats now too (or subcats rather)
         addToShowSecureNote(state, action: PayloadAction<string>) {
             return produce(state, (draft) => {
                 const id = action.payload; // shouldwe use maps instead?! quicker..
-                if (!draft.showSecureNote.includes(id)) {
-                    draft.showSecureNote.push(id);
+                if (!draft.canShowSecure.categories.includes(id)) {
+                    draft.canShowSecure.categories.push(id);
                 }
             });
         },
         removeFromShowSecureNote(state, action: PayloadAction<string>) {
             return produce(state, (draft) => {
                 const id = action.payload; // shouldwe use maps instead?! quicker..
-                const index = draft.showSecureNote.indexOf(id);
+                const index = draft.canShowSecure.categories.indexOf(id);
                 if (index > -1) {
-                    draft.showSecureNote.splice(index, 1);
+                    draft.canShowSecure.categories.splice(index, 1);
                 }
             });
         },
@@ -135,7 +143,7 @@ const notesSlice = createSlice({
         },
 
         // updateCategoryList updates the categoryList
-        updateCategoryList(state, action: PayloadAction<string[]>) {
+        updateCategoryList(state, action: PayloadAction<Ref[]>) {
             return { ...state, categoryList: action.payload };
         },
 
@@ -252,8 +260,8 @@ const notesSlice = createSlice({
 
                 // delete/update notes if they exist in a subcategory
                 const subCatsInCategory = category.subCategories;
-                subCatsInCategory.forEach((subCatID) => {
-                    const subCategory = draft.subCategories[subCatID];
+                subCatsInCategory.forEach((subCatRef) => {
+                    const subCategory = draft.subCategories[subCatRef.id];
                     const notesInSubCategory = subCategory.notes;
                     notesInSubCategory.forEach((noteRef) => {
                         const note = draft.notes[noteRef.id];
@@ -261,7 +269,7 @@ const notesSlice = createSlice({
                             // may have been deleted on prev loop
                             if (note.locations.some((loc) => loc[0] !== categoryID)) {
                                 // exists elsewhere - update locs
-                                const locationIndex = note.locations.findIndex((loc) => loc[1] === subCatID);
+                                const locationIndex = note.locations.findIndex((loc) => loc[1] === subCatRef.id);
                                 if (locationIndex > -1) {
                                     note.locations.splice(locationIndex, 1);
                                 }
@@ -273,15 +281,15 @@ const notesSlice = createSlice({
                 });
 
                 // delete subCategorys
-                subCatsInCategory.forEach((subCatID) => {
-                    delete draft.subCategories[subCatID];
+                subCatsInCategory.forEach((subCatRef) => {
+                    delete draft.subCategories[subCatRef.id];
                 });
 
                 // delete category
                 delete draft.categories[categoryID];
 
                 // remove category from list
-                const categoryIndex = draft.categoryList.indexOf(categoryID);
+                const categoryIndex = draft.categoryList.findIndex((catRef) => catRef.id === categoryID);
                 draft.categoryList.splice(categoryIndex, 1);
             });
         },
@@ -315,7 +323,7 @@ const notesSlice = createSlice({
 
                 // remove subCategory from parent category list
                 const parentCategory = draft.categories[parentCategoryID];
-                const index = parentCategory.subCategories.indexOf(subCategoryID);
+                const index = parentCategory.subCategories.findIndex((subCatRef) => subCatRef.id === subCategoryID);
                 parentCategory.subCategories.splice(index, 1);
             });
         },
@@ -462,10 +470,11 @@ const notesSlice = createSlice({
                     createdBy: Device.deviceName ? Device.deviceName : "Annoynmous",
                     lastUpdatedBy: "",
                     location: [parentCategoryID, ""],
+                    isSecure: false,
                 };
 
                 const parentCategory = draft.categories[parentCategoryID];
-                parentCategory.subCategories.push(newSubCategory.id);
+                parentCategory.subCategories.push({ id: newSubCategory.id, isSecure: false });
 
                 // moves any existing notes from parentCat to new subCat
                 // ensures all locations are updated too
@@ -503,10 +512,11 @@ const notesSlice = createSlice({
                     dateUpdated: "",
                     createdBy: Device.deviceName ? Device.deviceName : "Annoynmous",
                     lastUpdatedBy: "",
+                    isSecure: false,
                 };
 
                 draft.categories[newCategory.id] = newCategory;
-                draft.categoryList.push(newCategory.id);
+                draft.categoryList.push({ id: newCategory.id, isSecure: false });
             });
         },
 
@@ -543,6 +553,41 @@ const notesSlice = createSlice({
                         category.notes[noteRefIndex].isSecure = note.isSecureNote;
                     }
                 });
+            });
+        },
+
+        // updateCategorySecureStatus toggles wherer a category is secure or not
+        // it will update the catRef in the categoryList
+        updateCategorySecureStatus(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const categoryID = action.payload;
+                const category = draft.categories[categoryID];
+                category.isSecure = !category.isSecure;
+
+                const categoryIndex = draft.categoryList.findIndex((catRef) => catRef.id === categoryID);
+                draft.categoryList[categoryIndex].isSecure = category.isSecure;
+            });
+        },
+
+        // updateSubCategorySecureStatus toggles wherer a category is secure or not
+        // it will update the catRef in the parent category subCategoryList
+        updateSubCategorySecureStatus(state, action: PayloadAction<string>) {
+            return produce(state, (draft) => {
+                const subCategoryID = action.payload;
+                const subCategory = draft.subCategories[subCategoryID];
+                subCategory.isSecure = !subCategory.isSecure;
+
+                const parentCategory = draft.categories[subCategory.location[0]];
+                const subCategoryIndex = parentCategory.subCategories.findIndex(
+                    (catRef) => catRef.id === subCategoryID
+                );
+                parentCategory.subCategories[subCategoryIndex].isSecure = subCategory.isSecure;
+            });
+        },
+
+        toggleHomeScreenShowingSecureCategories(state, action: PayloadAction) {
+            return produce(state, (draft) => {
+                draft.canShowSecure.homeScreen = !draft.canShowSecure.homeScreen;
             });
         },
 
@@ -587,6 +632,9 @@ export const {
     removeNoteFromCategory,
     updateNoteSecureStatus,
     updateMemoryFromBackup,
+    updateCategorySecureStatus,
+    updateSubCategorySecureStatus,
+    toggleHomeScreenShowingSecureCategories,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

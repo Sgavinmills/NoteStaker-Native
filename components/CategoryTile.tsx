@@ -28,15 +28,22 @@ const CategoryTile: React.FC<TileProps> = ({
     setCloseAllCategories,
 }) => {
     const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
-    const showSecureNotes = useSelector((state: RootState) => state.memory.showSecureNote);
+    const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
-    const showingSecureNotes = showSecureNotes.includes(categoryID);
+    const showingSecure = showSecure.homeScreen || showSecure.categories.includes(categoryID);
     // console.log("re render category: " + category.name);
 
     const notesForCat: string[] = [];
     category.notes.forEach((noteRef) => {
-        if (showingSecureNotes || !noteRef.isSecure) {
+        if (showingSecure || !noteRef.isSecure) {
             notesForCat.push(noteRef.id);
+        }
+    });
+
+    const subCatsForCat: string[] = [];
+    category.subCategories.forEach((subCatRef) => {
+        if (showingSecure || !subCatRef.isSecure) {
+            subCatsForCat.push(subCatRef.id);
         }
     });
 
@@ -53,7 +60,9 @@ const CategoryTile: React.FC<TileProps> = ({
 
     const toggleExpansion = () => {
         if (isExpanded) {
-            if (showingSecureNotes) {
+            if (showingSecure) {
+                // TODO  - NEED TO CHECK ANY SUB CATS ALSO HAVE THEIR IDS REMOVED FROM THE SECURENOTE LIST
+
                 dispatch(removeFromShowSecureNote(categoryID));
             }
         }
@@ -184,7 +193,10 @@ const CategoryTile: React.FC<TileProps> = ({
                 >
                     <View style={categoryStyles.categoryTextContainer}>
                         <Text style={categoryStyles.categoryText} adjustsFontSizeToFit={true} numberOfLines={1}>
-                            {category.name}
+                            {category.isSecure && (
+                                <FontAwesome name="lock" style={categoryStyles.padlock}></FontAwesome>
+                            )}
+                            {category.isSecure && "  "} {category.name}
                         </Text>
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
@@ -207,14 +219,14 @@ const CategoryTile: React.FC<TileProps> = ({
                 </View>
             </TouchableWithoutFeedback>
             {isExpanded &&
-                category.subCategories.length > 0 &&
-                category.subCategories.map((subCatID, subCatIndex) => {
+                subCatsForCat.length > 0 &&
+                subCatsForCat.map((subCatID, subCatIndex) => {
                     return (
                         <SubCategoryTile
                             parentCategoryID={category.id}
                             isLastCategory={isLastCategory}
                             subCategoryID={subCatID}
-                            isLastSubCategory={subCatIndex === category.subCategories.length - 1}
+                            isLastSubCategory={subCatIndex === subCatsForCat.length - 1}
                             key={subCatID}
                             index={subCatIndex}
                             parentCategoryIndex={index}

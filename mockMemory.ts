@@ -1,7 +1,10 @@
 import { Memory } from "./types";
 
 export const memory: Memory = {
-    categoryList: ["TURNIPS", "CARROTS"],
+    categoryList: [
+        { id: "TURNIPS", isSecure: false },
+        { id: "CARROTS", isSecure: false },
+    ],
     notes: {
         "1682188137607ngw9drt": {
             id: "1682188137607ngw9drt",
@@ -62,16 +65,18 @@ export const memory: Memory = {
             dateUpdated: "",
             createdBy: "mockMemory",
             lastUpdatedBy: "",
+            isSecure: false,
         },
         CARROTS: {
             id: "CARROTS",
             name: "test cat 2",
-            subCategories: [""],
+            subCategories: [],
             notes: [],
             dateAdded: "",
             dateUpdated: "",
             createdBy: "mockMemory",
             lastUpdatedBy: "",
+            isSecure: false,
         },
     },
 
@@ -86,6 +91,7 @@ export const memory: Memory = {
             createdBy: "mockMemory",
             lastUpdatedBy: "",
             location: ["CARROTS", ""],
+            isSecure: false,
         },
     },
 };

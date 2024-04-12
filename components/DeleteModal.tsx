@@ -143,8 +143,9 @@ const DeleteModal: React.FC<TileProps> = ({
         printSubCategories(newData.subCategories);
         printNotes(newData.notes);
         for (const [id, note] of Object.entries(newData.notes)) {
-            if (!note.id || !note.note || !note.locations || !note.locations[0]) {
+            if (!note.id || !note.locations || !note.locations[0]) {
                 console.error("Issue validating notes");
+                console.error(note.note);
                 return false;
             }
 
@@ -185,12 +186,11 @@ const DeleteModal: React.FC<TileProps> = ({
                 !subCategory.id ||
                 !subCategory.name ||
                 !subCategory.notes ||
-                subCategory.notes[0] == undefined ||
                 !subCategory.location ||
                 !subCategory.parentCategory
             ) {
                 console.error("Issue validating subCategories");
-
+                console.error(subCategory.name);
                 return false;
             }
 

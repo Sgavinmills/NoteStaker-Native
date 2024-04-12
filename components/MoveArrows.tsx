@@ -16,7 +16,7 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
     const handleDownPress = () => {
         if (memory.menuOverlay.menuType === "category") {
             const newList = [...memory.categoryList];
-            const currentIndex = newList.indexOf(memory.menuOverlay.menuData.categoryID);
+            const currentIndex = newList.findIndex((ref) => ref.id === memory.menuOverlay.menuData.categoryID);
             if (currentIndex < newList.length - 1) {
                 const updatedList = moveDownList(newList, currentIndex);
                 dispatch(updateCategoryList(updatedList));
@@ -28,7 +28,7 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
             const parentCategoryCopy = { ...memory.categories[memory.menuOverlay.menuData.categoryID] };
 
             const newList = [...parentCategoryCopy.subCategories];
-            const currentIndex = newList.indexOf(memory.menuOverlay.menuData.subCategoryID);
+            const currentIndex = newList.findIndex((ref) => ref.id === memory.menuOverlay.menuData.subCategoryID);
             if (currentIndex < newList.length - 1) {
                 parentCategoryCopy.subCategories = moveDownList(newList, currentIndex);
                 dispatch(updateCategory(parentCategoryCopy));
@@ -60,7 +60,7 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
     const handleUpPress = () => {
         if (memory.menuOverlay.menuType === "category") {
             const newList = [...memory.categoryList];
-            const currentIndex = newList.indexOf(memory.menuOverlay.menuData.categoryID);
+            const currentIndex = newList.findIndex((ref) => ref.id === memory.menuOverlay.menuData.categoryID);
             if (currentIndex > 0) {
                 const updatedList = moveUpList(newList, currentIndex);
                 dispatch(updateCategoryList(updatedList));
@@ -72,7 +72,7 @@ const MoveArrows: React.FC<TileProps> = ({}) => {
             const parentCategoryCopy = { ...memory.categories[memory.menuOverlay.menuData.categoryID] };
 
             const newList = [...parentCategoryCopy.subCategories];
-            const currentIndex = newList.indexOf(memory.menuOverlay.menuData.subCategoryID);
+            const currentIndex = newList.findIndex((ref) => ref.id === memory.menuOverlay.menuData.subCategoryID);
             if (currentIndex > 0) {
                 parentCategoryCopy.subCategories = moveUpList(newList, currentIndex);
                 dispatch(updateCategory(parentCategoryCopy));

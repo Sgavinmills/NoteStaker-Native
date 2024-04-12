@@ -24,6 +24,13 @@ const HomeScreen: React.FC = () => {
 
     const flatListRef = useRef<FlatList>(null);
 
+    const showingSecureCategories = useSelector((state: RootState) => state.memory.canShowSecure.homeScreen);
+    const catsForHomeScreen: string[] = [];
+    categoryList.forEach((catRef) => {
+        if (showingSecureCategories || !catRef.isSecure) {
+            catsForHomeScreen.push(catRef.id);
+        }
+    });
     const handleOpenMenuPress = () => {
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
@@ -101,7 +108,7 @@ const HomeScreen: React.FC = () => {
                     ref={flatListRef}
                     removeClippedSubviews={false}
                     style={categoryStyles.categoryListContainer}
-                    data={categoryList}
+                    data={catsForHomeScreen}
                     renderItem={renderCategory}
                     keyExtractor={(cat) => cat}
                 />

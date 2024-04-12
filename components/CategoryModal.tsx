@@ -63,8 +63,8 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
     const validCatName = () => {
         if (overlay.menuType === "category") {
             const currentSubCats = categories[overlay.menuData.categoryID].subCategories;
-            return !currentSubCats.some((subCatID) => {
-                return subCategories[subCatID].name === newCategoryName;
+            return !currentSubCats.some((subCatRef) => {
+                return subCategories[subCatRef.id].name === newCategoryName;
             });
         }
 

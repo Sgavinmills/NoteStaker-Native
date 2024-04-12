@@ -8,7 +8,13 @@ import { AppDispatch } from "../redux/store/store";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
-import { addToShowSecureNote, updateMenuOverlay } from "../redux/slice";
+import {
+    addToShowSecureNote,
+    removeFromShowSecureNote,
+    updateCategorySecureStatus,
+    updateMenuOverlay,
+    updateSubCategorySecureStatus,
+} from "../redux/slice";
 import DeleteModal from "./DeleteModal";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -22,6 +28,7 @@ interface TileProps {
 // CategoryMainMenu provides main menu for parent categories and sub categories
 const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryMainMenu, setScrollTo }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const showingSecureCategories = useSelector((state: RootState) => state.memory.canShowSecure.categories);
 
     const isCategory = overlay.menuType === "category" ? true : false;
     const category = useSelector((state: RootState) => state.memory.categories[overlay.menuData.categoryID]);
@@ -114,11 +121,12 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
         setDeleteModalVisible(true);
     };
 
-    const handleShowSecureNote = () => {
-        showSecureNotes();
+    const handleMakeSecureCategory = () => {
+        const isParentCat = !subCategory;
+        adjustCategorySecurity(isParentCat);
     };
 
-    const showSecureNotes = async () => {
+    const adjustCategorySecurity = async (isParentCat: boolean) => {
         const compatible = await LocalAuthentication.hasHardwareAsync();
         if (compatible) {
             const enrolled = await LocalAuthentication.isEnrolledAsync();
@@ -127,8 +135,40 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
                     promptMessage: "Authenticate to continue",
                 });
                 if (result.success) {
-                    dispatch(addToShowSecureNote(openCategoryID));
+                    if (overlay.isShowing) {
+                        dispatch(updateMenuOverlay(getEmptyOverlay()));
+                    }
+                    if (isParentCat) {
+                        dispatch(updateCategorySecureStatus(overlay.menuData.categoryID));
+                    } else {
+                        dispatch(updateSubCategorySecureStatus(overlay.menuData.subCategoryID));
+                    }
+                }
+            }
+        }
+    };
+
+    const handleShowSecureNote = () => {
+        showSecureNotes();
+    };
+
+    const showSecureNotes = async () => {
+        if (showingSecureCategories.includes(openCategoryID)) {
+            dispatch(removeFromShowSecureNote(openCategoryID));
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
+
+        const compatible = await LocalAuthentication.hasHardwareAsync();
+        if (compatible) {
+            const enrolled = await LocalAuthentication.isEnrolledAsync();
+            if (enrolled) {
+                const result = await LocalAuthentication.authenticateAsync({
+                    promptMessage: "Authenticate to continue",
+                });
+                if (result.success) {
                     dispatch(updateMenuOverlay(getEmptyOverlay()));
+                    dispatch(addToShowSecureNote(openCategoryID));
                 }
             }
         }
@@ -165,6 +205,25 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
         }
     };
 
+    // too much for one line, can be made nicer but in a rush.
+    const makeCategorySecure = (): string => {
+        if (subCategory) {
+            if (subCategory.isSecure) {
+                return "remove category as secure";
+            } else {
+                return "make category secure";
+            }
+        } else {
+            if (category.isSecure) {
+                return "remove category as secure";
+            } else {
+                return "make category secure";
+            }
+        }
+    };
+
+    const makeCategorySecureText = makeCategorySecure();
+
     return (
         <>
             {overlay.menuType === "category" && (
@@ -187,12 +246,20 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
                     <Text style={menuOverlayStyles.text}>Remove all notes from {catName}</Text>
                 </TouchableOpacity>
             )}
-            {showNoteSpecificOptions() && (
-                <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleShowSecureNote}>
-                    <FontAwesome name="lock" style={menuOverlayStyles.icons} />
-                    <Text style={menuOverlayStyles.text}>Show secure notes</Text>
-                </TouchableOpacity>
-            )}
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleShowSecureNote}>
+                <FontAwesome name="lock" style={menuOverlayStyles.icons} />
+                {/* TODO - MAKE TEXT MORE SPECIFIC TO NOTES OR SUB CATS  */}
+                {showingSecureCategories.includes(openCategoryID) && (
+                    <Text style={menuOverlayStyles.text}>Hide secure items</Text>
+                )}
+                {!showingSecureCategories.includes(openCategoryID) && (
+                    <Text style={menuOverlayStyles.text}>Show secure items</Text>
+                )}
+            </TouchableOpacity>
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecureCategory}>
+                <FontAwesome name="lock" style={menuOverlayStyles.icons} />
+                <Text style={menuOverlayStyles.text}>{makeCategorySecureText}hh</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDeleteCategory}>
                 <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
                 <Text style={menuOverlayStyles.text}>Delete {catName}</Text>
