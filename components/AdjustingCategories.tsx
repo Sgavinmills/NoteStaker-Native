@@ -12,7 +12,6 @@ import {
 } from "../redux/slice";
 import { RootState } from "../redux/store/store";
 import theme from "../styles/constants";
-import SubtleMessage from "./SubtleMessage";
 import { IDs } from "../types";
 
 interface TileProps {}
@@ -29,8 +28,9 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
     const dispatch = useDispatch<AppDispatch>();
     const note = useSelector((state: RootState) => state.memory.notes[overlay.menuData.noteID]);
     const [parentCatToDisplaySubsOf, setParentCatToDisplaySubsOf] = useState(overlay.menuData.categoryID);
-    const [showSubtleMessage, setShowSubtleMessage] = useState(false);
     const [displayMainCategories, setDisplayMainCategories] = useState(overlay.menuData.subCategoryID ? false : true);
+
+    const [errorMessage, setErrorMessage] = useState("");
 
     const handleSubCategoryClick = (subCategoryID: string) => {
         // check if note exists in subcategory we've clicked on
@@ -46,6 +46,11 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                     categoryID: "",
                 };
                 dispatch(removeNoteFromSubCategory(ids));
+            } else {
+                setErrorMessage("Can't remove from only category. Note would be deleted.");
+                setTimeout(() => {
+                    setErrorMessage("");
+                }, 1000);
             }
         } else {
             // add the note
@@ -74,6 +79,11 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                         categoryID: categoryID,
                     };
                     dispatch(removeNoteFromCategory(ids));
+                } else {
+                    setErrorMessage("Can't remove from only category. Note would be deleted.");
+                    setTimeout(() => {
+                        setErrorMessage("");
+                    }, 500);
                 }
             } else {
                 // add the note
@@ -163,13 +173,8 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                     </TouchableOpacity>
                 </>
             )}
-            {showSubtleMessage && (
-                <SubtleMessage
-                    message="Can't remove from only category"
-                    visible={showSubtleMessage}
-                    setSubtleMessage={setShowSubtleMessage}
-                />
-            )}
+
+            {errorMessage && <Text style={adjustCatsStyles.errorText}>{errorMessage}</Text>}
         </View>
     );
 };

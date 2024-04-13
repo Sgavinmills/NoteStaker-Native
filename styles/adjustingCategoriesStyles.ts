@@ -34,6 +34,15 @@ const adjustCatStyles = StyleSheet.create({
         paddingLeft: 15,
         paddingRight: 12,
     },
+
+    errorText: {
+        color: theme.colors.categoryText,
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+        textAlign: "center",
+        fontSize: 12,
+    },
 });
 
 export default adjustCatStyles;
