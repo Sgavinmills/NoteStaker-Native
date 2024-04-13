@@ -37,6 +37,16 @@ const catStyles = StyleSheet.create({
         marginTop: 0,
     },
 
+    topRadius: {
+        borderTopLeftRadius: 5,
+        borderTopRightRadius: 5,
+    },
+
+    bottomRadius: {
+        borderBottomLeftRadius: 5,
+        borderBottomRightRadius: 5,
+    },
+
     subCategoryTile: {
         borderWidth: 1,
         borderColor: theme.colors.tileBorder,
@@ -52,6 +62,11 @@ const catStyles = StyleSheet.create({
         fontSize: 20,
         color: theme.colors.categoryText,
         fontWeight: "bold",
+    },
+
+    searchTilePlaceholderText: {
+        fontSize: 16,
+        color: theme.colors.noteText,
     },
 
     padlock: {
@@ -75,6 +90,16 @@ const catStyles = StyleSheet.create({
 
     ellipsisIconText: {
         fontSize: 24,
+        color: theme.colors.noteText,
+    },
+
+    binocularCategoryText: {
+        fontSize: 20,
+        color: theme.colors.categoryText,
+    },
+
+    binocularNoteText: {
+        fontSize: 14,
         color: theme.colors.noteText,
     },
 

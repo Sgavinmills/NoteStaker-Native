@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BackHandler, TouchableWithoutFeedback, View, Text, FlatList } from "react-native";
 import categoryStyles from "../styles/categoryStyles";
-import { FontAwesome, Entypo, Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 
 import { RootState } from "../redux/store/store";
 import { useSelector } from "react-redux";
@@ -21,8 +21,6 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
     useEffect(() => {
         const matchingNotes = searchNotes(searchText);
         setSearchResults([...matchingNotes]);
-        console.log(matchingNotes.length);
-        console.log(matchingNotes);
     }, [searchText]);
 
     // back button closes closes search rather than normal behaviour
@@ -41,13 +39,15 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
         const matchingNotes = [];
         const searchTermLower = searchTerm.toLowerCase();
         // Iterate through each note in the map
-        for (const id in notes) {
-            const note = notes[id];
+        if (searchTerm) {
+            for (const id in notes) {
+                const note = notes[id];
 
-            const noteTextLower = note.note.toLowerCase();
-            // Check if the note's text contains the search term
-            if (noteTextLower.includes(searchTermLower)) {
-                matchingNotes.push(note);
+                const noteTextLower = note.note.toLowerCase();
+                // Check if the note's text contains the search term
+                if (noteTextLower.includes(searchTermLower)) {
+                    matchingNotes.push(note);
+                }
             }
         }
 
@@ -77,11 +77,38 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
     return (
         <>
             <TouchableWithoutFeedback onPress={handleSearchTilePress}>
-                <View style={[categoryStyles.categoryTile, categoryStyles.categoryTileFirst]}>
+                <View
+                    style={[
+                        categoryStyles.categoryTile,
+                        categoryStyles.categoryTileFirst,
+                        categoryStyles.topRadius,
+                        searchResults.length === 0 && categoryStyles.bottomRadius,
+                    ]}
+                >
                     <View style={categoryStyles.categoryTextContainer}>
-                        <Text style={categoryStyles.categoryText} adjustsFontSizeToFit={true} numberOfLines={1}>
-                            {searchText}
-                        </Text>
+                        {searchText ? (
+                            <Text style={categoryStyles.categoryText} adjustsFontSizeToFit={true} numberOfLines={1}>
+                                <FontAwesome5
+                                    name="binoculars"
+                                    style={[categoryStyles.binocularCategoryText, categoryStyles.icons]}
+                                />
+                                {"   "}
+                                {searchText}
+                            </Text>
+                        ) : (
+                            <Text
+                                style={categoryStyles.searchTilePlaceholderText}
+                                adjustsFontSizeToFit={true}
+                                numberOfLines={1}
+                            >
+                                <FontAwesome5
+                                    name="binoculars"
+                                    style={[categoryStyles.binocularNoteText, categoryStyles.icons]}
+                                />
+                                {"    "}
+                                Start typing to filter results...
+                            </Text>
+                        )}
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
                         <TouchableWithoutFeedback

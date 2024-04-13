@@ -23,6 +23,8 @@ const noteStyles = StyleSheet.create({
 
     bottomBorder: {
         borderBottomWidth: 1,
+        borderBottomLeftRadius: 5,
+        borderBottomRightRadius: 5,
     },
 
     noteText: {

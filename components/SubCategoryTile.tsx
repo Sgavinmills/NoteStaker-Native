@@ -1,7 +1,7 @@
 import { GestureResponderEvent, Text, View, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RootState } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
@@ -48,6 +48,13 @@ const SubCategoryTile: React.FC<TileProps> = ({
     const dispatch = useDispatch<AppDispatch>();
 
     const [isExpanded, setIsExpanded] = useState(false);
+
+    useEffect(() => {
+        // needed for when a solitary note is deleted so the border radius is added properly
+        if (notesForSubCat.length === 0) {
+            setIsExpanded(false);
+        }
+    }, [notesForSubCat]);
 
     const handleTilePress = () => {
         if (overlay.isShowing) {
@@ -183,7 +190,6 @@ const SubCategoryTile: React.FC<TileProps> = ({
         };
         dispatch(updateSubCategoryHeight(update));
     };
-
     return (
         <View onLayout={handleCategoryLayout}>
             <TouchableWithoutFeedback onPress={handleTilePress} onLongPress={handleMenuPress}>
@@ -192,6 +198,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
                         categoryStyles.subCategoryTile,
                         addBottomTileMargin() && categoryStyles.lastMargin,
                         tileHasMenuOpen() && categoryStyles.categoryTileSelected,
+                        !isExpanded && isLastSubCategory && categoryStyles.bottomRadius,
                     ]}
                 >
                     <View style={categoryStyles.categoryTextContainer}>

@@ -47,6 +47,13 @@ const CategoryTile: React.FC<TileProps> = ({
         }
     });
 
+    useEffect(() => {
+        // needed for when a solitary note is deleted so the border radius is added properly
+        if (subCatsForCat.length === 0 && notesForCat.length === 0) {
+            setIsExpanded(false);
+        }
+    }, [notesForCat]);
+
     const dispatch = useDispatch<AppDispatch>();
 
     const [isExpanded, setIsExpanded] = useState(false);
@@ -85,7 +92,6 @@ const CategoryTile: React.FC<TileProps> = ({
         }
         toggleExpansion();
     };
-
     const addNewNote = () => {
         const newNoteData: NewNoteData = {
             categoryID: categoryID,
@@ -189,6 +195,8 @@ const CategoryTile: React.FC<TileProps> = ({
                         index === 0 && categoryStyles.categoryTileFirst,
                         addBottomTileMartin() && categoryStyles.lastMargin,
                         tileHasMenuOpen() && categoryStyles.categoryTileSelected,
+                        categoryStyles.topRadius,
+                        !isExpanded && categoryStyles.bottomRadius,
                     ]}
                 >
                     <View style={categoryStyles.categoryTextContainer}>

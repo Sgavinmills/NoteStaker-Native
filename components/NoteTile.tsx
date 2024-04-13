@@ -151,6 +151,14 @@ const NoteTile: React.FC<TileProps> = ({
 
         dispatch(updateNoteHeight(update));
     };
+
+    const addBottomRadius = () => {
+        if (!subCategoryID) {
+            return isLastNote;
+        }
+
+        return isLastSubCategory && isLastNote;
+    };
     return (
         <View
             onLayout={handleCategoryLayout}
@@ -159,7 +167,7 @@ const NoteTile: React.FC<TileProps> = ({
             <View
                 style={[
                     addBottomTileMargin() && noteStyles.lastMargin,
-                    isLastNote && noteStyles.bottomBorder,
+                    addBottomRadius() && noteStyles.bottomBorder,
                     noteStyles.noteTile,
                     tileHasMenuOpen() && categoryStyles.categoryTileSelected,
                 ]}
