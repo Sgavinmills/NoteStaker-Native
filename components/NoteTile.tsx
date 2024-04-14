@@ -30,6 +30,7 @@ interface TileProps {
     index: number;
     subCategoryIndex: number;
     parentCategoryIndex: number;
+    isSearchTile: boolean;
 }
 
 const NoteTile: React.FC<TileProps> = ({
@@ -42,6 +43,7 @@ const NoteTile: React.FC<TileProps> = ({
     index,
     subCategoryIndex,
     parentCategoryIndex,
+    isSearchTile,
 }) => {
     const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const note = useSelector((state: RootState) => state.memory.notes[noteID]);
@@ -88,6 +90,7 @@ const NoteTile: React.FC<TileProps> = ({
                 categoryIndex: parentCategoryIndex,
                 subCategoryIndex: subCategoryIndex !== undefined ? subCategoryIndex : null,
                 noteIndex: index,
+                isSearchTile: isSearchTile,
             },
         };
         dispatch(updateMenuOverlay(newOverlay));

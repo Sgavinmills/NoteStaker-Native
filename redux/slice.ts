@@ -45,6 +45,7 @@ const initialState: AppState = {
             categoryIndex: null,
             subCategoryIndex: null,
             noteIndex: null,
+            isSearchTile: false,
         },
     },
     heightData: [],

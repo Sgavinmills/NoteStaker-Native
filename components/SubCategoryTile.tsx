@@ -140,6 +140,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
                 noteIndex: null,
                 subCategoryIndex: index,
                 categoryIndex: parentCategoryIndex,
+                isSearchTile: false,
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
@@ -249,6 +250,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
                             isLastCategory={isLastCategory}
                             isLastSubCategory={isLastSubCategory}
                             key={noteID}
+                            isSearchTile={false}
                         />
                     );
                 })}

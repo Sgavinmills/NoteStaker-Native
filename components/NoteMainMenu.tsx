@@ -178,10 +178,12 @@ const NoteMainMenu: React.FC<TileProps> = ({
                 <FontAwesome name="star" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>Mark as high priority</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveNote}>
-                <Entypo name="select-arrows" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>Reorder note</Text>
-            </TouchableOpacity>
+            {!overlay.menuData.isSearchTile && (
+                <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveNote}>
+                    <Entypo name="select-arrows" style={menuOverlayStyles.icons} />
+                    <Text style={menuOverlayStyles.text}>Reorder note</Text>
+                </TouchableOpacity>
+            )}
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecure}>
                 <FontAwesome name="lock" style={menuOverlayStyles.icons} />
                 {!note.isSecureNote && <Text style={menuOverlayStyles.text}>Make secure note</Text>}

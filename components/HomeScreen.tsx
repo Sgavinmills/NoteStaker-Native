@@ -77,6 +77,7 @@ const HomeScreen: React.FC = () => {
                 categoryIndex: null,
                 subCategoryIndex: null,
                 noteIndex: null,
+                isSearchTile: false,
             },
         };
         dispatch(updateMenuOverlay(newOverlay));

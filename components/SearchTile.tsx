@@ -17,13 +17,7 @@ interface TileProps {
 const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focusInput }) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
 
-    const [searchResults, setSearchResults] = useState<Note[]>([]);
-    useEffect(() => {
-        const matchingNotes = searchNotes(searchText);
-        setSearchResults([...matchingNotes]);
-    }, [searchText]);
-
-    // back button closes closes search rather than normal behaviour
+    // back button closes search rather than normal behaviour
     useEffect(() => {
         const backAction = () => {
             setIsSearch(false);
@@ -39,14 +33,14 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
         const matchingNotes = [];
         const searchTermLower = searchTerm.toLowerCase();
         // Iterate through each note in the map
-        if (searchTerm) {
+        if (searchTerm.length > 2) {
             for (const id in notes) {
                 const note = notes[id];
 
                 const noteTextLower = note.note.toLowerCase();
                 // Check if the note's text contains the search term
                 if (noteTextLower.includes(searchTermLower)) {
-                    matchingNotes.push(note);
+                    matchingNotes.push(note.id);
                 }
             }
         }
@@ -54,17 +48,20 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
         return matchingNotes;
     };
 
-    const renderSearchResult = ({ item, index }: { item: Note; index: number }) => (
+    const searchResults = searchNotes(searchText);
+
+    const renderSearchResult = ({ item, index }: { item: string; index: number }) => (
         <NoteTile
             index={Number(index)}
             parentCategoryIndex={-1}
-            noteID={item.id}
+            noteID={item}
             categoryID={""}
             subCategoryID={""}
             isLastCategory={false} // technically yes but dont need
             isLastNote={index === searchResults.length - 1}
-            key={item.id}
+            key={item}
             subCategoryIndex={10000}
+            isSearchTile={true}
         />
     );
 
@@ -129,7 +126,7 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
                 style={categoryStyles.categoryListContainer}
                 data={searchResults}
                 renderItem={renderSearchResult}
-                keyExtractor={(note) => note.id}
+                keyExtractor={(note) => note}
             />
         </>
     );

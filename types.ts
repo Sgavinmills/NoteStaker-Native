@@ -66,6 +66,7 @@ export interface MenuData {
     categoryIndex: number | null;
     subCategoryIndex: number | null;
     noteIndex: number | null;
+    isSearchTile: boolean;
 }
 
 export interface DeleteInfo {
