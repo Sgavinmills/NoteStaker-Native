@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Button, BackHandler, TouchableWithoutFeedback } from "react-native";
+import { View, Button, BackHandler, TouchableWithoutFeedback, Modal } from "react-native";
 import menuOverlayStyles from "../styles/menuOverlayStyles";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch } from "react-redux";
@@ -66,38 +66,50 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo, setCloseAllCat
     }, []);
 
     return (
-        <TouchableWithoutFeedback>
-            <View style={menuOverlayStyles.container}>
-                <View style={menuOverlayStyles.contentContainer}>
-                    {isCatsMainMenu && (
-                        <CategoryMainMenu
-                            setScrollTo={setScrollTo}
-                            setIsMoveArrows={setIsMoveArrows}
-                            setIsCategoryMainMenu={setIsCatsMainMenu}
-                        />
-                    )}
-                    {isNoteMainMenu && (
-                        <NoteMainMenu
-                            setIsAdjustingCategories={setIsAdjustingCategories}
-                            setIsMoveArrows={setIsMoveArrows}
-                            setIsNoteMainMenu={setIsNoteMainMenu}
-                            setScrollTo={setScrollTo}
-                            setIsAdditionalInfo={setIsAdditionalInfo}
-                        />
-                    )}
-                    {isHomeScreenMainMenu && (
-                        <HomeScreenMainMenu
-                            setIsHomeScreenMainMenu={setIsHomeScreenMainMenu}
-                            setCloseAllCategories={setCloseAllCategories}
-                        />
-                    )}
-                    {isMoveArrows && <MoveArrows />}
-                    {isAdjustingCategories && <AdjustingCategories />}
-                    {isAdditionalInfo && <AdditionalInfo />}
+        <Modal
+            animationType="none"
+            transparent={true}
+            visible={overlay.isShowing}
+            onRequestClose={() => {
+                handleClose();
+            }}
+        >
+            <TouchableWithoutFeedback onPress={handleClose}>
+                <View style={menuOverlayStyles.modal}></View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback>
+                <View style={menuOverlayStyles.container}>
+                    <View style={menuOverlayStyles.contentContainer}>
+                        {isCatsMainMenu && (
+                            <CategoryMainMenu
+                                setScrollTo={setScrollTo}
+                                setIsMoveArrows={setIsMoveArrows}
+                                setIsCategoryMainMenu={setIsCatsMainMenu}
+                            />
+                        )}
+                        {isNoteMainMenu && (
+                            <NoteMainMenu
+                                setIsAdjustingCategories={setIsAdjustingCategories}
+                                setIsMoveArrows={setIsMoveArrows}
+                                setIsNoteMainMenu={setIsNoteMainMenu}
+                                setScrollTo={setScrollTo}
+                                setIsAdditionalInfo={setIsAdditionalInfo}
+                            />
+                        )}
+                        {isHomeScreenMainMenu && (
+                            <HomeScreenMainMenu
+                                setIsHomeScreenMainMenu={setIsHomeScreenMainMenu}
+                                setCloseAllCategories={setCloseAllCategories}
+                            />
+                        )}
+                        {isMoveArrows && <MoveArrows />}
+                        {isAdjustingCategories && <AdjustingCategories />}
+                        {isAdditionalInfo && <AdditionalInfo />}
+                    </View>
+                    <Button title="Close" onPress={handleClose} />
                 </View>
-                <Button title="Close" onPress={handleClose} />
-            </View>
-        </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>
+        </Modal>
     );
 };
 

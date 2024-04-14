@@ -2,6 +2,10 @@ import { StyleSheet } from "react-native";
 import theme from "./constants";
 
 const menuOverlayStyles = StyleSheet.create({
+    modal: {
+        flex: 1,
+    },
+
     container: {
         position: "absolute",
         bottom: 0,
