@@ -104,27 +104,6 @@ const SubCategoryTile: React.FC<TileProps> = ({
         return false;
     };
 
-    const addBottomTileMargin = () => {
-        if (!isLastCategory) {
-            return false;
-        }
-
-        if (!isLastSubCategory) {
-            return false;
-        }
-
-        if (!isExpanded) {
-            return true;
-        }
-
-        const isEmpty = subCategory.notes.length === 0;
-        if (isEmpty) {
-            return true;
-        }
-
-        return false;
-    };
-
     const handleMenuPress = () => {
         if (overlay.isShowing) {
             dispatch(updateMenuOverlay(getEmptyOverlay()));
@@ -206,7 +185,6 @@ const SubCategoryTile: React.FC<TileProps> = ({
                 <View
                     style={[
                         categoryStyles.subCategoryTile,
-                        addBottomTileMargin() && categoryStyles.lastMargin,
                         tileHasMenuOpen() && categoryStyles.categoryTileSelected,
                         !isExpanded && isLastSubCategory && categoryStyles.bottomRadius,
                     ]}

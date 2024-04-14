@@ -11,7 +11,7 @@ const catStyles = StyleSheet.create({
     },
 
     lastMargin: {
-        marginBottom: 500,
+        marginBottom: 200,
     },
 
     categoryTile: {

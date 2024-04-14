@@ -105,17 +105,6 @@ const NoteTile: React.FC<TileProps> = ({
         setIsShowingImage(true);
     };
 
-    const addBottomTileMargin = () => {
-        if (!isLastCategory) {
-            return false;
-        }
-
-        if (!subCategoryID) {
-            return isLastNote;
-        }
-        return isLastSubCategory && isLastNote;
-    };
-
     const handleCheckboxPress = () => {
         const noteCopy = { ...note };
         noteCopy.completed = !noteCopy.completed;
@@ -163,13 +152,9 @@ const NoteTile: React.FC<TileProps> = ({
         return isLastSubCategory && isLastNote;
     };
     return (
-        <View
-            onLayout={handleCategoryLayout}
-            style={[addBottomTileMargin() && noteStyles.lastMargin, isLastNote && noteStyles.bottomBorder]}
-        >
+        <View onLayout={handleCategoryLayout} style={isLastNote && noteStyles.bottomBorder}>
             <View
                 style={[
-                    addBottomTileMargin() && noteStyles.lastMargin,
                     addBottomRadius() && noteStyles.bottomBorder,
                     noteStyles.noteTile,
                     tileHasMenuOpen() && categoryStyles.categoryTileSelected,

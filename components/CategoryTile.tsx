@@ -169,18 +169,6 @@ const CategoryTile: React.FC<TileProps> = ({
         dispatch(updateMenuOverlay(newOverlay));
     };
 
-    const addBottomTileMartin = () => {
-        if (!isLastCategory) {
-            return false;
-        }
-
-        if (!isExpanded) {
-            return true;
-        }
-        const isEmpty = category.notes.length === 0 && category.subCategories.length === 0;
-        return isEmpty;
-    };
-
     const tileHasMenuOpen = () => {
         if (overlay.isShowing && overlay.menuType === "category" && overlay.menuData.categoryID === category.id) {
             return true;
@@ -200,13 +188,12 @@ const CategoryTile: React.FC<TileProps> = ({
         dispatch(updateCategoryHeight(update));
     };
     return (
-        <View onLayout={handleCategoryLayout}>
+        <View onLayout={handleCategoryLayout} style={isLastCategory && categoryStyles.lastMargin}>
             <TouchableWithoutFeedback onPress={handleTilePress} onLongPress={handleMenuPress}>
                 <View
                     style={[
                         categoryStyles.categoryTile,
                         index === 0 && categoryStyles.categoryTileFirst,
-                        addBottomTileMartin() && categoryStyles.lastMargin,
                         tileHasMenuOpen() && categoryStyles.categoryTileSelected,
                         categoryStyles.topRadius,
                         !isExpanded && categoryStyles.bottomRadius,

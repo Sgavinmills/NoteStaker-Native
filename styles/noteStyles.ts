@@ -71,7 +71,7 @@ const noteStyles = StyleSheet.create({
     },
 
     lastMargin: {
-        marginBottom: 500,
+        marginBottom: 200,
     },
 
     noteMenuContainer: {
