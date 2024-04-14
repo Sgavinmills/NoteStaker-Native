@@ -59,11 +59,6 @@ const HomeScreen: React.FC = () => {
     }, []);
 
     const handleOpenMenuPress = () => {
-        if (isSearch) {
-            setIsSearch(false);
-            return;
-        }
-
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "homeScreen",

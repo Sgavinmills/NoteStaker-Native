@@ -99,8 +99,8 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setCloseAllCategories }) => {
             {/* // TODO MAKE THIS TEXT GOGGLE */}
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleViewSecureCategoriesPress}>
                 <FontAwesome name="lock" style={menuOverlayStyles.icons} />
-                {homeScreenShowSecure && <Text style={menuOverlayStyles.text}>Hide secure categories</Text>}
-                {!homeScreenShowSecure && <Text style={menuOverlayStyles.text}>View secure categories</Text>}
+                {homeScreenShowSecure && <Text style={menuOverlayStyles.text}>Hide secure categories and notes</Text>}
+                {!homeScreenShowSecure && <Text style={menuOverlayStyles.text}>View secure categories and notes</Text>}
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleBackupDataPress}>
                 <Entypo name="save" style={menuOverlayStyles.icons} />

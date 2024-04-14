@@ -16,6 +16,7 @@ interface TileProps {
 
 const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focusInput }) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
+    const showSecure = useSelector((state: RootState) => state.memory.canShowSecure.homeScreen);
 
     // back button closes search rather than normal behaviour
     useEffect(() => {
@@ -40,7 +41,9 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
                 const noteTextLower = note.note.toLowerCase();
                 // Check if the note's text contains the search term
                 if (noteTextLower.includes(searchTermLower)) {
-                    matchingNotes.push(note.id);
+                    if (!note.isSecureNote || showSecure) {
+                        matchingNotes.push(note.id);
+                    }
                 }
             }
         }
