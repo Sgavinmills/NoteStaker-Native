@@ -106,6 +106,7 @@ const HomeScreen: React.FC = () => {
     };
 
     const handleSearchPress = () => {
+        dispatch(updateMenuOverlay(getEmptyOverlay()));
         setIsSearch(true);
     };
 
