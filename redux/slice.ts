@@ -475,6 +475,9 @@ const notesSlice = createSlice({
                 };
 
                 const parentCategory = draft.categories[parentCategoryID];
+                parentCategory.dateUpdated = new Date().toISOString();
+                parentCategory.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
+
                 parentCategory.subCategories.push({ id: newSubCategory.id, isSecure: false });
 
                 // moves any existing notes from parentCat to new subCat
@@ -541,7 +544,8 @@ const notesSlice = createSlice({
             return produce(state, (draft) => {
                 const noteID = action.payload;
                 const note = draft.notes[noteID];
-
+                note.dateUpdated = new Date().toISOString();
+                note.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
                 note.isSecureNote = !note.isSecureNote;
                 note.locations.forEach((location) => {
                     if (location[1]) {
@@ -564,7 +568,8 @@ const notesSlice = createSlice({
                 const categoryID = action.payload;
                 const category = draft.categories[categoryID];
                 category.isSecure = !category.isSecure;
-
+                category.dateUpdated = new Date().toISOString();
+                category.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
                 const categoryIndex = draft.categoryList.findIndex((catRef) => catRef.id === categoryID);
                 draft.categoryList[categoryIndex].isSecure = category.isSecure;
             });
@@ -578,7 +583,8 @@ const notesSlice = createSlice({
                 const subCategoryID = action.payload;
                 const subCategory = draft.subCategories[subCategoryID];
                 subCategory.isSecure = !subCategory.isSecure;
-
+                subCategory.dateUpdated = new Date().toISOString();
+                subCategory.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
                 const parentCategory = draft.categories[subCategory.location[0]];
                 const subCategoryIndex = parentCategory.subCategories.findIndex(
                     (catRef) => catRef.id === subCategoryID

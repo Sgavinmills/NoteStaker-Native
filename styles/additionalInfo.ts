@@ -11,11 +11,14 @@ const additionalInfo = StyleSheet.create({
 
     text: {
         color: "white",
+        paddingRight: 5,
     },
 
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
+        width: "100%",
+        overflow: "hidden",
     },
 });
 

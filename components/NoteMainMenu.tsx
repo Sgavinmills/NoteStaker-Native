@@ -12,8 +12,8 @@ import DeleteModal from "./DeleteModal";
 import { DeleteInfo } from "../types";
 import * as LocalAuthentication from "expo-local-authentication";
 import AdjustingCategories from "./AdjustingCategories";
-import AdditionalInfo from "./AdditionalInfo";
 import MoveArrows from "./MoveArrows";
+import NoteAdditionalInfo from "./NoteAdditionalInfo";
 
 interface TileProps {
     setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
@@ -162,7 +162,7 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
             {isAdjustingCategories ? (
                 <AdjustingCategories />
             ) : isAdditionalInfo ? (
-                <AdditionalInfo />
+                <NoteAdditionalInfo />
             ) : isMoveArrows ? (
                 <MoveArrows />
             ) : (

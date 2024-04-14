@@ -19,6 +19,7 @@ import DeleteModal from "./DeleteModal";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import * as LocalAuthentication from "expo-local-authentication";
 import MoveArrows from "./MoveArrows";
+import CategoryAdditionalInfo from "./CategoryAdditionalInfo";
 
 interface TileProps {
     setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
@@ -37,6 +38,7 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
     const heightData = useSelector((state: RootState) => state.memory.heightData);
     const dispatch = useDispatch<AppDispatch>();
 
+    const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
     const [isMoveArrows, setIsMoveArrows] = useState(false);
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -258,7 +260,9 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         }
     };
 
-    const handleAdditionalInfoPress = () => {};
+    const handleAdditionalInfoPress = () => {
+        setIsAdditionalInfo(true);
+    };
 
     const makeCategorySecureText = makeCategorySecure();
 
@@ -286,6 +290,8 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         <>
             {isMoveArrows ? (
                 <MoveArrows />
+            ) : isAdditionalInfo ? (
+                <CategoryAdditionalInfo />
             ) : (
                 <>
                     {overlay.menuType === "category" && (
@@ -322,7 +328,7 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                     </TouchableOpacity>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAdditionalInfoPress}>
                         <MaterialIcons name="read-more" style={menuOverlayStyles.icons} />
-                        <Text style={menuOverlayStyles.text}>See category details</Text>
+                        <Text style={menuOverlayStyles.text}>See {catName} details</Text>
                     </TouchableOpacity>
                 </>
             )}
