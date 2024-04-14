@@ -37,15 +37,12 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
     const subCatTabsToDisplay: string[] = [];
     const catTabsToDisplay: string[] = [];
     if (!displayMainCategories) {
-        console.log("1");
         categories[parentCatToDisplaySubsOf].subCategories.forEach((subCatRef) => {
             if (showingSecure || !subCatRef.isSecure) {
                 subCatTabsToDisplay.push(subCatRef.id);
             }
         });
     } else {
-        console.log("2");
-
         categoryList.forEach((catRef) => {
             if (showingSecure || !catRef.isSecure) {
                 catTabsToDisplay.push(catRef.id);
