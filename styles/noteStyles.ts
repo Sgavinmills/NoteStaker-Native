@@ -104,6 +104,10 @@ const noteStyles = StyleSheet.create({
         color: "red",
     },
 
+    noteTileSelected: {
+        backgroundColor: theme.colors.tileBackgroundSelected,
+    },
+
     highPriority: {
         color: "gold",
     },

@@ -10,6 +10,7 @@ import NoteMainMenu from "./NoteMainMenu";
 import HomeScreenMainMenu from "./HomeScreenMainMenu";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
+import SubCategoryMainMenu from "./SubCategoryMainMenu";
 
 interface TileProps {
     setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
@@ -41,7 +42,6 @@ const MenuDisplay: React.FC<TileProps> = ({ setScrollTo, setCloseAllCategories }
 
         dispatch(updateMenuOverlay(overlay));
     };
-
     // back button closes overlay rather than normal behaviour
     useEffect(() => {
         const backAction = () => {
@@ -55,37 +55,43 @@ const MenuDisplay: React.FC<TileProps> = ({ setScrollTo, setCloseAllCategories }
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
         return () => backHandler.remove(); // Cleanup the event listener
-    }, []);
+    }, [overlay.isShowing]);
 
     return (
-        <Modal
-            animationType="none"
-            transparent={true}
-            visible={overlay.isShowing}
-            onRequestClose={() => {
-                handleClose();
-            }}
-        >
-            <TouchableWithoutFeedback onPress={handleClose}>
-                <View style={menuOverlayStyles.modal}></View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback>
-                <View style={menuOverlayStyles.container}>
-                    <View style={menuOverlayStyles.contentContainer}>
-                        {menuType === "category" || menuType === "subCategory" ? (
-                            <CategoryMainMenu setScrollTo={setScrollTo} />
-                        ) : menuType === "note" ? (
-                            <NoteMainMenu setScrollTo={setScrollTo} />
-                        ) : menuType === "homeScreen" ? (
-                            <HomeScreenMainMenu setCloseAllCategories={setCloseAllCategories} />
-                        ) : (
-                            <></>
-                        )}
+        // <Modal
+        //     animationType="none"
+        //     transparent={true}
+        //     visible={overlay.isShowing}
+        //     onRequestClose={() => {
+        //         handleClose();
+        //     }}
+        // >
+        // <TouchableWithoutFeedback onPress={handleClose}>
+        //     <View style={menuOverlayStyles.modal}></View>
+        // </TouchableWithoutFeedback>
+        <>
+            {overlay.isShowing && (
+                <TouchableWithoutFeedback>
+                    <View style={menuOverlayStyles.container}>
+                        <View style={menuOverlayStyles.contentContainer}>
+                            {menuType === "category" ? (
+                                <CategoryMainMenu setScrollTo={setScrollTo} />
+                            ) : menuType === "subCategory" ? (
+                                <SubCategoryMainMenu setScrollTo={setScrollTo} />
+                            ) : menuType === "note" ? (
+                                <NoteMainMenu setScrollTo={setScrollTo} />
+                            ) : menuType === "homeScreen" ? (
+                                <HomeScreenMainMenu setCloseAllCategories={setCloseAllCategories} />
+                            ) : (
+                                <></>
+                            )}
+                        </View>
+                        {overlay.isShowing && <Button title="Close" onPress={handleClose} />}
                     </View>
-                    <Button title="Close" onPress={handleClose} />
-                </View>
-            </TouchableWithoutFeedback>
-        </Modal>
+                </TouchableWithoutFeedback>
+            )}
+        </>
+        // </Modal>
     );
 };
 

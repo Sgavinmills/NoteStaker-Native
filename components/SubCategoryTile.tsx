@@ -104,6 +104,8 @@ const SubCategoryTile: React.FC<TileProps> = ({
     };
 
     const addNewNote = () => {
+        dispatch(updateMenuOverlay(getEmptyOverlay()));
+
         const newNoteData: NewNoteData = {
             categoryID: parentCategoryID,
             subCategoryID: subCategoryID,

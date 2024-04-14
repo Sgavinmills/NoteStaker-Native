@@ -18,6 +18,7 @@ import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import React from "react";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 interface TileProps {
     noteID: string;
     isLastCategory: boolean;
@@ -99,6 +100,7 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleTouchNote = () => {
+        dispatch(updateMenuOverlay(getEmptyOverlay()));
         setNoteEditMode(true);
     };
 
@@ -196,6 +198,8 @@ const InsertNote: React.FC<Props> = ({ subCategoryID, categoryID, index }) => {
     const dispatch = useDispatch<AppDispatch>();
 
     const handleAddNoteToBottom = () => {
+        dispatch(updateMenuOverlay(getEmptyOverlay()));
+
         const newNoteData: NewNoteData = {
             categoryID: categoryID,
             subCategoryID: subCategoryID ? subCategoryID : "",

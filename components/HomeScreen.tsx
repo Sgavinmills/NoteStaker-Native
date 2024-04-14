@@ -117,52 +117,54 @@ const HomeScreen: React.FC = () => {
 
     return (
         <TouchableWithoutFeedback onPress={handleOutsideMenuPress}>
-            <View style={styles.mainContainer}>
-                <StatusBar translucent={true} />
-                {newCatModalVisible && (
-                    <CategoryModal
-                        setNewCatModalVisible={setNewCatModalVisible}
-                        newCatModalVisible={newCatModalVisible}
-                        catInfo={{ currentName: "", parentCat: "" }}
-                    ></CategoryModal>
-                )}
-                <View style={styles.homeScreenTopBarContainer}>
-                    <TouchableOpacity style={styles.searchContainer} onPress={handleSearchPress}>
-                        {!isSearch ? (
-                            <Text style={styles.searchText}>Search...</Text>
-                        ) : (
-                            <TextInput
-                                style={styles.searchText}
-                                onChangeText={handleSearchTextChange}
-                                onBlur={handleSearchBlur}
-                                value={searchText}
-                                autoFocus
-                                ref={searchInputRef}
-                                placeholder={"Enter search text..."}
-                            ></TextInput>
-                        )}
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleOpenMenuPress}>
-                        <FontAwesome
-                            name="ellipsis-v"
-                            style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
+            <>
+                <View style={styles.mainContainer}>
+                    <StatusBar translucent={true} />
+                    {newCatModalVisible && (
+                        <CategoryModal
+                            setNewCatModalVisible={setNewCatModalVisible}
+                            newCatModalVisible={newCatModalVisible}
+                            catInfo={{ currentName: "", parentCat: "" }}
+                        ></CategoryModal>
+                    )}
+                    <View style={styles.homeScreenTopBarContainer}>
+                        <TouchableOpacity style={styles.searchContainer} onPress={handleSearchPress}>
+                            {!isSearch ? (
+                                <Text style={styles.searchText}>Search...</Text>
+                            ) : (
+                                <TextInput
+                                    style={styles.searchText}
+                                    onChangeText={handleSearchTextChange}
+                                    onBlur={handleSearchBlur}
+                                    value={searchText}
+                                    autoFocus
+                                    ref={searchInputRef}
+                                    placeholder={"Enter search text..."}
+                                ></TextInput>
+                            )}
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handleOpenMenuPress}>
+                            <FontAwesome
+                                name="ellipsis-v"
+                                style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    {isSearch ? (
+                        <SearchCategoryTile searchText={searchText} setIsSearch={setIsSearch} focusInput={focusInput} />
+                    ) : (
+                        <FlatList
+                            ref={flatListRef}
+                            removeClippedSubviews={false}
+                            style={categoryStyles.categoryListContainer}
+                            data={catsForHomeScreen}
+                            renderItem={renderCategory}
+                            keyExtractor={(cat) => cat}
                         />
-                    </TouchableOpacity>
+                    )}
                 </View>
-                {isSearch ? (
-                    <SearchCategoryTile searchText={searchText} setIsSearch={setIsSearch} focusInput={focusInput} />
-                ) : (
-                    <FlatList
-                        ref={flatListRef}
-                        removeClippedSubviews={false}
-                        style={categoryStyles.categoryListContainer}
-                        data={catsForHomeScreen}
-                        renderItem={renderCategory}
-                        keyExtractor={(cat) => cat}
-                    />
-                )}
                 <MenuDisplay setScrollTo={setScrollTo} setCloseAllCategories={setCloseAllCategories} />
-            </View>
+            </>
         </TouchableWithoutFeedback>
     );
 };

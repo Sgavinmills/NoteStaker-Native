@@ -100,6 +100,8 @@ const CategoryTile: React.FC<TileProps> = ({
         toggleExpansion();
     };
     const addNewNote = () => {
+        dispatch(updateMenuOverlay(getEmptyOverlay()));
+
         const newNoteData: NewNoteData = {
             categoryID: categoryID,
             subCategoryID: "",

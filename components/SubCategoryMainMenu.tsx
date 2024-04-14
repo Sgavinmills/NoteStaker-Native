@@ -26,12 +26,11 @@ interface TileProps {
 }
 
 // CategoryMainMenu provides main menu for parent categories and sub categories
-const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
+const SubCategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const showingSecureCategories = useSelector((state: RootState) => state.memory.canShowSecure.categories);
 
-    const category = useSelector((state: RootState) => state.memory.categories[overlay.menuData.categoryID]);
-
+    const subCategory = useSelector((state: RootState) => state.memory.subCategories[overlay.menuData.subCategoryID]);
     const heightData = useSelector((state: RootState) => state.memory.heightData);
     const dispatch = useDispatch<AppDispatch>();
 
@@ -48,19 +47,14 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
 
     const handleEditName = () => {
         setCatModalInfo({
-            currentName: category.name,
-            parentCat: "",
+            currentName: subCategory.name,
+            parentCat: overlay.menuData.categoryID,
         });
         setIsCategoryModal(true);
     };
 
     const handleMoveCategory = () => {
         setIsMoveArrows(true);
-    };
-
-    const handleAddSubCat = () => {
-        setCatModalInfo({ currentName: "", parentCat: category.id });
-        setIsCategoryModal(true);
     };
 
     const handleRemoveAllNotes = () => {
@@ -70,11 +64,12 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
             additionalMessage: "",
         };
 
-        let name = category.name;
+        let name = subCategory.name;
+
         deleteInfo.deleteMessage = `Are you sure you want to remove all notes from ${name}? All notes not within other categories will be permenantly deleted`;
 
-        if (category.notes.some((noteRef) => noteRef.isSecure === true)) {
-            deleteInfo.additionalMessage = `There are secure notes in this category that will be deleted`;
+        if (subCategory.notes.some((noteRef) => noteRef.isSecure === true)) {
+            deleteInfo.additionalMessage = `There are secure notes in this subCategory that will be deleted`;
         }
 
         setDeleteInfo(deleteInfo);
@@ -88,22 +83,12 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
             additionalMessage: "",
         };
 
-        let catName = category.name;
+        let catName = subCategory.name;
 
         deleteInfo.deleteMessage = `Are you sure you want to delete the category ${catName}? All notes not within other categories will be permenantly deleted`;
 
-        if (category.subCategories.length === 0) {
-            if (category.notes.some((noteRef) => noteRef.isSecure === true)) {
-                deleteInfo.additionalMessage = `There are secure notes in this category that will be deleted`;
-            }
-        } else {
-            // need to know if the subcategories have any secure notes.
-            if (category.subCategories.some((subCatRef) => subCatRef.isSecure === true)) {
-                deleteInfo.additionalMessage = `There are secure subcategories in this category that will be deleted`;
-            } else {
-                // cant get any more specific than this without having access to subCategories
-                deleteInfo.additionalMessage = `There may be secure notes in the subcategories that will be deleted`;
-            }
+        if (subCategory.notes.some((noteRef) => noteRef.isSecure === true)) {
+            deleteInfo.additionalMessage = `There are secure notes in this subcategory that will be deleted`;
         }
 
         setDeleteInfo(deleteInfo);
@@ -126,7 +111,7 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                     if (overlay.isShowing) {
                         dispatch(updateMenuOverlay(getEmptyOverlay()));
                     }
-                    dispatch(updateCategorySecureStatus(overlay.menuData.categoryID));
+                    dispatch(updateSubCategorySecureStatus(overlay.menuData.subCategoryID));
                 }
             }
         }
@@ -137,8 +122,8 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
     };
 
     const showSecureNotes = async () => {
-        if (showingSecureCategories.includes(category.id)) {
-            dispatch(removeFromShowSecureNote(category.id));
+        if (showingSecureCategories.includes(subCategory.id)) {
+            dispatch(removeFromShowSecureNote(subCategory.id));
             dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;
         }
@@ -152,7 +137,7 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                 });
                 if (result.success) {
                     dispatch(updateMenuOverlay(getEmptyOverlay()));
-                    dispatch(addToShowSecureNote(category.id));
+                    dispatch(addToShowSecureNote(subCategory.id));
                 }
             }
         }
@@ -191,10 +176,10 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
 
     // too much for one line, can be made nicer but in a rush.
     const makeCategorySecure = (): string => {
-        if (category.isSecure) {
-            return "Unsecure category";
+        if (subCategory.isSecure) {
+            return "Unsecure subcategory";
         } else {
-            return "Make category secure";
+            return "Make subcategory secure";
         }
     };
 
@@ -205,17 +190,9 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
     const makeCategorySecureText = makeCategorySecure();
 
     const getSecureItemsText = () => {
-        if (showingSecureCategories.includes(category.id)) {
-            if (category.subCategories.length > 0) {
-                return "Hide secure subcategories";
-            }
-
+        if (showingSecureCategories.includes(subCategory.id)) {
             return "Hide secure notes";
         } else {
-            // show text
-            if (category.subCategories.length > 0) {
-                return "Show secure subcategories";
-            }
             return "Show secure notes";
         }
     };
@@ -228,23 +205,19 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                 <CategoryAdditionalInfo />
             ) : (
                 <>
-                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddSubCat}>
-                        <FontAwesome name="plus" style={menuOverlayStyles.icons} />
-                        <Text style={menuOverlayStyles.text}>Add subcategory</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleEditName}>
                         <FontAwesome name="edit" style={menuOverlayStyles.icons} />
-                        <Text style={menuOverlayStyles.text}>Edit category name</Text>
+                        <Text style={menuOverlayStyles.text}>Edit subcategory name</Text>
                     </TouchableOpacity>
-                    {category.notes.length > 0 && (
+                    {subCategory.notes.length && (
                         <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleRemoveAllNotes}>
                             <FontAwesome name="trash" style={menuOverlayStyles.icons} />
-                            <Text style={menuOverlayStyles.text}>Remove all notes from category</Text>
+                            <Text style={menuOverlayStyles.text}>Remove all notes from subcategory</Text>
                         </TouchableOpacity>
                     )}
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveCategory}>
                         <Entypo name="select-arrows" style={[menuOverlayStyles.icons]} />
-                        <Text style={menuOverlayStyles.text}>Reorder category</Text>
+                        <Text style={menuOverlayStyles.text}>Reorder subcategory</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleShowSecureNote}>
                         <FontAwesome name="key" style={menuOverlayStyles.icons} />
@@ -256,11 +229,11 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                     </TouchableOpacity>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDeleteCategory}>
                         <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
-                        <Text style={menuOverlayStyles.text}>Delete category</Text>
+                        <Text style={menuOverlayStyles.text}>Delete subcategory</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAdditionalInfoPress}>
                         <MaterialIcons name="read-more" style={menuOverlayStyles.icons} />
-                        <Text style={menuOverlayStyles.text}>See category details</Text>
+                        <Text style={menuOverlayStyles.text}>See subcategory details</Text>
                     </TouchableOpacity>
                 </>
             )}
@@ -282,4 +255,4 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
     );
 };
 
-export default CategoryMainMenu;
+export default SubCategoryMainMenu;
