@@ -43,6 +43,7 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo, setCloseAllCat
                 categoryIndex: null,
                 subCategoryIndex: null,
                 noteIndex: null,
+                isSearchTile: false,
             },
         };
 

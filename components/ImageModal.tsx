@@ -19,13 +19,18 @@ const ImageModal: React.FC<TileProps> = ({ note, isShowingImage, setIsShowingIma
     const screenWidth = Dimensions.get("window").width;
     const screenHeight = Dimensions.get("window").height;
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteType: "", deleteMessage: "" });
+    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({
+        deleteType: "",
+        deleteMessage: "",
+        additionalMessage: "",
+    });
 
     const handleDelete = () => {
         setDeleteModalVisible(true);
         const deleteInfo: DeleteInfo = {
             deleteType: "deleteImage",
             deleteMessage: "Remove image from note?",
+            additionalMessage: "",
         };
 
         setDeleteInfo(deleteInfo);
