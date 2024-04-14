@@ -14,11 +14,10 @@ import { RootState } from "../redux/store/store";
 import { useSelector } from "react-redux";
 
 interface TileProps {
-    setIsHomeScreenMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
     setCloseAllCategories: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setCloseAllCategories }) => {
+const HomeScreenMainMenu: React.FC<TileProps> = ({ setCloseAllCategories }) => {
     const homeScreenShowSecure = useSelector((state: RootState) => state.memory.canShowSecure.homeScreen);
 
     const [isCategoryModal, setIsCategoryModal] = useState(false);

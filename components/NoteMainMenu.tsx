@@ -11,22 +11,18 @@ import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import DeleteModal from "./DeleteModal";
 import { DeleteInfo } from "../types";
 import * as LocalAuthentication from "expo-local-authentication";
+import AdjustingCategories from "./AdjustingCategories";
+import AdditionalInfo from "./AdditionalInfo";
+import MoveArrows from "./MoveArrows";
 
 interface TileProps {
-    setIsMoveArrows: React.Dispatch<React.SetStateAction<boolean>>;
-    setIsNoteMainMenu: React.Dispatch<React.SetStateAction<boolean>>;
     setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
-    setIsAdjustingCategories: React.Dispatch<React.SetStateAction<boolean>>;
-    setIsAdditionalInfo: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const NoteMainMenu: React.FC<TileProps> = ({
-    setScrollTo,
-    setIsMoveArrows,
-    setIsNoteMainMenu,
-    setIsAdjustingCategories,
-    setIsAdditionalInfo,
-}) => {
+const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
+    const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
+    const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
+    const [isMoveArrows, setIsMoveArrows] = useState(false);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const heightData = useSelector((state: RootState) => state.memory.heightData);
 
@@ -43,7 +39,6 @@ const NoteMainMenu: React.FC<TileProps> = ({
 
     const handleMoveNote = () => {
         setIsMoveArrows(true);
-        setIsNoteMainMenu(false);
     };
 
     const handleCameraPress = (event: GestureResponderEvent) => {
@@ -115,12 +110,10 @@ const NoteMainMenu: React.FC<TileProps> = ({
 
     const handleAddRemoveCategories = () => {
         setIsAdjustingCategories(true);
-        setIsNoteMainMenu(false);
     };
 
     const handleAdditionalInfoPress = () => {
         setIsAdditionalInfo(true);
-        setIsNoteMainMenu(false);
     };
 
     const handleScrollToNote = () => {
@@ -166,37 +159,47 @@ const NoteMainMenu: React.FC<TileProps> = ({
     const dispatch = useDispatch<AppDispatch>();
     return (
         <>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleCameraPress}>
-                <FontAwesome name="camera" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>Add image to note</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddRemoveCategories}>
-                <FontAwesome name="reorder" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>Move between categories</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleHighPriorityPress}>
-                <FontAwesome name="star" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>Mark as high priority</Text>
-            </TouchableOpacity>
-            {!overlay.menuData.isSearchTile && (
-                <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveNote}>
-                    <Entypo name="select-arrows" style={menuOverlayStyles.icons} />
-                    <Text style={menuOverlayStyles.text}>Reorder note</Text>
-                </TouchableOpacity>
+            {isAdjustingCategories ? (
+                <AdjustingCategories />
+            ) : isAdditionalInfo ? (
+                <AdditionalInfo />
+            ) : isMoveArrows ? (
+                <MoveArrows />
+            ) : (
+                <>
+                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleCameraPress}>
+                        <FontAwesome name="camera" style={menuOverlayStyles.icons} />
+                        <Text style={menuOverlayStyles.text}>Add image to note</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddRemoveCategories}>
+                        <FontAwesome name="reorder" style={menuOverlayStyles.icons} />
+                        <Text style={menuOverlayStyles.text}>Move between categories</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleHighPriorityPress}>
+                        <FontAwesome name="star" style={menuOverlayStyles.icons} />
+                        <Text style={menuOverlayStyles.text}>Mark as high priority</Text>
+                    </TouchableOpacity>
+                    {!overlay.menuData.isSearchTile && (
+                        <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveNote}>
+                            <Entypo name="select-arrows" style={menuOverlayStyles.icons} />
+                            <Text style={menuOverlayStyles.text}>Reorder note</Text>
+                        </TouchableOpacity>
+                    )}
+                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecure}>
+                        <FontAwesome name="lock" style={menuOverlayStyles.icons} />
+                        {!note.isSecureNote && <Text style={menuOverlayStyles.text}>Make secure note</Text>}
+                        {note.isSecureNote && <Text style={menuOverlayStyles.text}>Unsecure note</Text>}
+                    </TouchableOpacity>
+                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDelete}>
+                        <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
+                        <Text style={menuOverlayStyles.text}>Delete note</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAdditionalInfoPress}>
+                        <MaterialIcons name="read-more" style={menuOverlayStyles.icons} />
+                        <Text style={menuOverlayStyles.text}>See note details</Text>
+                    </TouchableOpacity>
+                </>
             )}
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecure}>
-                <FontAwesome name="lock" style={menuOverlayStyles.icons} />
-                {!note.isSecureNote && <Text style={menuOverlayStyles.text}>Make secure note</Text>}
-                {note.isSecureNote && <Text style={menuOverlayStyles.text}>Unsecure note</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDelete}>
-                <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
-                <Text style={menuOverlayStyles.text}>Delete note</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAdditionalInfoPress}>
-                <MaterialIcons name="read-more" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>See note details</Text>
-            </TouchableOpacity>
             {deleteModalVisible && (
                 <DeleteModal
                     setDeleteModalVisible={setDeleteModalVisible}

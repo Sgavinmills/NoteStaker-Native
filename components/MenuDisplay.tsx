@@ -6,32 +6,24 @@ import { useDispatch } from "react-redux";
 import { updateMenuOverlay } from "../redux/slice";
 import { MenuOverlay } from "../types";
 import CategoryMainMenu from "./CategoryMainMenu";
-import MoveArrows from "./MoveArrows";
 import NoteMainMenu from "./NoteMainMenu";
-import AdjustingCategories from "./AdjustingCategories";
-import AdditionalInfo from "./AdditionalInfo";
 import HomeScreenMainMenu from "./HomeScreenMainMenu";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store/store";
 
 interface TileProps {
-    overlay: MenuOverlay;
     setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
     setCloseAllCategories: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // TODO - Move menu config componenets into own folder.
 
-const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo, setCloseAllCategories }) => {
+const MenuDisplay: React.FC<TileProps> = ({ setScrollTo, setCloseAllCategories }) => {
     const dispatch = useDispatch<AppDispatch>();
-    const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
-    const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
+    const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
+    const menuType = overlay.menuType;
 
-    // TODO: having 4 states for each type of menu is a bit daft. Should be one state with variable ting but ok for now.
-    const [isNoteMainMenu, setIsNoteMainMenu] = useState(overlay.menuType === "note");
-    const [isMoveArrows, setIsMoveArrows] = useState(false);
-    const [isCatsMainMenu, setIsCatsMainMenu] = useState(
-        overlay.menuType === "category" || overlay.menuType === "subCategory"
-    );
-    const [isHomeScreenMainMenu, setIsHomeScreenMainMenu] = useState(overlay.menuType === "homeScreen");
+    // console.log("is note main menu: " + isNoteMainMenu);
     const handleClose = () => {
         const overlay: MenuOverlay = {
             isShowing: false,
@@ -80,31 +72,15 @@ const MenuDisplay: React.FC<TileProps> = ({ overlay, setScrollTo, setCloseAllCat
             <TouchableWithoutFeedback>
                 <View style={menuOverlayStyles.container}>
                     <View style={menuOverlayStyles.contentContainer}>
-                        {isCatsMainMenu && (
-                            <CategoryMainMenu
-                                setScrollTo={setScrollTo}
-                                setIsMoveArrows={setIsMoveArrows}
-                                setIsCategoryMainMenu={setIsCatsMainMenu}
-                            />
+                        {menuType === "category" || menuType === "subCategory" ? (
+                            <CategoryMainMenu setScrollTo={setScrollTo} />
+                        ) : menuType === "note" ? (
+                            <NoteMainMenu setScrollTo={setScrollTo} />
+                        ) : menuType === "homeScreen" ? (
+                            <HomeScreenMainMenu setCloseAllCategories={setCloseAllCategories} />
+                        ) : (
+                            <></>
                         )}
-                        {isNoteMainMenu && (
-                            <NoteMainMenu
-                                setIsAdjustingCategories={setIsAdjustingCategories}
-                                setIsMoveArrows={setIsMoveArrows}
-                                setIsNoteMainMenu={setIsNoteMainMenu}
-                                setScrollTo={setScrollTo}
-                                setIsAdditionalInfo={setIsAdditionalInfo}
-                            />
-                        )}
-                        {isHomeScreenMainMenu && (
-                            <HomeScreenMainMenu
-                                setIsHomeScreenMainMenu={setIsHomeScreenMainMenu}
-                                setCloseAllCategories={setCloseAllCategories}
-                            />
-                        )}
-                        {isMoveArrows && <MoveArrows />}
-                        {isAdjustingCategories && <AdjustingCategories />}
-                        {isAdditionalInfo && <AdditionalInfo />}
                     </View>
                     <Button title="Close" onPress={handleClose} />
                 </View>

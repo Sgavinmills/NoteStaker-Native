@@ -8,7 +8,6 @@ import {
     TouchableWithoutFeedback,
 } from "react-native";
 import noteStyles from "../styles/noteStyles";
-import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
 import { useDispatch } from "react-redux";
@@ -18,7 +17,6 @@ import ImageModal from "./ImageModal";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
-import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import React from "react";
 interface TileProps {
     noteID: string;
@@ -35,7 +33,6 @@ interface TileProps {
 
 const NoteTile: React.FC<TileProps> = ({
     noteID,
-    isLastCategory,
     isLastNote,
     isLastSubCategory,
     categoryID,
@@ -45,13 +42,12 @@ const NoteTile: React.FC<TileProps> = ({
     parentCategoryIndex,
     isSearchTile,
 }) => {
-    const menuOverlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const note = useSelector((state: RootState) => state.memory.notes[noteID]);
     const dispatch = useDispatch<AppDispatch>();
 
     const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
     const [isShowingImage, setIsShowingImage] = useState(false);
-    // console.log("re render note: " + note.note);
+    console.log("re render note: " + note.note);
     const handleNoteChange = (text: string) => {
         const noteCopy = { ...note, note: text };
         if (noteCopy.isNewNote) {
@@ -76,10 +72,6 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleMenuPress = (event: GestureResponderEvent) => {
-        if (menuOverlay.isShowing) {
-            dispatch(updateMenuOverlay(getEmptyOverlay()));
-            return;
-        }
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "note",
@@ -97,11 +89,6 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleImagePress = () => {
-        if (menuOverlay.isShowing) {
-            dispatch(updateMenuOverlay(getEmptyOverlay()));
-            return;
-        }
-
         setIsShowingImage(true);
     };
 
@@ -112,23 +99,7 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleTouchNote = () => {
-        if (menuOverlay.isShowing) {
-            dispatch(updateMenuOverlay(getEmptyOverlay()));
-            return;
-        }
         setNoteEditMode(true);
-    };
-
-    const tileHasMenuOpen = () => {
-        if (menuOverlay.isShowing && menuOverlay.menuType === "note" && menuOverlay.menuData.noteID === note.id) {
-            if (menuOverlay.menuData.subCategoryID && subCategoryID) {
-                return menuOverlay.menuData.subCategoryID === subCategoryID;
-            }
-
-            return menuOverlay.menuData.categoryID === categoryID;
-        }
-
-        return false;
     };
 
     const handleCategoryLayout = (event: any) => {
@@ -153,13 +124,7 @@ const NoteTile: React.FC<TileProps> = ({
     };
     return (
         <View onLayout={handleCategoryLayout} style={isLastNote && noteStyles.bottomBorder}>
-            <View
-                style={[
-                    addBottomRadius() && noteStyles.bottomBorder,
-                    noteStyles.noteTile,
-                    tileHasMenuOpen() && categoryStyles.categoryTileSelected,
-                ]}
-            >
+            <View style={[addBottomRadius() && noteStyles.bottomBorder, noteStyles.noteTile]}>
                 <View style={noteStyles.noteContainer}>
                     <TouchableOpacity onPress={handleImagePress}>
                         {note.imageURI && <Image source={{ uri: note.imageURI }} style={{ height: 150, width: 150 }} />}

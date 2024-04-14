@@ -29,10 +29,9 @@ const CategoryTile: React.FC<TileProps> = ({
 }) => {
     const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
-    const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const showingSecure = showSecure.homeScreen || showSecure.categories.includes(categoryID);
     const [securePlaceholderTile, setSecurePlaceholderTile] = useState(false);
-    // console.log("re render category: " + category.name);
+    console.log("re render category: " + category.name);
 
     const notesForCat: string[] = [];
     category.notes.forEach((noteRef) => {
@@ -78,11 +77,6 @@ const CategoryTile: React.FC<TileProps> = ({
     };
 
     const handleTilePress = () => {
-        if (overlay.isShowing) {
-            dispatch(updateMenuOverlay(getEmptyOverlay()));
-            return;
-        }
-
         const isEmpty = notesForCat.length === 0 && category.subCategories.length === 0;
         if (isEmpty) {
             addNewNote();
@@ -149,10 +143,6 @@ const CategoryTile: React.FC<TileProps> = ({
     };
 
     const handleMenuPress = () => {
-        if (overlay.isShowing) {
-            dispatch(updateMenuOverlay(getEmptyOverlay()));
-            return;
-        }
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "category",
@@ -167,14 +157,6 @@ const CategoryTile: React.FC<TileProps> = ({
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
-    };
-
-    const tileHasMenuOpen = () => {
-        if (overlay.isShowing && overlay.menuType === "category" && overlay.menuData.categoryID === category.id) {
-            return true;
-        }
-
-        return false;
     };
 
     const handleCategoryLayout = (event: any) => {
@@ -194,7 +176,6 @@ const CategoryTile: React.FC<TileProps> = ({
                     style={[
                         categoryStyles.categoryTile,
                         index === 0 && categoryStyles.categoryTileFirst,
-                        tileHasMenuOpen() && categoryStyles.categoryTileSelected,
                         categoryStyles.topRadius,
                         !isExpanded && categoryStyles.bottomRadius,
                     ]}

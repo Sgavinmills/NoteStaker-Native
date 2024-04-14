@@ -25,7 +25,6 @@ import SearchCategoryTile from "./SearchTile";
 
 const HomeScreen: React.FC = () => {
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
-    const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const dispatch = useDispatch<AppDispatch>();
 
     const [newCatModalVisible, setNewCatModalVisible] = useState(false);
@@ -45,6 +44,8 @@ const HomeScreen: React.FC = () => {
         }
     });
 
+    console.log("--Homescreen re-render");
+
     // back button closes overlay rather than normal behaviour
     useEffect(() => {
         const backAction = () => {
@@ -60,10 +61,6 @@ const HomeScreen: React.FC = () => {
     const handleOpenMenuPress = () => {
         if (isSearch) {
             setIsSearch(false);
-            return;
-        }
-        if (overlay.isShowing) {
-            dispatch(updateMenuOverlay(getEmptyOverlay()));
             return;
         }
 
@@ -107,15 +104,10 @@ const HomeScreen: React.FC = () => {
     };
 
     const handleOutsideMenuPress = () => {
-        // console.log("-------------------------------");
+        console.log("-------------------------------");
         // printCategories(categories);
         // printSubCategories(subCategories);
         // printNotes(notes);
-
-        if (overlay.isShowing) {
-            dispatch(updateMenuOverlay(getEmptyOverlay()));
-            return;
-        }
     };
 
     const handleSearchPress = () => {
@@ -174,13 +166,7 @@ const HomeScreen: React.FC = () => {
                         keyExtractor={(cat) => cat}
                     />
                 )}
-                {overlay.isShowing && (
-                    <MenuDisplay
-                        setScrollTo={setScrollTo}
-                        overlay={overlay}
-                        setCloseAllCategories={setCloseAllCategories}
-                    />
-                )}
+                <MenuDisplay setScrollTo={setScrollTo} setCloseAllCategories={setCloseAllCategories} />
             </View>
         </TouchableWithoutFeedback>
     );

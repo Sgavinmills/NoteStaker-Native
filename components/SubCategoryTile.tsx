@@ -28,7 +28,6 @@ const SubCategoryTile: React.FC<TileProps> = ({
     parentCategoryIndex,
     index: index,
 }) => {
-    const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
     const subCategory = useSelector((state: RootState) => state.memory.subCategories[subCategoryID]);
 
@@ -66,11 +65,6 @@ const SubCategoryTile: React.FC<TileProps> = ({
     }, [notesForSubCat]);
 
     const handleTilePress = () => {
-        if (overlay.isShowing) {
-            dispatch(updateMenuOverlay(getEmptyOverlay()));
-            return;
-        }
-
         const isEmpty = notesForSubCat.length === 0;
         if (isEmpty) {
             addNewNote();
@@ -92,23 +86,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
         setIsExpanded(!isExpanded);
     };
 
-    const tileHasMenuOpen = () => {
-        if (
-            overlay.isShowing &&
-            overlay.menuType === "subCategory" &&
-            overlay.menuData.subCategoryID === subCategory.id
-        ) {
-            return true;
-        }
-
-        return false;
-    };
-
     const handleMenuPress = () => {
-        if (overlay.isShowing) {
-            dispatch(updateMenuOverlay(getEmptyOverlay()));
-            return;
-        }
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "subCategory",
@@ -185,7 +163,6 @@ const SubCategoryTile: React.FC<TileProps> = ({
                 <View
                     style={[
                         categoryStyles.subCategoryTile,
-                        tileHasMenuOpen() && categoryStyles.categoryTileSelected,
                         !isExpanded && isLastSubCategory && categoryStyles.bottomRadius,
                     ]}
                 >
