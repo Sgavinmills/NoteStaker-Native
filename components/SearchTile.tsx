@@ -2,11 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { BackHandler, TouchableWithoutFeedback, View, Text, FlatList } from "react-native";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
-
+import { useDispatch } from "react-redux";
 import { RootState } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { Note } from "../types";
 import NoteTile from "./NoteTile";
+import { AppDispatch } from "../redux/store/store";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { updateMenuOverlay } from "../redux/slice";
 
 interface TileProps {
     setIsSearch: React.Dispatch<React.SetStateAction<boolean>>;
@@ -17,6 +20,7 @@ interface TileProps {
 const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focusInput }) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure.homeScreen);
+    const dispatch = useDispatch<AppDispatch>();
 
     // back button closes search rather than normal behaviour
     useEffect(() => {
@@ -68,10 +72,16 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
         />
     );
 
+    const handleBackPress = () => {
+        dispatch(updateMenuOverlay(getEmptyOverlay()));
+        setIsSearch(false);
+    };
+
     const inputRef = useRef(null);
 
     const handleSearchTilePress = () => {
         // set focus back to searchinput
+        dispatch(updateMenuOverlay(getEmptyOverlay()));
         focusInput();
     };
     return (
@@ -111,11 +121,7 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
                         )}
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
-                        <TouchableWithoutFeedback
-                            onPress={() => {
-                                setIsSearch(false);
-                            }}
-                        >
+                        <TouchableWithoutFeedback onPress={handleBackPress}>
                             <Ionicons
                                 name="return-up-back"
                                 style={[categoryStyles.binocularsIconText, categoryStyles.icons]}
