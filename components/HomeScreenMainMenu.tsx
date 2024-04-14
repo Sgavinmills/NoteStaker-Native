@@ -24,7 +24,11 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setC
     const [isCategoryModal, setIsCategoryModal] = useState(false);
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteMessage: "", deleteType: "" });
+    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({
+        deleteMessage: "",
+        deleteType: "",
+        additionalMessage: "",
+    });
     const dispatch = useDispatch<AppDispatch>();
 
     const handleAddCategoryPress = () => {
@@ -36,6 +40,11 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setC
         setCloseAllCategories(true);
     };
     const handleViewSecureCategoriesPress = () => {
+        if (homeScreenShowSecure) {
+            dispatch(toggleHomeScreenShowingSecureCategories());
+            dispatch(updateMenuOverlay(getEmptyOverlay()));
+            return;
+        }
         showSecureCategories();
     };
 
@@ -60,6 +69,7 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setC
             deleteType: "backupData",
             deleteMessage:
                 "Save a copy of note data to phone? This will not be encrypted and technically viewable to anyone with access to your phone",
+            additionalMessage: "",
         };
 
         setDeleteInfo(deleteInfo);
@@ -70,6 +80,7 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setIsHomeScreenMainMenu, setC
             deleteType: "importData",
             deleteMessage:
                 "You are about to import data from a backup file. All current data stored in the app will be overwritten. Ensure you have backed up data first.",
+            additionalMessage: "",
         };
 
         setDeleteInfo(deleteInfo);

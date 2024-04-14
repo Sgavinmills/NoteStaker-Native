@@ -60,6 +60,10 @@ const modalStyles = StyleSheet.create({
         top: 10,
     },
 
+    additionalMessageText: {
+        color: theme.colors.categoryText,
+    },
+
     modalButtonContainer: {
         width: "65%",
     },

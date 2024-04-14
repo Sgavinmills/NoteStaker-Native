@@ -25,12 +25,33 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
+    const showingSecure = useSelector((state: RootState) => state.memory.canShowSecure.homeScreen);
+
     const dispatch = useDispatch<AppDispatch>();
     const note = useSelector((state: RootState) => state.memory.notes[overlay.menuData.noteID]);
     const [parentCatToDisplaySubsOf, setParentCatToDisplaySubsOf] = useState(overlay.menuData.categoryID);
     const [displayMainCategories, setDisplayMainCategories] = useState(overlay.menuData.subCategoryID ? false : true);
 
     const [errorMessage, setErrorMessage] = useState("");
+
+    const subCatTabsToDisplay: string[] = [];
+    const catTabsToDisplay: string[] = [];
+    if (!displayMainCategories) {
+        console.log("1");
+        categories[parentCatToDisplaySubsOf].subCategories.forEach((subCatRef) => {
+            if (showingSecure || !subCatRef.isSecure) {
+                subCatTabsToDisplay.push(subCatRef.id);
+            }
+        });
+    } else {
+        console.log("2");
+
+        categoryList.forEach((catRef) => {
+            if (showingSecure || !catRef.isSecure) {
+                catTabsToDisplay.push(catRef.id);
+            }
+        });
+    }
 
     const handleSubCategoryClick = (subCategoryID: string) => {
         // check if note exists in subcategory we've clicked on
@@ -127,19 +148,19 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
         <View style={adjustCatsStyles.container}>
             {displayMainCategories && (
                 <>
-                    {categoryList.map((categoryRef) => {
+                    {catTabsToDisplay.map((categoryID) => {
                         return (
                             <TouchableOpacity
-                                key={categoryRef.id}
+                                key={categoryID}
                                 style={[
                                     adjustCatsStyles.tab,
-                                    isInMainCategory(categoryRef.id) && adjustCatsStyles.tabSelected,
+                                    isInMainCategory(categoryID) && adjustCatsStyles.tabSelected,
                                 ]}
                                 onPress={() => {
-                                    handleMainCategoryClick(categoryRef.id);
+                                    handleMainCategoryClick(categoryID);
                                 }}
                             >
-                                <Text style={adjustCatsStyles.text}>{categories[categoryRef.id].name}</Text>
+                                <Text style={adjustCatsStyles.text}>{categories[categoryID].name}</Text>
                             </TouchableOpacity>
                         );
                     })}
@@ -147,19 +168,19 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
             )}
             {!displayMainCategories && (
                 <>
-                    {categories[parentCatToDisplaySubsOf].subCategories.map((subCategoryRef) => {
+                    {subCatTabsToDisplay.map((subCategoryID) => {
                         return (
                             <TouchableOpacity
-                                key={subCategoryRef.id}
+                                key={subCategoryID}
                                 style={[
                                     adjustCatsStyles.subTab,
-                                    isInSubCategory(subCategoryRef.id) && adjustCatsStyles.tabSelected,
+                                    isInSubCategory(subCategoryID) && adjustCatsStyles.tabSelected,
                                 ]}
                                 onPress={() => {
-                                    handleSubCategoryClick(subCategoryRef.id);
+                                    handleSubCategoryClick(subCategoryID);
                                 }}
                             >
-                                <Text style={adjustCatsStyles.text}>{subCategories[subCategoryRef.id].name}</Text>
+                                <Text style={adjustCatsStyles.text}>{subCategories[subCategoryID].name}</Text>
                             </TouchableOpacity>
                         );
                     })}

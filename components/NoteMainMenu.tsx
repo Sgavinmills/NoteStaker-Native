@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import menuOverlayStyles from "../styles/menuOverlayStyles";
-import { FontAwesome, Entypo } from "@expo/vector-icons";
+import { FontAwesome, Entypo, MaterialIcons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, GestureResponderEvent } from "react-native";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector, useDispatch } from "react-redux";
@@ -35,7 +35,11 @@ const NoteMainMenu: React.FC<TileProps> = ({
     const category = useSelector((state: RootState) => state.memory.categories[overlay.menuData.categoryID]);
 
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteType: "", deleteMessage: "" });
+    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({
+        deleteType: "",
+        deleteMessage: "",
+        additionalMessage: "",
+    });
 
     const handleMoveNote = () => {
         setIsMoveArrows(true);
@@ -98,6 +102,7 @@ const NoteMainMenu: React.FC<TileProps> = ({
         const deleteInfo: DeleteInfo = {
             deleteType: "deleteNote",
             deleteMessage: "Are you sure you want to delete?",
+            additionalMessage: "",
         };
 
         if (note.locations.length > 1) {
@@ -163,7 +168,7 @@ const NoteMainMenu: React.FC<TileProps> = ({
         <>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleCameraPress}>
                 <FontAwesome name="camera" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>Add photo to note (tmp)</Text>
+                <Text style={menuOverlayStyles.text}>Add image to note</Text>
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddRemoveCategories}>
                 <FontAwesome name="reorder" style={menuOverlayStyles.icons} />
@@ -175,20 +180,20 @@ const NoteMainMenu: React.FC<TileProps> = ({
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveNote}>
                 <Entypo name="select-arrows" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>Move note</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDelete}>
-                <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
-                <Text style={menuOverlayStyles.text}>Delete note</Text>
+                <Text style={menuOverlayStyles.text}>Reorder note</Text>
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecure}>
                 <FontAwesome name="lock" style={menuOverlayStyles.icons} />
                 {!note.isSecureNote && <Text style={menuOverlayStyles.text}>Make secure note</Text>}
                 {note.isSecureNote && <Text style={menuOverlayStyles.text}>Unsecure note</Text>}
             </TouchableOpacity>
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDelete}>
+                <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
+                <Text style={menuOverlayStyles.text}>Delete note</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAdditionalInfoPress}>
-                <FontAwesome name="times" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>See additional note info</Text>
+                <MaterialIcons name="read-more" style={menuOverlayStyles.icons} />
+                <Text style={menuOverlayStyles.text}>See note details</Text>
             </TouchableOpacity>
             {deleteModalVisible && (
                 <DeleteModal

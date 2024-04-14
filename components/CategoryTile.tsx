@@ -31,6 +31,7 @@ const CategoryTile: React.FC<TileProps> = ({
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const showingSecure = showSecure.homeScreen || showSecure.categories.includes(categoryID);
+    const [securePlaceholderTile, setSecurePlaceholderTile] = useState(false);
     // console.log("re render category: " + category.name);
 
     const notesForCat: string[] = [];
@@ -89,6 +90,18 @@ const CategoryTile: React.FC<TileProps> = ({
                 toggleExpansion();
             }
             return;
+        }
+
+        // if has subcats but all are secure then display a temp warning
+        if (
+            !showingSecure &&
+            category.subCategories.length > 0 &&
+            category.subCategories.every((subCatRef) => subCatRef.isSecure)
+        ) {
+            setSecurePlaceholderTile(true);
+            setTimeout(() => {
+                setSecurePlaceholderTile(false);
+            }, 500);
         }
         toggleExpansion();
     };
@@ -163,7 +176,6 @@ const CategoryTile: React.FC<TileProps> = ({
         if (!isExpanded) {
             return true;
         }
-
         const isEmpty = category.notes.length === 0 && category.subCategories.length === 0;
         return isEmpty;
     };
@@ -226,6 +238,7 @@ const CategoryTile: React.FC<TileProps> = ({
                     </View>
                 </View>
             </TouchableWithoutFeedback>
+            {securePlaceholderTile && <PlaceholderTile />}
             {isExpanded &&
                 subCatsForCat.length > 0 &&
                 subCatsForCat.map((subCatID, subCatIndex) => {
@@ -263,3 +276,25 @@ const CategoryTile: React.FC<TileProps> = ({
 };
 
 export default CategoryTile;
+
+const PlaceholderTile: React.FC = () => {
+    return (
+        <View
+            style={[
+                categoryStyles.subCategoryTile,
+                // addBottomTileMargin() && categoryStyles.lastMargin,
+                categoryStyles.bottomRadius,
+            ]}
+        >
+            <View style={[categoryStyles.categoryTextContainer, { flexDirection: "row", alignItems: "center" }]}>
+                <Text style={categoryStyles.subCategoryText} adjustsFontSizeToFit={true} numberOfLines={1}>
+                    <FontAwesome name="lock" style={categoryStyles.padlock}></FontAwesome>
+                    {"  "}
+                    Subcategories are secured
+                    {"  "}
+                    <FontAwesome name="lock" style={categoryStyles.padlock}></FontAwesome>
+                </Text>
+            </View>
+        </View>
+    );
+};

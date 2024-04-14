@@ -32,8 +32,9 @@ const SubCategoryTile: React.FC<TileProps> = ({
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
     const subCategory = useSelector((state: RootState) => state.memory.subCategories[subCategoryID]);
 
-    // console.log("re render subcategory: " + subCategory.name);
+    const dispatch = useDispatch<AppDispatch>();
 
+    console.log("re render subcategory: " + subCategory.name);
     const showingSecure =
         showSecure.homeScreen ||
         showSecure.categories.includes(subCategoryID) ||
@@ -45,7 +46,15 @@ const SubCategoryTile: React.FC<TileProps> = ({
         }
     });
 
-    const dispatch = useDispatch<AppDispatch>();
+    // clean up method
+    useEffect(() => {
+        return () => {
+            // if this subcat id is in the showing list then remove it
+            if (showSecure.categories.includes(subCategoryID)) {
+                dispatch(removeFromShowSecureNote(subCategoryID));
+            }
+        };
+    }, [showSecure.categories]);
 
     const [isExpanded, setIsExpanded] = useState(false);
 

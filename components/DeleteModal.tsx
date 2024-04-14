@@ -349,6 +349,7 @@ const DeleteModal: React.FC<TileProps> = ({
                             />
                         </View>
                     </View>
+                    <Text style={modalStyles.additionalMessageText}>{deleteInfo.additionalMessage}</Text>
                 </View>
             </View>
         </Modal>

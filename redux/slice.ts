@@ -572,6 +572,7 @@ const notesSlice = createSlice({
         // updateSubCategorySecureStatus toggles wherer a category is secure or not
         // it will update the catRef in the parent category subCategoryList
         updateSubCategorySecureStatus(state, action: PayloadAction<string>) {
+            console.log("getting rogue called?");
             return produce(state, (draft) => {
                 const subCategoryID = action.payload;
                 const subCategory = draft.subCategories[subCategoryID];

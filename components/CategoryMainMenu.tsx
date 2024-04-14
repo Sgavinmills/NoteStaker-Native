@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import menuOverlayStyles from "../styles/menuOverlayStyles";
-import { FontAwesome, Entypo } from "@expo/vector-icons";
+import { FontAwesome, Entypo, MaterialIcons } from "@expo/vector-icons";
 import { Text, TouchableOpacity } from "react-native";
 import CategoryModal from "./CategoryModal";
 import { DeleteInfo } from "../types";
@@ -40,10 +40,14 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
 
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({ deleteMessage: "", deleteType: "" });
+    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({
+        deleteMessage: "",
+        deleteType: "",
+        additionalMessage: "",
+    });
     const [isCategoryModal, setIsCategoryModal] = useState(false);
 
-    const catName = isCategory ? "category" : "sub-category";
+    const catName = isCategory ? "category" : "subcategory";
     const openCategoryID = isCategory ? overlay.menuData.categoryID : overlay.menuData.subCategoryID;
 
     // whether to show any options that depend on the category having notes or not
@@ -88,16 +92,27 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
         const deleteInfo: DeleteInfo = {
             deleteType: "removeAll",
             deleteMessage: "",
+            additionalMessage: "",
         };
 
-        let catName: string;
+        let name: string;
         if (!subCategory) {
-            catName = category.name;
+            name = category.name;
         } else {
-            catName = subCategory.name;
+            name = subCategory.name;
         }
 
-        deleteInfo.deleteMessage = `Are you sure you want to remove all notes from ${catName}? All notes not within other categories will be permenantly deleted`;
+        deleteInfo.deleteMessage = `Are you sure you want to remove all notes from ${name}? All notes not within other categories will be permenantly deleted`;
+
+        if (subCategory) {
+            if (subCategory.notes.some((noteRef) => noteRef.isSecure === true)) {
+                deleteInfo.additionalMessage = `There are secure notes in this ${catName} that will be deleted`;
+            }
+        } else {
+            if (category.notes.some((noteRef) => noteRef.isSecure === true)) {
+                deleteInfo.additionalMessage = `There are secure notes in this ${catName} that will be deleted`;
+            }
+        }
         setDeleteInfo(deleteInfo);
         setDeleteModalVisible(true);
     };
@@ -106,6 +121,7 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
         const deleteInfo: DeleteInfo = {
             deleteType: "deleteCategory",
             deleteMessage: "",
+            additionalMessage: "",
         };
 
         let catName: string;
@@ -116,6 +132,27 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
         }
 
         deleteInfo.deleteMessage = `Are you sure you want to delete the category ${catName}? All notes not within other categories will be permenantly deleted`;
+
+        if (subCategory) {
+            if (subCategory.notes.some((noteRef) => noteRef.isSecure === true)) {
+                deleteInfo.additionalMessage = `There are secure notes in this subcategory that will be deleted`;
+            }
+        } else {
+            if (category.subCategories.length === 0) {
+                if (category.notes.some((noteRef) => noteRef.isSecure === true)) {
+                    deleteInfo.additionalMessage = `There are secure notes in this category that will be deleted`;
+                }
+            } else {
+                // need to know if the subcategories have any secure notes.
+                console.log(category.subCategories);
+                if (category.subCategories.some((subCatRef) => subCatRef.isSecure === true)) {
+                    deleteInfo.additionalMessage = `There are secure subcategories in this category that will be deleted`;
+                } else {
+                    // cant get any more specific than this without having access to subCategories
+                    deleteInfo.additionalMessage = `There may be secure notes in the subcategories that will be deleted`;
+                }
+            }
+        }
 
         setDeleteInfo(deleteInfo);
         setDeleteModalVisible(true);
@@ -209,36 +246,54 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
     const makeCategorySecure = (): string => {
         if (subCategory) {
             if (subCategory.isSecure) {
-                return "remove category as secure";
+                return "Unsecure subcategory";
             } else {
-                return "make category secure";
+                return "Make subcategory secure";
             }
         } else {
             if (category.isSecure) {
-                return "remove category as secure";
+                return "Unsecure category";
             } else {
-                return "make category secure";
+                return "Make category secure";
             }
         }
     };
 
+    const handleAdditionalInfoPress = () => {};
+
     const makeCategorySecureText = makeCategorySecure();
+
+    const getSecureItemsText = () => {
+        if (showingSecureCategories.includes(openCategoryID)) {
+            // hide text
+            if (!subCategory) {
+                if (category.subCategories.length > 0) {
+                    return "Hide secure subcategories";
+                }
+            }
+            return "Hide secure notes";
+        } else {
+            // show text
+            if (!subCategory) {
+                if (category.subCategories.length > 0) {
+                    return "Show secure subcategories";
+                }
+            }
+            return "Show secure notes";
+        }
+    };
 
     return (
         <>
             {overlay.menuType === "category" && (
                 <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddSubCat}>
                     <FontAwesome name="plus" style={menuOverlayStyles.icons} />
-                    <Text style={menuOverlayStyles.text}>Add Sub-Category</Text>
+                    <Text style={menuOverlayStyles.text}>Add subcategory</Text>
                 </TouchableOpacity>
             )}
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleEditName}>
                 <FontAwesome name="edit" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>Edit {catName} name</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveCategory}>
-                <Entypo name="select-arrows" style={[menuOverlayStyles.icons]} />
-                <Text style={menuOverlayStyles.text}>Move {catName}</Text>
             </TouchableOpacity>
             {showNoteSpecificOptions() && (
                 <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleRemoveAllNotes}>
@@ -246,27 +301,25 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setIsMoveArrows, setIsCategoryM
                     <Text style={menuOverlayStyles.text}>Remove all notes from {catName}</Text>
                 </TouchableOpacity>
             )}
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveCategory}>
+                <Entypo name="select-arrows" style={[menuOverlayStyles.icons]} />
+                <Text style={menuOverlayStyles.text}>Reorder {catName}</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleShowSecureNote}>
-                <FontAwesome name="lock" style={menuOverlayStyles.icons} />
-                {/* TODO - MAKE TEXT MORE SPECIFIC TO NOTES OR SUB CATS  */}
-                {showingSecureCategories.includes(openCategoryID) && (
-                    <Text style={menuOverlayStyles.text}>Hide secure items</Text>
-                )}
-                {!showingSecureCategories.includes(openCategoryID) && (
-                    <Text style={menuOverlayStyles.text}>Show secure items</Text>
-                )}
+                <FontAwesome name="key" style={menuOverlayStyles.icons} />
+                <Text style={menuOverlayStyles.text}>{getSecureItemsText()}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecureCategory}>
                 <FontAwesome name="lock" style={menuOverlayStyles.icons} />
-                <Text style={menuOverlayStyles.text}>{makeCategorySecureText}hh</Text>
+                <Text style={menuOverlayStyles.text}>{makeCategorySecureText}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDeleteCategory}>
                 <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
                 <Text style={menuOverlayStyles.text}>Delete {catName}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleScrollTo}>
-                <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
-                <Text style={menuOverlayStyles.text}>SCROLL TO</Text>
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAdditionalInfoPress}>
+                <MaterialIcons name="read-more" style={menuOverlayStyles.icons} />
+                <Text style={menuOverlayStyles.text}>See category details</Text>
             </TouchableOpacity>
             {deleteModalVisible && (
                 <DeleteModal

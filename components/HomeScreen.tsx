@@ -1,4 +1,13 @@
-import { FlatList, TouchableOpacity, Text, View, StatusBar, TouchableWithoutFeedback, TextInput } from "react-native";
+import {
+    FlatList,
+    TouchableOpacity,
+    Text,
+    View,
+    StatusBar,
+    TouchableWithoutFeedback,
+    TextInput,
+    BackHandler,
+} from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
 import categoryStyles from "../styles/categoryStyles";
@@ -35,6 +44,19 @@ const HomeScreen: React.FC = () => {
             catsForHomeScreen.push(catRef.id);
         }
     });
+
+    // back button closes overlay rather than normal behaviour
+    useEffect(() => {
+        const backAction = () => {
+            setCloseAllCategories(true);
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+
+        return () => backHandler.remove(); // Cleanup the event listener
+    }, []);
+
     const handleOpenMenuPress = () => {
         if (isSearch) {
             setIsSearch(false);
@@ -71,7 +93,7 @@ const HomeScreen: React.FC = () => {
         <CategoryTile
             categoryID={item}
             index={index}
-            isLastCategory={index === categoryList.length - 1 ? true : false}
+            isLastCategory={index === catsForHomeScreen.length - 1 ? true : false}
             closeAllCategories={closeAllCategories}
             setCloseAllCategories={setCloseAllCategories}
         />
