@@ -60,7 +60,7 @@ const catStyles = StyleSheet.create({
 
     categoryText: {
         fontSize: 20,
-        color: theme.colors.categoryText,
+        color: theme.colors.noteText,
         fontWeight: "bold",
     },
 
@@ -80,12 +80,12 @@ const catStyles = StyleSheet.create({
 
     plusIconText: {
         fontSize: 20,
-        color: theme.colors.categoryText,
+        color: theme.colors.noteText,
     },
 
     caretIconText: {
         fontSize: 33,
-        color: theme.colors.categoryText,
+        color: theme.colors.noteText,
     },
 
     ellipsisIconText: {
@@ -95,7 +95,7 @@ const catStyles = StyleSheet.create({
 
     binocularCategoryText: {
         fontSize: 20,
-        color: theme.colors.categoryText,
+        color: theme.colors.noteText,
     },
 
     binocularNoteText: {
@@ -111,13 +111,13 @@ const catStyles = StyleSheet.create({
 
     subCategoryText: {
         fontSize: 20,
-        color: theme.colors.categoryText,
+        color: theme.colors.noteText,
     },
 
     newCategoryText: {
         fontSize: 30,
         fontWeight: "bold",
-        color: theme.colors.categoryText,
+        color: theme.colors.noteText,
         textAlign: "right",
         paddingLeft: 20,
         paddingRight: 20,
