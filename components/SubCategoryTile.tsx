@@ -1,4 +1,4 @@
-import { GestureResponderEvent, Text, View, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
+import { GestureResponderEvent, Text, View, TouchableWithoutFeedback, TouchableOpacity, Keyboard } from "react-native";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
@@ -65,6 +65,10 @@ const SubCategoryTile: React.FC<TileProps> = ({
     }, [notesForSubCat]);
 
     const handleTilePress = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
         const isEmpty = notesForSubCat.length === 0;
         if (isEmpty) {
             addNewNote();
@@ -87,6 +91,10 @@ const SubCategoryTile: React.FC<TileProps> = ({
     };
 
     const handleMenuPress = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "subCategory",
@@ -117,6 +125,10 @@ const SubCategoryTile: React.FC<TileProps> = ({
     };
 
     const handleAddNotePress = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
         addNewNote();
         if (!isExpanded) {
             toggleExpansion();
@@ -124,6 +136,10 @@ const SubCategoryTile: React.FC<TileProps> = ({
     };
 
     const handleLongPressAddNote = (event: GestureResponderEvent) => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
         pickImage();
     };
 

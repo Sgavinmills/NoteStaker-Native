@@ -5,7 +5,6 @@ import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useDispatch } from "react-redux";
 import { RootState } from "../redux/store/store";
 import { useSelector } from "react-redux";
-import { Note } from "../types";
 import NoteTile from "./NoteTile";
 import { AppDispatch } from "../redux/store/store";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";

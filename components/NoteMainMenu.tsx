@@ -41,29 +41,6 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         setIsMoveArrows(true);
     };
 
-    const handleCameraPress = (event: GestureResponderEvent) => {
-        pickImage();
-    };
-
-    const pickImage = async () => {
-        // No permissions request is necessary for launching the image library
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,
-            quality: 1,
-        });
-
-        if (overlay.isShowing) {
-            dispatch(updateMenuOverlay(getEmptyOverlay()));
-        }
-
-        if (!result.canceled) {
-            const imageURI = result.assets[0].uri;
-            const noteCopy = { ...note };
-            dispatch(updateNote({ ...noteCopy, imageURI: imageURI }));
-        }
-    };
-
     const handleHighPriorityPress = () => {
         const noteCopy = { ...note };
         noteCopy.priority = noteCopy.priority !== "high" ? "high" : "normal";
@@ -167,10 +144,6 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                 <MoveArrows />
             ) : (
                 <>
-                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleCameraPress}>
-                        <FontAwesome name="camera" style={menuOverlayStyles.icons} />
-                        <Text style={menuOverlayStyles.text}>Add image to note</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddRemoveCategories}>
                         <FontAwesome name="reorder" style={menuOverlayStyles.icons} />
                         <Text style={menuOverlayStyles.text}>Move between categories</Text>

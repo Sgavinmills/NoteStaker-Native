@@ -7,6 +7,7 @@ import {
     TouchableWithoutFeedback,
     TextInput,
     BackHandler,
+    Keyboard,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
@@ -59,6 +60,10 @@ const HomeScreen: React.FC = () => {
     }, []);
 
     const handleOpenMenuPress = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "homeScreen",
@@ -106,6 +111,10 @@ const HomeScreen: React.FC = () => {
     };
 
     const handleSearchPress = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
         dispatch(updateMenuOverlay(getEmptyOverlay()));
         setIsSearch(true);
     };
@@ -155,6 +164,7 @@ const HomeScreen: React.FC = () => {
                         <SearchCategoryTile searchText={searchText} setIsSearch={setIsSearch} focusInput={focusInput} />
                     ) : (
                         <FlatList
+                            keyboardShouldPersistTaps={"handled"}
                             ref={flatListRef}
                             removeClippedSubviews={false}
                             style={categoryStyles.categoryListContainer}

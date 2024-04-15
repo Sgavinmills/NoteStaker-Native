@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     GestureResponderEvent,
     TouchableWithoutFeedback,
+    Keyboard,
 } from "react-native";
 import noteStyles from "../styles/noteStyles";
 import { FontAwesome } from "@expo/vector-icons";
@@ -19,6 +20,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import React from "react";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import * as ImagePicker from "expo-image-picker";
+
 interface TileProps {
     noteID: string;
     isLastCategory: boolean;
@@ -73,6 +76,10 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleMenuPress = (event: GestureResponderEvent) => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "note",
@@ -90,8 +97,31 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleImagePress = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
         dispatch(updateMenuOverlay(getEmptyOverlay()));
         setIsShowingImage(true);
+    };
+
+    const handleCameraPress = (event: GestureResponderEvent) => {
+        pickImage();
+    };
+
+    const pickImage = async () => {
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            const imageURI = result.assets[0].uri;
+            const noteCopy = { ...note };
+            dispatch(updateNote({ ...noteCopy, imageURI: imageURI }));
+        }
     };
 
     const handleCheckboxPress = () => {
@@ -101,6 +131,10 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleTouchNote = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
         dispatch(updateMenuOverlay(getEmptyOverlay()));
         setNoteEditMode(true);
     };
@@ -159,6 +193,11 @@ const NoteTile: React.FC<TileProps> = ({
                     )}
                 </View>
                 <View style={noteStyles.tileIconsContainer}>
+                    {noteEditMode && (
+                        <TouchableOpacity onPress={handleCameraPress}>
+                            <FontAwesome name="camera" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
+                        </TouchableOpacity>
+                    )}
                     <TouchableOpacity onPress={handleCheckboxPress}>
                         {note.completed && (
                             <Text style={[noteStyles.icons, noteStyles.completedCheckbox]}>&#x2705;</Text>
@@ -201,6 +240,9 @@ const InsertNote: React.FC<Props> = ({ subCategoryID, categoryID, index }) => {
     const handleAddNoteToBottom = () => {
         dispatch(updateMenuOverlay(getEmptyOverlay()));
 
+        // slight issue with secure notes, in that it messes the insertion index up.
+        // so really, need to find the true index of the note we're adding below... so look up the category, find the index in notes where the ref.id matches this id
+        // and use that index as insertion position.
         const newNoteData: NewNoteData = {
             categoryID: categoryID,
             subCategoryID: subCategoryID ? subCategoryID : "",

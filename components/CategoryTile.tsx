@@ -1,4 +1,4 @@
-import { Text, View, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent } from "react-native";
+import { Text, View, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent, Keyboard } from "react-native";
 import { useEffect, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome } from "@expo/vector-icons";
@@ -77,6 +77,11 @@ const CategoryTile: React.FC<TileProps> = ({
     };
 
     const handleTilePress = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
+
         const isEmpty = notesForCat.length === 0 && category.subCategories.length === 0;
         if (isEmpty) {
             addNewNote();
@@ -112,6 +117,11 @@ const CategoryTile: React.FC<TileProps> = ({
     };
 
     const handleAddNotePress = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
+
         addNewNote();
         if (!isExpanded) {
             toggleExpansion();
@@ -119,6 +129,11 @@ const CategoryTile: React.FC<TileProps> = ({
     };
 
     const handleLongPressAddNote = (event: GestureResponderEvent) => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
+
         pickImage();
     };
 
@@ -145,6 +160,10 @@ const CategoryTile: React.FC<TileProps> = ({
     };
 
     const handleMenuPress = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+            return;
+        }
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "category",
