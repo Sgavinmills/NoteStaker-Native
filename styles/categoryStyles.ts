@@ -135,6 +135,12 @@ const catStyles = StyleSheet.create({
         paddingLeft: 10,
         paddingRight: 10,
     },
+
+    moveArrows: {
+        paddingLeft: 10,
+        paddingRight: 10,
+        fontSize: 45,
+    },
 });
 
 export default catStyles;

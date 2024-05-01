@@ -11,10 +11,25 @@ export const getEmptyOverlay = () => {
             noteIndex: null,
             categoryIndex: null,
             subCategoryIndex: null,
+            isSearchTile: false,
         },
     };
 
     return overlay;
+};
+
+export const moveDownList = (newList: any[], index: number) => {
+    const temp = newList[index + 1];
+    newList[index + 1] = newList[index];
+    newList[index] = temp;
+    return [...newList];
+};
+
+export const moveUpList = (newList: any[], index: number) => {
+    const temp = newList[index - 1];
+    newList[index - 1] = newList[index];
+    newList[index] = temp;
+    return [...newList];
 };
 
 export const printCategories = (categories: { [id: string]: Category }) => {

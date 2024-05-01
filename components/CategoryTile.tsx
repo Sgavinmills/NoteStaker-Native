@@ -1,16 +1,22 @@
 import { Text, View, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent, Keyboard } from "react-native";
 import { useEffect, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Entypo } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { MenuOverlay, HeightUpdateInfo, NewNoteData, Note } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData, Note, IDs } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import NoteTile from "./NoteTile";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";
-import { createNewNote, removeFromShowSecureNote, updateCategoryHeight, updateMenuOverlay } from "../redux/slice";
-import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import {
+    createNewNote,
+    removeFromShowSecureNote,
+    updateCategoryHeight,
+    updateCategoryList,
+    updateMenuOverlay,
+} from "../redux/slice";
+import { getEmptyOverlay, moveDownList, moveUpList } from "../utilFuncs/utilFuncs";
 import * as ImagePicker from "expo-image-picker";
 interface TileProps {
     categoryID: string;
@@ -18,6 +24,8 @@ interface TileProps {
     isLastCategory: boolean;
     setCloseAllCategories: React.Dispatch<React.SetStateAction<boolean>>;
     closeAllCategories: boolean;
+    moving: string;
+    setMoving: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const CategoryTile: React.FC<TileProps> = ({
@@ -26,12 +34,14 @@ const CategoryTile: React.FC<TileProps> = ({
     isLastCategory,
     closeAllCategories,
     setCloseAllCategories,
+    moving,
+    setMoving,
 }) => {
     const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
     const showingSecure = showSecure.homeScreen || showSecure.categories.includes(categoryID);
     const [securePlaceholderTile, setSecurePlaceholderTile] = useState(false);
-    console.log("re render category: " + category.name);
+    // console.log("--re render category: " + category.name);
 
     const notesForCat: string[] = [];
     category.notes.forEach((noteRef) => {
@@ -82,6 +92,11 @@ const CategoryTile: React.FC<TileProps> = ({
             return;
         }
 
+        if (moving) {
+            setMoving("");
+            return true;
+        }
+
         const isEmpty = notesForCat.length === 0 && category.subCategories.length === 0;
         if (isEmpty) {
             addNewNote();
@@ -122,6 +137,11 @@ const CategoryTile: React.FC<TileProps> = ({
             return;
         }
 
+        if (moving) {
+            setMoving("");
+            return true;
+        }
+
         addNewNote();
         if (!isExpanded) {
             toggleExpansion();
@@ -132,6 +152,11 @@ const CategoryTile: React.FC<TileProps> = ({
         if (Keyboard.isVisible()) {
             Keyboard.dismiss();
             return;
+        }
+
+        if (moving) {
+            setMoving("");
+            return true;
         }
 
         pickImage();
@@ -164,6 +189,12 @@ const CategoryTile: React.FC<TileProps> = ({
             Keyboard.dismiss();
             return;
         }
+
+        if (moving) {
+            setMoving("");
+            return true;
+        }
+
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "category",
@@ -190,15 +221,44 @@ const CategoryTile: React.FC<TileProps> = ({
         };
         dispatch(updateCategoryHeight(update));
     };
+
+    const handleLongPress = () => {
+        setCloseAllCategories(true);
+        setMoving(categoryID);
+    };
+
+    const categoryList = useSelector((state: RootState) => state.memory.categoryList);
+    const handleUpPress = () => {
+        const categoryListCopy = [...categoryList];
+
+        const currentIndex = categoryListCopy.findIndex((ref) => ref.id === categoryID);
+        if (currentIndex > 0) {
+            const newList = moveUpList(categoryListCopy, currentIndex);
+            dispatch(updateCategoryList(newList));
+        }
+        return;
+    };
+
+    const handleDownPress = () => {
+        const categoryListCopy = [...categoryList];
+
+        const currentIndex = categoryListCopy.findIndex((ref) => ref.id === categoryID);
+        if (currentIndex < categoryListCopy.length - 1) {
+            const newList = moveDownList(categoryListCopy, currentIndex);
+            dispatch(updateCategoryList(categoryListCopy));
+        }
+        return;
+    };
     return (
         <View onLayout={handleCategoryLayout} style={isLastCategory && categoryStyles.lastMargin}>
-            <TouchableWithoutFeedback onPress={handleTilePress} onLongPress={handleMenuPress}>
+            <TouchableWithoutFeedback onPress={handleTilePress} onLongPress={handleLongPress}>
                 <View
                     style={[
                         categoryStyles.categoryTile,
                         index === 0 && categoryStyles.categoryTileFirst,
                         categoryStyles.topRadius,
                         !isExpanded && categoryStyles.bottomRadius,
+                        moving === categoryID && categoryStyles.categoryTileSelected,
                     ]}
                 >
                     <View style={categoryStyles.categoryTextContainer}>
@@ -210,21 +270,45 @@ const CategoryTile: React.FC<TileProps> = ({
                         </Text>
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
-                        {category.subCategories.length === 0 && (
-                            <TouchableOpacity onPress={handleAddNotePress} onLongPress={handleLongPressAddNote}>
-                                <FontAwesome name="plus" style={[categoryStyles.plusIconText, categoryStyles.icons]} />
-                            </TouchableOpacity>
+                        {moving === categoryID ? (
+                            <>
+                                <View style={{ flexDirection: "row" }}>
+                                    <TouchableOpacity onPress={handleUpPress}>
+                                        <Entypo
+                                            name="arrow-bold-up"
+                                            style={[categoryStyles.categoryText, categoryStyles.moveArrows]}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={handleDownPress}>
+                                        <Entypo
+                                            name="arrow-bold-down"
+                                            style={[categoryStyles.categoryText, categoryStyles.moveArrows]}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </>
+                        ) : (
+                            <>
+                                {category.subCategories.length === 0 && (
+                                    <TouchableOpacity onPress={handleAddNotePress} onLongPress={handleLongPressAddNote}>
+                                        <FontAwesome
+                                            name="plus"
+                                            style={[categoryStyles.plusIconText, categoryStyles.icons]}
+                                        />
+                                    </TouchableOpacity>
+                                )}
+                                <FontAwesome
+                                    name={isExpanded ? "caret-up" : "caret-down"}
+                                    style={[categoryStyles.caretIconText, categoryStyles.icons]}
+                                />
+                                <TouchableOpacity onPress={handleMenuPress}>
+                                    <FontAwesome
+                                        name="ellipsis-v"
+                                        style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
+                                    />
+                                </TouchableOpacity>
+                            </>
                         )}
-                        <FontAwesome
-                            name={isExpanded ? "caret-up" : "caret-down"}
-                            style={[categoryStyles.caretIconText, categoryStyles.icons]}
-                        />
-                        <TouchableOpacity onPress={handleMenuPress}>
-                            <FontAwesome
-                                name="ellipsis-v"
-                                style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
-                            />
-                        </TouchableOpacity>
                     </View>
                 </View>
             </TouchableWithoutFeedback>
@@ -241,6 +325,8 @@ const CategoryTile: React.FC<TileProps> = ({
                             key={subCatID}
                             index={subCatIndex}
                             parentCategoryIndex={index}
+                            moving={moving}
+                            setMoving={setMoving}
                         />
                     );
                 })}
@@ -259,6 +345,8 @@ const CategoryTile: React.FC<TileProps> = ({
                             key={noteID}
                             subCategoryIndex={-1}
                             isSearchTile={false}
+                            moving={moving}
+                            setMoving={setMoving}
                         />
                     );
                 })}

@@ -124,6 +124,12 @@ const noteStyles = StyleSheet.create({
         fontSize: 20,
         paddingLeft: 5,
     },
+
+    moveArrows: {
+        paddingLeft: 10,
+        paddingRight: 10,
+        fontSize: 45,
+    },
 });
 
 export default noteStyles;

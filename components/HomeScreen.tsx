@@ -37,6 +37,8 @@ const HomeScreen: React.FC = () => {
     const flatListRef = useRef<FlatList>(null);
     const searchInputRef = useRef<TextInput>(null);
 
+    const [moving, setMoving] = useState<string>("");
+
     const showingSecureCategories = useSelector((state: RootState) => state.memory.canShowSecure.homeScreen);
     const catsForHomeScreen: string[] = [];
     categoryList.forEach((catRef) => {
@@ -45,11 +47,14 @@ const HomeScreen: React.FC = () => {
         }
     });
 
-    console.log("--Homescreen re-render");
-
+    // console.log("Homescreen re-render");
     // back button closes overlay rather than normal behaviour
     useEffect(() => {
         const backAction = () => {
+            if (moving) {
+                setMoving("");
+                return true;
+            }
             setCloseAllCategories(true);
             return true;
         };
@@ -57,13 +62,19 @@ const HomeScreen: React.FC = () => {
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
         return () => backHandler.remove(); // Cleanup the event listener
-    }, []);
+    }, [moving]);
 
     const handleOpenMenuPress = () => {
         if (Keyboard.isVisible()) {
             Keyboard.dismiss();
             return;
         }
+
+        if (moving) {
+            setMoving("");
+            return true;
+        }
+
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "homeScreen",
@@ -94,6 +105,8 @@ const HomeScreen: React.FC = () => {
             isLastCategory={index === catsForHomeScreen.length - 1 ? true : false}
             closeAllCategories={closeAllCategories}
             setCloseAllCategories={setCloseAllCategories}
+            moving={moving}
+            setMoving={setMoving}
         />
     );
 
@@ -115,6 +128,12 @@ const HomeScreen: React.FC = () => {
             Keyboard.dismiss();
             return;
         }
+
+        if (moving) {
+            setMoving("");
+            return true;
+        }
+
         dispatch(updateMenuOverlay(getEmptyOverlay()));
         setIsSearch(true);
     };

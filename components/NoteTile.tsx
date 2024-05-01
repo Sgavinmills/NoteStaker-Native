@@ -9,17 +9,25 @@ import {
     Keyboard,
 } from "react-native";
 import noteStyles from "../styles/noteStyles";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Entypo } from "@expo/vector-icons";
 import { MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
 import { useDispatch } from "react-redux";
-import { createNewNote, deleteNote, updateMenuOverlay, updateNote, updateNoteHeight } from "../redux/slice";
+import {
+    createNewNote,
+    deleteNote,
+    updateCategory,
+    updateMenuOverlay,
+    updateNote,
+    updateNoteHeight,
+    updateSubCategory,
+} from "../redux/slice";
 import { useState } from "react";
 import ImageModal from "./ImageModal";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import React from "react";
-import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import { getEmptyOverlay, moveDownList, moveUpList } from "../utilFuncs/utilFuncs";
 import * as ImagePicker from "expo-image-picker";
 
 interface TileProps {
@@ -33,6 +41,8 @@ interface TileProps {
     subCategoryIndex: number;
     parentCategoryIndex: number;
     isSearchTile: boolean;
+    moving: string;
+    setMoving: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const NoteTile: React.FC<TileProps> = ({
@@ -45,13 +55,15 @@ const NoteTile: React.FC<TileProps> = ({
     subCategoryIndex,
     parentCategoryIndex,
     isSearchTile,
+    moving,
+    setMoving,
 }) => {
     const note = useSelector((state: RootState) => state.memory.notes[noteID]);
     const dispatch = useDispatch<AppDispatch>();
 
     const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
     const [isShowingImage, setIsShowingImage] = useState(false);
-    console.log("re render note: " + note.note);
+    // console.log("----------re render note: " + note.note);
     const handleNoteChange = (text: string) => {
         const noteCopy = { ...note, note: text };
         if (noteCopy.isNewNote) {
@@ -80,6 +92,12 @@ const NoteTile: React.FC<TileProps> = ({
             Keyboard.dismiss();
             return;
         }
+
+        if (moving) {
+            setMoving("");
+            return true;
+        }
+
         const newOverlay: MenuOverlay = {
             isShowing: true,
             menuType: "note",
@@ -101,6 +119,12 @@ const NoteTile: React.FC<TileProps> = ({
             Keyboard.dismiss();
             return;
         }
+
+        if (moving) {
+            setMoving("");
+            return true;
+        }
+
         dispatch(updateMenuOverlay(getEmptyOverlay()));
         setIsShowingImage(true);
     };
@@ -135,6 +159,12 @@ const NoteTile: React.FC<TileProps> = ({
             Keyboard.dismiss();
             return;
         }
+
+        if (moving) {
+            setMoving("");
+            return true;
+        }
+
         dispatch(updateMenuOverlay(getEmptyOverlay()));
         setNoteEditMode(true);
     };
@@ -159,11 +189,72 @@ const NoteTile: React.FC<TileProps> = ({
 
         return isLastSubCategory && isLastNote;
     };
+
+    const handleLongPress = () => {
+        setMoving(noteID);
+    };
+
+    const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
+    const subCategory = useSelector((state: RootState) => state.memory.subCategories[subCategoryID]);
+    const handleUpPress = () => {
+        if (subCategoryID) {
+            const subCategoryCopy = { ...subCategory };
+
+            const newList = [...subCategoryCopy.notes];
+            const currentIndex = newList.findIndex((ref) => ref.id === noteID);
+            if (currentIndex > 0) {
+                subCategoryCopy.notes = moveUpList(newList, currentIndex);
+                dispatch(updateSubCategory(subCategoryCopy));
+            }
+            return;
+        } else {
+            const parentCategoryCopy = { ...category };
+
+            const newList = [...parentCategoryCopy.notes];
+            const currentIndex = newList.findIndex((ref) => ref.id === noteID);
+            if (currentIndex > 0) {
+                parentCategoryCopy.notes = moveUpList(newList, currentIndex);
+                dispatch(updateCategory(parentCategoryCopy));
+            }
+            return;
+        }
+    };
+
+    const handleDownPress = () => {
+        if (subCategoryID) {
+            const subCategoryCopy = { ...subCategory };
+
+            const newList = [...subCategoryCopy.notes];
+            const currentIndex = newList.findIndex((ref) => ref.id === noteID);
+            if (currentIndex < newList.length - 1) {
+                subCategoryCopy.notes = moveDownList(newList, currentIndex);
+                dispatch(updateSubCategory(subCategoryCopy));
+            }
+            return;
+        } else {
+            const categoryCopy = { ...category };
+
+            const newList = [...categoryCopy.notes];
+            const currentIndex = newList.findIndex((ref) => ref.id === noteID);
+            if (currentIndex < newList.length - 1) {
+                categoryCopy.notes = moveDownList(newList, currentIndex);
+                dispatch(updateCategory(categoryCopy));
+            }
+            return;
+        }
+    };
+
     return (
         <View onLayout={handleCategoryLayout} style={isLastNote && noteStyles.bottomBorder}>
-            <View style={[addBottomRadius() && noteStyles.bottomBorder, noteStyles.noteTile]}>
+            <View
+                style={[
+                    addBottomRadius() && noteStyles.bottomBorder,
+                    noteStyles.noteTile,
+                    moving === noteID && noteStyles.noteTileSelected,
+                ]}
+            >
                 <View style={noteStyles.noteContainer}>
-                    <TouchableOpacity onPress={handleImagePress}>
+                    <TouchableOpacity onPress={handleImagePress} onLongPress={handleLongPress}>
                         {note.imageURI && <Image source={{ uri: note.imageURI }} style={{ height: 150, width: 150 }} />}
                     </TouchableOpacity>
                     {noteEditMode && (
@@ -181,7 +272,7 @@ const NoteTile: React.FC<TileProps> = ({
                         />
                     )}
                     {!noteEditMode && (
-                        <TouchableWithoutFeedback onPress={handleTouchNote} onLongPress={handleMenuPress}>
+                        <TouchableWithoutFeedback onPress={handleTouchNote} onLongPress={handleLongPress}>
                             <Text style={[noteStyles.noteText, note.priority === "high" && noteStyles.highPriority]}>
                                 {note.isSecureNote && (
                                     <FontAwesome name="lock" style={noteStyles.padlock}></FontAwesome>
@@ -198,17 +289,35 @@ const NoteTile: React.FC<TileProps> = ({
                             <FontAwesome name="camera" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
                         </TouchableOpacity>
                     )}
-                    <TouchableOpacity onPress={handleCheckboxPress}>
-                        {note.completed && (
-                            <Text style={[noteStyles.icons, noteStyles.completedCheckbox]}>&#x2705;</Text>
-                        )}
-                        {!note.completed && (
-                            <Text style={[noteStyles.icons, noteStyles.notCompletedCheckbox]}>&#x26AA;</Text>
-                        )}
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleMenuPress}>
-                        <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
-                    </TouchableOpacity>
+                    {moving === noteID ? (
+                        <>
+                            <View style={{ flexDirection: "row" }}>
+                                <TouchableOpacity onPress={handleUpPress}>
+                                    <Entypo name="arrow-bold-up" style={[noteStyles.noteText, noteStyles.moveArrows]} />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handleDownPress}>
+                                    <Entypo
+                                        name="arrow-bold-down"
+                                        style={[noteStyles.noteText, noteStyles.moveArrows]}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        </>
+                    ) : (
+                        <>
+                            <TouchableOpacity onPress={handleCheckboxPress}>
+                                {note.completed && (
+                                    <Text style={[noteStyles.icons, noteStyles.completedCheckbox]}>&#x2705;</Text>
+                                )}
+                                {!note.completed && (
+                                    <Text style={[noteStyles.icons, noteStyles.notCompletedCheckbox]}>&#x26AA;</Text>
+                                )}
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handleMenuPress}>
+                                <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
+                            </TouchableOpacity>
+                        </>
+                    )}
                 </View>
                 {<InsertNote subCategoryID={subCategoryID} categoryID={categoryID} index={index} />}
             </View>
