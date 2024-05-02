@@ -116,13 +116,17 @@ const noteStyles = StyleSheet.create({
         position: "absolute",
         bottom: 0,
         left: 0,
+        width: 30,
+        height: 30,
     },
 
     addToBottomText: {
         color: theme.colors.tileBackground,
         textAlign: "center",
-        fontSize: 20,
+        fontSize: 45,
         paddingLeft: 5,
+        padding: 0,
+        margin: 0,
     },
 
     moveArrows: {

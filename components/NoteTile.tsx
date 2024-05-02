@@ -362,9 +362,9 @@ const InsertNote: React.FC<Props> = ({ subCategoryID, categoryID, index }) => {
     };
     return (
         <View style={noteStyles.addToBottomContainer}>
-            <TouchableWithoutFeedback onPress={handleAddNoteToBottom}>
-                <Text style={noteStyles.addToBottomText}>+</Text>
-            </TouchableWithoutFeedback>
+            <TouchableOpacity onLongPress={handleAddNoteToBottom}>
+                <Text style={noteStyles.addToBottomText}></Text>
+            </TouchableOpacity>
         </View>
     );
 };
