@@ -31,7 +31,7 @@ const SubCategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
     const showingSecureCategories = useSelector((state: RootState) => state.memory.canShowSecure.categories);
 
     const subCategory = useSelector((state: RootState) => state.memory.subCategories[overlay.menuData.subCategoryID]);
-    const heightData = useSelector((state: RootState) => state.memory.heightData);
+    // const heightData = useSelector((state: RootState) => state.memory.heightData);
     const dispatch = useDispatch<AppDispatch>();
 
     const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
@@ -209,7 +209,7 @@ const SubCategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                         <FontAwesome name="edit" style={menuOverlayStyles.icons} />
                         <Text style={menuOverlayStyles.text}>Edit subcategory name</Text>
                     </TouchableOpacity>
-                    {subCategory.notes.length && (
+                    {subCategory.notes.length > 0 && (
                         <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleRemoveAllNotes}>
                             <FontAwesome name="trash" style={menuOverlayStyles.icons} />
                             <Text style={menuOverlayStyles.text}>Remove all notes from subcategory</Text>
