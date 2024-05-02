@@ -7,6 +7,7 @@ import {
     GestureResponderEvent,
     TouchableWithoutFeedback,
     Keyboard,
+    BackHandler,
 } from "react-native";
 import noteStyles from "../styles/noteStyles";
 import { FontAwesome, Entypo } from "@expo/vector-icons";
@@ -21,7 +22,7 @@ import {
     updateNoteHeight,
     updateSubCategory,
 } from "../redux/slice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ImageModal from "./ImageModal";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
@@ -71,6 +72,19 @@ const NoteTile: React.FC<TileProps> = ({
         }
         dispatch(updateNote(noteCopy));
     };
+
+    useEffect(() => {
+        const backAction = () => {
+            if (noteEditMode) {
+                setNoteEditMode(false);
+                return true;
+            }
+        };
+
+        const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+
+        return () => backHandler.remove(); // Cleanup the event listener
+    });
 
     const handleNoteBlur = () => {
         setNoteEditMode(false);
