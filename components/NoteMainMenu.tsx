@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import menuOverlayStyles from "../styles/menuOverlayStyles";
 import { FontAwesome, Entypo, MaterialIcons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, GestureResponderEvent } from "react-native";
@@ -93,6 +93,10 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         setIsAdditionalInfo(true);
     };
 
+    useEffect(() => {
+        handleScrollToNote();
+    }, []);
+
     const handleScrollToNote = () => {
         let offset = 0;
         // to scroll to offset for all cats up to and inc this one
@@ -105,7 +109,6 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
             for (let i = 0; i <= categoryIndex; i++) {
                 offset += heightData[i].catHeight;
             }
-
             const subCategoryIndex = overlay.menuData.subCategoryIndex;
             if (subCategoryIndex != null && subCategoryIndex >= 0) {
                 const numOfSubs = category.subCategories.length;
@@ -117,7 +120,7 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                 if (noteIndex != null && noteIndex >= 0) {
                     const numOfNotes = subCategory.notes.length;
                     for (let k = noteIndex; k < numOfNotes; k++) {
-                        offset -= heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[noteIndex];
+                        offset -= heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[k];
                     }
                 }
             } else {
@@ -125,7 +128,7 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                 if (noteIndex != null && noteIndex >= 0) {
                     const numOfNotes = category.notes.length;
                     for (let k = noteIndex; k < numOfNotes; k++) {
-                        offset -= heightData[categoryIndex].noteHeights[noteIndex];
+                        offset -= heightData[categoryIndex].noteHeights[k];
                     }
                 }
             }

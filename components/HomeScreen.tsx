@@ -8,6 +8,7 @@ import {
     TextInput,
     BackHandler,
     Keyboard,
+    Dimensions,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "../styles/styles";
@@ -93,7 +94,11 @@ const HomeScreen: React.FC = () => {
 
     useEffect(() => {
         if (scrollTo) {
-            flatListRef.current?.scrollToOffset({ offset: scrollTo, animated: true });
+            const screenHeight = Dimensions.get("window").height;
+            // const offset = scrollTo - screenHeight / 3;
+
+            const offset = scrollTo;
+            flatListRef.current?.scrollToOffset({ offset: offset, animated: true });
             setScrollTo(null);
         }
     }, [scrollTo]);

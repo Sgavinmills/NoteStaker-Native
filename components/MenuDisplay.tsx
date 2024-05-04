@@ -58,40 +58,40 @@ const MenuDisplay: React.FC<TileProps> = ({ setScrollTo, setCloseAllCategories }
     }, [overlay.isShowing]);
 
     return (
-        // <Modal
-        //     animationType="none"
-        //     transparent={true}
-        //     visible={overlay.isShowing}
-        //     onRequestClose={() => {
-        //         handleClose();
-        //     }}
-        // >
-        // <TouchableWithoutFeedback onPress={handleClose}>
-        //     <View style={menuOverlayStyles.modal}></View>
-        // </TouchableWithoutFeedback>
-        <>
-            {overlay.isShowing && (
-                <TouchableWithoutFeedback>
-                    <View style={menuOverlayStyles.container}>
-                        <View style={menuOverlayStyles.contentContainer}>
-                            {menuType === "category" ? (
-                                <CategoryMainMenu setScrollTo={setScrollTo} />
-                            ) : menuType === "subCategory" ? (
-                                <SubCategoryMainMenu setScrollTo={setScrollTo} />
-                            ) : menuType === "note" ? (
-                                <NoteMainMenu setScrollTo={setScrollTo} />
-                            ) : menuType === "homeScreen" ? (
-                                <HomeScreenMainMenu setCloseAllCategories={setCloseAllCategories} />
-                            ) : (
-                                <></>
-                            )}
+        <Modal
+            animationType="none"
+            transparent={true}
+            visible={overlay.isShowing}
+            onRequestClose={() => {
+                handleClose();
+            }}
+        >
+            <TouchableWithoutFeedback onPress={handleClose}>
+                <View style={menuOverlayStyles.modal}></View>
+            </TouchableWithoutFeedback>
+            <>
+                {overlay.isShowing && (
+                    <TouchableWithoutFeedback>
+                        <View style={menuOverlayStyles.container}>
+                            <View style={menuOverlayStyles.contentContainer}>
+                                {menuType === "category" ? (
+                                    <CategoryMainMenu setScrollTo={setScrollTo} />
+                                ) : menuType === "subCategory" ? (
+                                    <SubCategoryMainMenu setScrollTo={setScrollTo} />
+                                ) : menuType === "note" ? (
+                                    <NoteMainMenu setScrollTo={setScrollTo} />
+                                ) : menuType === "homeScreen" ? (
+                                    <HomeScreenMainMenu setCloseAllCategories={setCloseAllCategories} />
+                                ) : (
+                                    <></>
+                                )}
+                            </View>
+                            {overlay.isShowing && <Button title="Close" onPress={handleClose} />}
                         </View>
-                        {overlay.isShowing && <Button title="Close" onPress={handleClose} />}
-                    </View>
-                </TouchableWithoutFeedback>
-            )}
-        </>
-        // </Modal>
+                    </TouchableWithoutFeedback>
+                )}
+            </>
+        </Modal>
     );
 };
 
