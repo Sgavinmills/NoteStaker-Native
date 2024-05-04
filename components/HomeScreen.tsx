@@ -57,6 +57,7 @@ const HomeScreen: React.FC = () => {
                 return true;
             }
             setCloseAllCategories(true);
+            setScrollTo(0);
             return true;
         };
 
@@ -93,7 +94,7 @@ const HomeScreen: React.FC = () => {
     };
 
     useEffect(() => {
-        if (scrollTo) {
+        if (scrollTo !== null && scrollTo > -1) {
             const screenHeight = Dimensions.get("window").height;
             // const offset = scrollTo - screenHeight / 3;
 
@@ -153,7 +154,7 @@ const HomeScreen: React.FC = () => {
         <TouchableWithoutFeedback onPress={handleOutsideMenuPress}>
             <>
                 <View style={styles.mainContainer}>
-                    <StatusBar translucent={true} />
+                    <StatusBar translucent={true} backgroundColor="transparent" />
                     {newCatModalVisible && (
                         <CategoryModal
                             setNewCatModalVisible={setNewCatModalVisible}
