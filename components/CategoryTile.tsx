@@ -14,6 +14,7 @@ import {
     removeFromShowSecureNote,
     updateCategoryHeight,
     updateCategoryList,
+    updateCategorySilently,
     updateMenuOverlay,
 } from "../redux/slice";
 import { getEmptyOverlay, moveDownList, moveUpList } from "../utilFuncs/utilFuncs";
@@ -38,10 +39,12 @@ const CategoryTile: React.FC<TileProps> = ({
     setMoving,
 }) => {
     const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
+    const isSelected = category.isSelected;
+
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
     const showingSecure = showSecure.homeScreen || showSecure.categories.includes(categoryID);
     const [securePlaceholderTile, setSecurePlaceholderTile] = useState(false);
-    // console.log("--re render category: " + category.name);
+    console.log("--re render category: " + category.name);
 
     const notesForCat: string[] = [];
     category.notes.forEach((noteRef) => {
@@ -49,6 +52,14 @@ const CategoryTile: React.FC<TileProps> = ({
             notesForCat.push(noteRef.id);
         }
     });
+
+    useEffect(() => {
+        if (category.isSelected) {
+            const categoryCopy = { ...category };
+            categoryCopy.isSelected = false;
+            dispatch(updateCategorySilently(categoryCopy));
+        }
+    }, []);
 
     const subCatsForCat: string[] = [];
     category.subCategories.forEach((subCatRef) => {
@@ -259,6 +270,7 @@ const CategoryTile: React.FC<TileProps> = ({
                         categoryStyles.topRadius,
                         !isExpanded && categoryStyles.bottomRadius,
                         moving === categoryID && categoryStyles.categoryTileSelected,
+                        isSelected && categoryStyles.categoryTileSelected,
                     ]}
                 >
                     <View style={categoryStyles.categoryTextContainer}>

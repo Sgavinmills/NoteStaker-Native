@@ -138,9 +138,61 @@ const notesSlice = createSlice({
         },
 
         // updateMenuOverlay sets a new config on the menu overlay
+        // it also adds or removes the isSelected bool to the note/cat attached to the config
         updateMenuOverlay(state, action: PayloadAction<MenuOverlay>) {
-            const newOverlay = { ...action.payload };
-            return { ...state, menuOverlay: newOverlay };
+            return produce(state, (draft) => {
+                const newOverlay = action.payload;
+
+                if (newOverlay.isShowing) {
+                    switch (newOverlay.menuType) {
+                        case "note":
+                            const noteToSelect = draft.notes[newOverlay.menuData.noteID];
+                            if (noteToSelect) {
+                                noteToSelect.isSelected = true;
+                            }
+                            break;
+
+                        case "subCategory":
+                            const subCategoryToSelect = draft.subCategories[newOverlay.menuData.subCategoryID];
+                            if (subCategoryToSelect) {
+                                subCategoryToSelect.isSelected = true;
+                            }
+                            break;
+
+                        case "category":
+                            const categoryToSelect = draft.categories[newOverlay.menuData.categoryID];
+                            if (categoryToSelect) {
+                                categoryToSelect.isSelected = true;
+                            }
+                            break;
+                    }
+                } else {
+                    switch (draft.menuOverlay.menuType) {
+                        case "note":
+                            const noteToDeSelect = draft.notes[draft.menuOverlay.menuData.noteID];
+                            if (noteToDeSelect) {
+                                noteToDeSelect.isSelected = false;
+                            }
+                            break;
+
+                        case "subCategory":
+                            const subCategoryToSelect = draft.subCategories[draft.menuOverlay.menuData.subCategoryID];
+                            if (subCategoryToSelect) {
+                                subCategoryToSelect.isSelected = false;
+                            }
+                            break;
+
+                        case "category":
+                            const categoryToSelect = draft.categories[draft.menuOverlay.menuData.categoryID];
+                            if (categoryToSelect) {
+                                categoryToSelect.isSelected = false;
+                            }
+                            break;
+                    }
+                }
+
+                draft.menuOverlay = newOverlay;
+            });
         },
 
         // updateCategoryList updates the categoryList
@@ -165,6 +217,7 @@ const notesSlice = createSlice({
                     createdBy: Device.deviceName ? Device.deviceName : "Annoymous",
                     lastUpdatedBy: "",
                     isSecureNote: false,
+                    isSelected: false,
                     locations: [[categoryID, subCategoryID]],
                 };
 
@@ -342,6 +395,18 @@ const notesSlice = createSlice({
             return { ...state, categories: categoriesCopy };
         },
 
+        // updateCategory updates a single category
+        // same as updateCategory but does not update the metadata
+        updateCategorySilently(state, action: PayloadAction<Category>) {
+            const categoryCopy = action.payload;
+            const categoriesCopy = { ...state.categories };
+            if (categoriesCopy[categoryCopy.id]) {
+                categoriesCopy[categoryCopy.id] = { ...categoryCopy };
+            }
+
+            return { ...state, categories: categoriesCopy };
+        },
+
         // removeNoteFromSubCategory removes a note from a subcategory
         // it removes the noteRef from the subCategory notes
         // and updates the notes locations to remove the subCategory
@@ -426,6 +491,21 @@ const notesSlice = createSlice({
             return { ...state, subCategories: subCategoriesCopy };
         },
 
+        // updateSubCategorySilently updates a single subCategory
+        // same as updateSUbCategory but does not update the metadata
+        updateSubCategorySilently(state, action: PayloadAction<SubCategory>) {
+            const subCategoryCopy = action.payload;
+            const subCategoryId = subCategoryCopy.id;
+
+            const subCategoriesCopy = { ...state.subCategories };
+
+            if (subCategoriesCopy[subCategoryId]) {
+                subCategoriesCopy[subCategoryId] = { ...subCategoryCopy };
+            }
+
+            return { ...state, subCategories: subCategoriesCopy };
+        },
+
         // deleteNote deletes a note from all categories.
         // It removes the note from notes and removes it's noteRef from any category/subcategory note lists
         deleteNote(state, action: PayloadAction<string>) {
@@ -472,6 +552,7 @@ const notesSlice = createSlice({
                     lastUpdatedBy: "",
                     location: [parentCategoryID, ""],
                     isSecure: false,
+                    isSelected: false,
                 };
 
                 const parentCategory = draft.categories[parentCategoryID];
@@ -517,6 +598,7 @@ const notesSlice = createSlice({
                     createdBy: Device.deviceName ? Device.deviceName : "Annoynmous",
                     lastUpdatedBy: "",
                     isSecure: false,
+                    isSelected: false,
                 };
 
                 draft.categories[newCategory.id] = newCategory;
@@ -532,6 +614,16 @@ const notesSlice = createSlice({
 
             newNote.dateUpdated = new Date().toISOString();
             newNote.lastUpdatedBy = Device.deviceName ? Device.deviceName : "Annoymous";
+
+            const newNotes = { ...state.notes };
+            newNotes[newNote.id] = newNote;
+            return { ...state, notes: newNotes };
+        },
+
+        // updateNoteSilently updates a single note
+        // exactly the same as updateDate except it doesnt amend the lastUpdatedBy metadata
+        updateNoteSilently(state, action: PayloadAction<Note>) {
+            const newNote = action.payload;
 
             const newNotes = { ...state.notes };
             newNotes[newNote.id] = newNote;
@@ -643,6 +735,9 @@ export const {
     updateCategorySecureStatus,
     updateSubCategorySecureStatus,
     toggleHomeScreenShowingSecureCategories,
+    updateCategorySilently,
+    updateNoteSilently,
+    updateSubCategorySilently,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

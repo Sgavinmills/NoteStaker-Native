@@ -5,7 +5,6 @@ import { Text, TouchableOpacity, GestureResponderEvent } from "react-native";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../redux/store/store";
-import * as ImagePicker from "expo-image-picker";
 import { updateMenuOverlay, updateNote, updateNoteSecureStatus } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import DeleteModal from "./DeleteModal";

@@ -48,7 +48,7 @@ const HomeScreen: React.FC = () => {
         }
     });
 
-    // console.log("Homescreen re-render");
+    console.log("Homescreen re-render");
     // back button closes overlay rather than normal behaviour
     useEffect(() => {
         const backAction = () => {

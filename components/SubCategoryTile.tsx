@@ -13,6 +13,7 @@ import {
     updateCategory,
     updateMenuOverlay,
     updateSubCategoryHeight,
+    updateSubCategorySilently,
 } from "../redux/slice";
 import { AppDispatch } from "../redux/store/store";
 import * as ImagePicker from "expo-image-picker";
@@ -40,10 +41,10 @@ const SubCategoryTile: React.FC<TileProps> = ({
 }) => {
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
     const subCategory = useSelector((state: RootState) => state.memory.subCategories[subCategoryID]);
-
+    const isSelected = subCategory.isSelected;
     const dispatch = useDispatch<AppDispatch>();
 
-    // console.log("------ re render subcategory: " + subCategory.name);
+    console.log("------ re render subcategory: " + subCategory.name);
     const showingSecure =
         showSecure.homeScreen ||
         showSecure.categories.includes(subCategoryID) ||
@@ -54,6 +55,14 @@ const SubCategoryTile: React.FC<TileProps> = ({
             notesForSubCat.push(noteRef.id);
         }
     });
+
+    useEffect(() => {
+        if (subCategory.isSelected) {
+            const subCategoryCopy = { ...subCategory };
+            subCategoryCopy.isSelected = false;
+            dispatch(updateSubCategorySilently(subCategoryCopy));
+        }
+    }, []);
 
     // clean up method
     useEffect(() => {
@@ -247,6 +256,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
                         categoryStyles.subCategoryTile,
                         !isExpanded && isLastSubCategory && categoryStyles.bottomRadius,
                         moving === subCategoryID && categoryStyles.categoryTileSelected,
+                        isSelected && categoryStyles.categoryTileSelected,
                     ]}
                 >
                     <View style={categoryStyles.categoryTextContainer}>

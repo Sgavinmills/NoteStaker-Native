@@ -13,7 +13,6 @@ import {
     removeFromShowSecureNote,
     updateCategorySecureStatus,
     updateMenuOverlay,
-    updateSubCategorySecureStatus,
 } from "../redux/slice";
 import DeleteModal from "./DeleteModal";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";

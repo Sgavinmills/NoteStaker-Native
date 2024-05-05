@@ -19,6 +19,7 @@ export interface Note {
     lastUpdatedBy: string;
     isSecureNote: boolean;
     locations: Location[];
+    isSelected: boolean;
 }
 
 export interface Category {
@@ -31,6 +32,7 @@ export interface Category {
     createdBy: string;
     lastUpdatedBy: string;
     isSecure: boolean;
+    isSelected: boolean;
 }
 
 export interface SubCategory {
@@ -44,6 +46,7 @@ export interface SubCategory {
     lastUpdatedBy: string;
     location: Location;
     isSecure: boolean;
+    isSelected: boolean;
 }
 
 export type Ref = {

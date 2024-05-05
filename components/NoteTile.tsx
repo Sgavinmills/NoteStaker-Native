@@ -20,6 +20,7 @@ import {
     updateMenuOverlay,
     updateNote,
     updateNoteHeight,
+    updateNoteSilently,
     updateSubCategory,
 } from "../redux/slice";
 import { useEffect, useState } from "react";
@@ -60,11 +61,12 @@ const NoteTile: React.FC<TileProps> = ({
     setMoving,
 }) => {
     const note = useSelector((state: RootState) => state.memory.notes[noteID]);
+    const isSelected = note.isSelected;
     const dispatch = useDispatch<AppDispatch>();
 
     const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
     const [isShowingImage, setIsShowingImage] = useState(false);
-    // console.log("----------re render note: " + note.note);
+    console.log("----------re render note: " + note.note);
     const handleNoteChange = (text: string) => {
         const noteCopy = { ...note, note: text };
         if (noteCopy.isNewNote) {
@@ -72,6 +74,14 @@ const NoteTile: React.FC<TileProps> = ({
         }
         dispatch(updateNote(noteCopy));
     };
+
+    useEffect(() => {
+        if (note.isSelected) {
+            const noteCopy = { ...note };
+            noteCopy.isSelected = false;
+            dispatch(updateNoteSilently(noteCopy));
+        }
+    }, []);
 
     useEffect(() => {
         const backAction = () => {
@@ -265,6 +275,7 @@ const NoteTile: React.FC<TileProps> = ({
                     addBottomRadius() && noteStyles.bottomBorder,
                     noteStyles.noteTile,
                     moving === noteID && noteStyles.noteTileSelected,
+                    isSelected && noteStyles.noteTileSelected,
                 ]}
             >
                 <View style={noteStyles.noteContainer}>
