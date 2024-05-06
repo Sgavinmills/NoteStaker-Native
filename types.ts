@@ -5,6 +5,7 @@ export interface Memory {
     subCategories: { [id: string]: SubCategory };
 }
 
+// todo change interfaces to types?
 export interface Note {
     id: string;
     note: string;
@@ -20,6 +21,7 @@ export interface Note {
     isSecureNote: boolean;
     locations: Location[];
     isSelected: boolean;
+    dontForgetMe: string;
 }
 
 export interface Category {
@@ -33,6 +35,7 @@ export interface Category {
     lastUpdatedBy: string;
     isSecure: boolean;
     isSelected: boolean;
+    dontForgetMe: DontForgetMeRef[];
 }
 
 export interface SubCategory {
@@ -47,7 +50,13 @@ export interface SubCategory {
     location: Location;
     isSecure: boolean;
     isSelected: boolean;
+    dontForgetMe: DontForgetMeRef[];
 }
+
+export type DontForgetMeRef = {
+    date: string;
+    noteID: string;
+};
 
 export type Ref = {
     id: string;
@@ -107,4 +116,8 @@ export interface IDs {
     categoryID: string;
     subCategoryID: string;
     noteID: string;
+}
+
+export interface DontForgetMeConfig extends IDs {
+    date: string;
 }

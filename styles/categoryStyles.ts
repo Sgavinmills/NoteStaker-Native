@@ -141,6 +141,16 @@ const catStyles = StyleSheet.create({
         paddingRight: 10,
         fontSize: 45,
     },
+
+    dontForgetMeBell: {
+        color: "gold",
+        fontSize: 25,
+    },
+
+    dontForgetMeContainer: {
+        position: "absolute",
+        top: 0,
+    },
 });
 
 export default catStyles;

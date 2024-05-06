@@ -63,6 +63,12 @@ const NoteAdditionalInfo: React.FC<TileProps> = ({}) => {
                 <Text style={additionalInfo.text}>Is secure: </Text>
                 <Text style={additionalInfo.text}>{note.isSecureNote ? "Yes" : "No"}</Text>
             </View>
+            <View style={additionalInfo.row}>
+                <Text style={additionalInfo.text}>DontForgetMe: </Text>
+                <Text style={additionalInfo.text}>
+                    {note.dontForgetMe ? new Date(note.dontForgetMe).toLocaleString() : ""}
+                </Text>
+            </View>
             {noteLocations.length >= 30 ? (
                 <Text style={additionalInfo.row}>
                     <Text style={additionalInfo.text}>Locations: </Text>

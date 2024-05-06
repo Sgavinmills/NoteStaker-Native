@@ -1,7 +1,7 @@
 import { Text, View, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent, Keyboard } from "react-native";
 import { useEffect, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
-import { FontAwesome, Entypo } from "@expo/vector-icons";
+import { FontAwesome, Entypo, Ionicons } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
 import { MenuOverlay, HeightUpdateInfo, NewNoteData, Note, IDs } from "../types";
 import { useSelector } from "react-redux";
@@ -39,18 +39,23 @@ const CategoryTile: React.FC<TileProps> = ({
     setMoving,
 }) => {
     const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
-    const isSelected = category.isSelected;
-
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
-    const showingSecure = showSecure.homeScreen || showSecure.categories.includes(categoryID);
-    const [securePlaceholderTile, setSecurePlaceholderTile] = useState(false);
-    console.log("--re render category: " + category.name);
 
+    const [securePlaceholderTile, setSecurePlaceholderTile] = useState(false);
+    const isSelected = category.isSelected;
+    const showingSecure = showSecure.homeScreen || showSecure.categories.includes(categoryID);
+    console.log("--re render category: " + category.name);
     const notesForCat: string[] = [];
     category.notes.forEach((noteRef) => {
         if (showingSecure || !noteRef.isSecure) {
             notesForCat.push(noteRef.id);
         }
+    });
+
+    const dontForgetMe = category.dontForgetMe?.some((ref) => {
+        const currentTime = new Date();
+        const reminderTime = new Date(ref.date);
+        return reminderTime.getTime() < currentTime.getTime();
     });
 
     useEffect(() => {
@@ -273,6 +278,11 @@ const CategoryTile: React.FC<TileProps> = ({
                         isSelected && categoryStyles.categoryTileSelected,
                     ]}
                 >
+                    {dontForgetMe && !isExpanded && (
+                        <View style={categoryStyles.dontForgetMeContainer}>
+                            <Ionicons name="notifications-outline" style={categoryStyles.dontForgetMeBell} />
+                        </View>
+                    )}
                     <View style={categoryStyles.categoryTextContainer}>
                         <Text style={categoryStyles.categoryText} adjustsFontSizeToFit={true} numberOfLines={1}>
                             {category.isSecure && (

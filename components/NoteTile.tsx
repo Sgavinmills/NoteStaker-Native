@@ -10,10 +10,13 @@ import {
     BackHandler,
 } from "react-native";
 import noteStyles from "../styles/noteStyles";
-import { FontAwesome, Entypo } from "@expo/vector-icons";
-import { MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
+import { FontAwesome, Entypo, Ionicons } from "@expo/vector-icons";
+import categoryStyles from "../styles/categoryStyles";
+
+import { MenuOverlay, HeightUpdateInfo, NewNoteData, DontForgetMeConfig } from "../types";
 import { useDispatch } from "react-redux";
 import {
+    addDontForgetMe,
     createNewNote,
     deleteNote,
     updateCategory,
@@ -64,6 +67,13 @@ const NoteTile: React.FC<TileProps> = ({
     const isSelected = note.isSelected;
     const dispatch = useDispatch<AppDispatch>();
 
+    const dontForgetMeCalc = () => {
+        const currentTime = new Date();
+        const reminderTime = new Date(note.dontForgetMe);
+        return reminderTime.getTime() < currentTime.getTime();
+    };
+
+    const dontForgetMe = dontForgetMeCalc();
     const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
     const [isShowingImage, setIsShowingImage] = useState(false);
     console.log("----------re render note: " + note.note);
@@ -189,7 +199,19 @@ const NoteTile: React.FC<TileProps> = ({
             return true;
         }
 
+        // TODO - DONT THINK WE NEED THESE CLEAR OVERLAYS ANYMORE.
         dispatch(updateMenuOverlay(getEmptyOverlay()));
+
+        if (dontForgetMe) {
+            const config: DontForgetMeConfig = {
+                noteID: note.id,
+                subCategoryID: subCategory ? subCategory.id : "",
+                categoryID: category.id,
+                date: "",
+            };
+            dispatch(addDontForgetMe(config));
+            return;
+        }
         setNoteEditMode(true);
     };
 
@@ -278,6 +300,11 @@ const NoteTile: React.FC<TileProps> = ({
                     isSelected && noteStyles.noteTileSelected,
                 ]}
             >
+                {dontForgetMe && (
+                    <View style={categoryStyles.dontForgetMeContainer}>
+                        <Ionicons name="notifications-outline" style={categoryStyles.dontForgetMeBell} />
+                    </View>
+                )}
                 <View style={noteStyles.noteContainer}>
                     <TouchableOpacity onPress={handleImagePress} onLongPress={handleLongPress}>
                         {note.imageURI && <Image source={{ uri: note.imageURI }} style={{ height: 150, width: 150 }} />}

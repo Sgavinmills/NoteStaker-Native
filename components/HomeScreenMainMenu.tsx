@@ -6,7 +6,7 @@ import CategoryModal from "./CategoryModal";
 import { DeleteInfo } from "../types";
 import DeleteModal from "./DeleteModal";
 import * as LocalAuthentication from "expo-local-authentication";
-import { toggleHomeScreenShowingSecureCategories, updateMenuOverlay } from "../redux/slice";
+import { migrateData, toggleHomeScreenShowingSecureCategories, updateMenuOverlay } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store/store";
@@ -86,6 +86,11 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setCloseAllCategories }) => {
         setDeleteModalVisible(true);
     };
 
+    // TODO ADD WARNINGS, MAKE SECURE, MAKE ONLY AVAILABLE WHEN REQUIRED ETC.
+    const handleMigrateData = () => {
+        dispatch(migrateData());
+    };
+
     return (
         <>
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddCategoryPress}>
@@ -96,7 +101,6 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setCloseAllCategories }) => {
                 <FontAwesome name="minus" style={menuOverlayStyles.icons} />
                 <Text style={menuOverlayStyles.text}>Close all categories</Text>
             </TouchableOpacity>
-            {/* // TODO MAKE THIS TEXT GOGGLE */}
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleViewSecureCategoriesPress}>
                 <FontAwesome name="lock" style={menuOverlayStyles.icons} />
                 {homeScreenShowSecure && <Text style={menuOverlayStyles.text}>Hide secure categories and notes</Text>}
@@ -109,6 +113,10 @@ const HomeScreenMainMenu: React.FC<TileProps> = ({ setCloseAllCategories }) => {
             <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleImportDataPress}>
                 <FontAwesome name="save" style={[menuOverlayStyles.icons]} />
                 <Text style={menuOverlayStyles.text}>Import Data</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMigrateData}>
+                <FontAwesome name="warning" style={[menuOverlayStyles.icons]} />
+                <Text style={menuOverlayStyles.text}>Migrate Data</Text>
             </TouchableOpacity>
             {deleteModalVisible && (
                 <DeleteModal

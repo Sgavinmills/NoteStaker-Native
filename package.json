@@ -26,7 +26,8 @@
     "expo-device": "~5.9.3",
     "expo-local-authentication": "~13.8.0",
     "expo-file-system": "~16.0.8",
-    "expo-document-picker": "~11.10.1"
+    "expo-document-picker": "~11.10.1",
+    "@react-native-community/datetimepicker": "7.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

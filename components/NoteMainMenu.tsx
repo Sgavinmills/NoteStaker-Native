@@ -1,34 +1,37 @@
 import React, { useEffect, useState } from "react";
 import menuOverlayStyles from "../styles/menuOverlayStyles";
-import { FontAwesome, Entypo, MaterialIcons } from "@expo/vector-icons";
-import { Text, TouchableOpacity, GestureResponderEvent } from "react-native";
+import { FontAwesome, MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { Text, TouchableOpacity } from "react-native";
 import { AppDispatch } from "../redux/store/store";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../redux/store/store";
-import { updateMenuOverlay, updateNote, updateNoteSecureStatus } from "../redux/slice";
+import { addDontForgetMe, updateMenuOverlay, updateNote, updateNoteSecureStatus } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import DeleteModal from "./DeleteModal";
-import { DeleteInfo } from "../types";
+import { DeleteInfo, DontForgetMeConfig } from "../types";
 import * as LocalAuthentication from "expo-local-authentication";
 import AdjustingCategories from "./AdjustingCategories";
 import MoveArrows from "./MoveArrows";
 import NoteAdditionalInfo from "./NoteAdditionalInfo";
+import DontForgetMeMenu from "./DontForgetMeMenu";
 
 interface TileProps {
     setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
-    const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
-    const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
-    const [isMoveArrows, setIsMoveArrows] = useState(false);
+    const dispatch = useDispatch<AppDispatch>();
+
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const heightData = useSelector((state: RootState) => state.memory.heightData);
-
     const note = useSelector((state: RootState) => state.memory.notes[overlay.menuData.noteID]);
     const subCategory = useSelector((state: RootState) => state.memory.subCategories[overlay.menuData.subCategoryID]);
     const category = useSelector((state: RootState) => state.memory.categories[overlay.menuData.categoryID]);
 
+    const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
+    const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
+    const [isMoveArrows, setIsMoveArrows] = useState(false);
+    const [isDontForgetMe, setIsDontForgetMe] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({
         deleteType: "",
@@ -36,8 +39,25 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         additionalMessage: "",
     });
 
-    const handleMoveNote = () => {
-        setIsMoveArrows(true);
+    // TODO REMOVE MOVE ARROWS
+
+    // const handleMoveNote = () => {
+    //     setIsMoveArrows(true);
+    // };
+
+    const handleDontForgetMe = () => {
+        if (note.dontForgetMe) {
+            const config: DontForgetMeConfig = {
+                noteID: note.id,
+                subCategoryID: subCategory ? subCategory.id : "",
+                categoryID: category.id,
+                date: "",
+            };
+            dispatch(addDontForgetMe(config));
+            return;
+        }
+
+        setIsDontForgetMe(true);
     };
 
     const handleHighPriorityPress = () => {
@@ -135,15 +155,14 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         setScrollTo(offset);
     };
 
-    const dispatch = useDispatch<AppDispatch>();
     return (
         <>
             {isAdjustingCategories ? (
                 <AdjustingCategories />
             ) : isAdditionalInfo ? (
                 <NoteAdditionalInfo />
-            ) : isMoveArrows ? (
-                <MoveArrows />
+            ) : isDontForgetMe ? (
+                <DontForgetMeMenu setIsDontForgetMe={setIsDontForgetMe} />
             ) : (
                 <>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddRemoveCategories}>
@@ -155,9 +174,11 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                         <Text style={menuOverlayStyles.text}>Mark as high priority</Text>
                     </TouchableOpacity>
                     {!overlay.menuData.isSearchTile && (
-                        <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveNote}>
-                            <Entypo name="select-arrows" style={menuOverlayStyles.icons} />
-                            <Text style={menuOverlayStyles.text}>Reorder note</Text>
+                        <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDontForgetMe}>
+                            <Ionicons name="notifications-outline" style={menuOverlayStyles.icons} />
+                            <Text style={menuOverlayStyles.text}>
+                                {note.dontForgetMe ? "Remove dont-forget-me reminder" : "Don't forget me"}
+                            </Text>
                         </TouchableOpacity>
                     )}
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecure}>

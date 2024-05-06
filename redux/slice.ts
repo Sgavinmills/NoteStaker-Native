@@ -11,6 +11,7 @@ import {
     IDs,
     Memory,
     Ref,
+    DontForgetMeConfig,
 } from "../types";
 import { memory } from "../mockMemory";
 import { produce } from "immer";
@@ -219,6 +220,7 @@ const notesSlice = createSlice({
                     isSecureNote: false,
                     isSelected: false,
                     locations: [[categoryID, subCategoryID]],
+                    dontForgetMe: "",
                 };
 
                 draft.notes[noteToAdd.id] = noteToAdd;
@@ -553,6 +555,7 @@ const notesSlice = createSlice({
                     location: [parentCategoryID, ""],
                     isSecure: false,
                     isSelected: false,
+                    dontForgetMe: [],
                 };
 
                 const parentCategory = draft.categories[parentCategoryID];
@@ -599,6 +602,7 @@ const notesSlice = createSlice({
                     lastUpdatedBy: "",
                     isSecure: false,
                     isSelected: false,
+                    dontForgetMe: [],
                 };
 
                 draft.categories[newCategory.id] = newCategory;
@@ -705,9 +709,62 @@ const notesSlice = createSlice({
                 }
             });
         },
+
+        addDontForgetMe(state, action: PayloadAction<DontForgetMeConfig>) {
+            return produce(state, (draft) => {
+                const { noteID, categoryID, subCategoryID, date } = action.payload;
+                const note = draft.notes[noteID];
+                note.dontForgetMe = date;
+
+                if (subCategoryID) {
+                    const subCategory = draft.subCategories[subCategoryID];
+                    if (date) {
+                        subCategory.dontForgetMe.push({
+                            noteID: noteID,
+                            date: date,
+                        });
+                    } else {
+                        // find ref in the array with correct noteid and splice out
+                        const index = subCategory.dontForgetMe.findIndex((ref) => ref.noteID === noteID);
+                        subCategory.dontForgetMe.splice(index, 1);
+                    }
+                }
+
+                if (categoryID) {
+                    const category = draft.categories[categoryID];
+                    if (date) {
+                        category.dontForgetMe.push({
+                            noteID: noteID,
+                            date: date,
+                        });
+                    } else {
+                        const index = category.dontForgetMe.findIndex((ref) => ref.noteID === noteID);
+                        category.dontForgetMe.splice(index, 1);
+                    }
+                }
+            });
+        },
+
+        migrateData(state, action: PayloadAction) {
+            return produce(state, (draft) => {
+                // add dontForgetMeArray to each category
+                Object.keys(draft.categories).forEach((key) => {
+                    const category = draft.categories[key];
+                    category.dontForgetMe = [];
+                });
+
+                // add dontForgetMeArray to each subCategory
+                Object.keys(draft.subCategories).forEach((key) => {
+                    const subCategory = draft.subCategories[key];
+                    subCategory.dontForgetMe = [];
+                });
+            });
+        },
     },
 });
 export const {
+    addDontForgetMe,
+    migrateData,
     updateCategoryList,
     addCategory,
     updateNote,

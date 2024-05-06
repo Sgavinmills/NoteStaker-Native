@@ -1,6 +1,6 @@
 import { GestureResponderEvent, Text, View, TouchableWithoutFeedback, TouchableOpacity, Keyboard } from "react-native";
 import categoryStyles from "../styles/categoryStyles";
-import { FontAwesome, Entypo } from "@expo/vector-icons";
+import { FontAwesome, Entypo, Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { RootState } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -54,6 +54,12 @@ const SubCategoryTile: React.FC<TileProps> = ({
         if (showingSecure || !noteRef.isSecure) {
             notesForSubCat.push(noteRef.id);
         }
+    });
+
+    const dontForgetMe = subCategory.dontForgetMe.some((ref) => {
+        const currentTime = new Date();
+        const reminderTime = new Date(ref.date);
+        return reminderTime.getTime() < currentTime.getTime();
     });
 
     useEffect(() => {
@@ -259,6 +265,11 @@ const SubCategoryTile: React.FC<TileProps> = ({
                         isSelected && categoryStyles.categoryTileSelected,
                     ]}
                 >
+                    {dontForgetMe && !isExpanded && (
+                        <View style={categoryStyles.dontForgetMeContainer}>
+                            <Ionicons name="notifications-outline" style={categoryStyles.dontForgetMeBell} />
+                        </View>
+                    )}
                     <View style={categoryStyles.categoryTextContainer}>
                         <Text style={categoryStyles.subCategoryText} adjustsFontSizeToFit={true} numberOfLines={1}>
                             {subCategory.isSecure && (
