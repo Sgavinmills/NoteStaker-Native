@@ -18,7 +18,6 @@ import {
 import DeleteModal from "./DeleteModal";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import * as LocalAuthentication from "expo-local-authentication";
-import MoveArrows from "./MoveArrows";
 import CategoryAdditionalInfo from "./CategoryAdditionalInfo";
 
 interface TileProps {
@@ -37,7 +36,6 @@ const SubCategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
     const dispatch = useDispatch<AppDispatch>();
 
     const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
-    const [isMoveArrows, setIsMoveArrows] = useState(false);
     const [catModalInfo, setCatModalInfo] = useState({ currentName: "", parentCat: "" });
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({
@@ -53,10 +51,6 @@ const SubCategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
             parentCat: overlay.menuData.categoryID,
         });
         setIsCategoryModal(true);
-    };
-
-    const handleMoveCategory = () => {
-        setIsMoveArrows(true);
     };
 
     const handleRemoveAllNotes = () => {
@@ -193,9 +187,7 @@ const SubCategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
 
     return (
         <>
-            {isMoveArrows ? (
-                <MoveArrows />
-            ) : isAdditionalInfo ? (
+            {isAdditionalInfo ? (
                 <CategoryAdditionalInfo />
             ) : (
                 <>
@@ -209,10 +201,6 @@ const SubCategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                             <Text style={menuOverlayStyles.text}>Remove all notes from subcategory</Text>
                         </TouchableOpacity>
                     )}
-                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMoveCategory}>
-                        <Entypo name="select-arrows" style={[menuOverlayStyles.icons]} />
-                        <Text style={menuOverlayStyles.text}>Reorder subcategory</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleShowSecureNote}>
                         <FontAwesome name="key" style={menuOverlayStyles.icons} />
                         <Text style={menuOverlayStyles.text}>{getSecureItemsText()}</Text>

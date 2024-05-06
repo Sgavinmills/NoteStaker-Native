@@ -11,7 +11,6 @@ import DeleteModal from "./DeleteModal";
 import { DeleteInfo, DontForgetMeConfig } from "../types";
 import * as LocalAuthentication from "expo-local-authentication";
 import AdjustingCategories from "./AdjustingCategories";
-import MoveArrows from "./MoveArrows";
 import NoteAdditionalInfo from "./NoteAdditionalInfo";
 import DontForgetMeMenu from "./DontForgetMeMenu";
 
@@ -30,7 +29,6 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
 
     const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
     const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
-    const [isMoveArrows, setIsMoveArrows] = useState(false);
     const [isDontForgetMe, setIsDontForgetMe] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({
@@ -38,12 +36,6 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         deleteMessage: "",
         additionalMessage: "",
     });
-
-    // TODO REMOVE MOVE ARROWS
-
-    // const handleMoveNote = () => {
-    //     setIsMoveArrows(true);
-    // };
 
     const handleDontForgetMe = () => {
         if (note.dontForgetMe) {
