@@ -150,7 +150,6 @@ const CategoryTile: React.FC<TileProps> = ({
     const handleAddNotePress = () => {
         if (Keyboard.isVisible()) {
             Keyboard.dismiss();
-            return;
         }
 
         if (moving) {
