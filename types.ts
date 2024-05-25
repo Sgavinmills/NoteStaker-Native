@@ -21,7 +21,6 @@ export interface Note {
     isSecureNote: boolean;
     locations: Location[];
     isSelected: boolean;
-    dontForgetMe: string;
 }
 
 export interface Category {
@@ -35,7 +34,6 @@ export interface Category {
     lastUpdatedBy: string;
     isSecure: boolean;
     isSelected: boolean;
-    dontForgetMe: DontForgetMeRef[];
 }
 
 export interface SubCategory {
@@ -50,7 +48,6 @@ export interface SubCategory {
     location: Location;
     isSecure: boolean;
     isSelected: boolean;
-    dontForgetMe: DontForgetMeRef[];
 }
 
 export type DontForgetMeRef = {
@@ -63,8 +60,14 @@ export type Ref = {
     isSecure: boolean;
 };
 
+export type SubtleMessage = {
+    message: string;
+    timeOut: number;
+};
+
 export type Location = [string, string];
 
+// TODO - check if we actually use menuType ever.
 export interface MenuOverlay {
     isShowing: boolean;
     menuType: "category" | "subCategory" | "note" | "homeScreen" | "";
@@ -79,6 +82,7 @@ export interface MenuData {
     subCategoryIndex: number | null;
     noteIndex: number | null;
     isSearchTile: boolean;
+    subMenu: "dontForgetMe" | "";
 }
 
 export interface DeleteInfo {
@@ -117,6 +121,11 @@ export interface IDs {
     subCategoryID: string;
     noteID: string;
 }
+
+export type dontForgetMeRef = {
+    location: Location;
+    date: string;
+};
 
 export interface DontForgetMeConfig extends IDs {
     date: string;

@@ -139,26 +139,31 @@ const SubCategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         }
     };
 
-    useEffect(() => {
-        handleScrollTo();
-    }, []);
+    // useEffect(() => {
+    //     handleScrollTo();
+    // }, []);
 
     const handleScrollTo = () => {
         let offset = 0;
         const categoryIndex = overlay.menuData.categoryIndex;
         if (categoryIndex != undefined && categoryIndex >= 0) {
             for (let i = 0; i <= categoryIndex; i++) {
-                offset += heightData[i].catHeight;
+                if (heightData[i]) {
+                    offset += heightData[i].catHeight;
+                }
             }
             const subCategoryIndex = overlay.menuData.subCategoryIndex;
             if (subCategoryIndex != undefined && subCategoryIndex >= 0) {
                 const numOfSubs = category.subCategories.length;
                 for (let j = subCategoryIndex; j < numOfSubs; j++) {
-                    offset -= heightData[categoryIndex].subHeights[j].subHeight;
+                    if (heightData[categoryIndex]) {
+                        if (heightData[categoryIndex].subHeights[j]) {
+                            offset -= heightData[categoryIndex].subHeights[j].subHeight;
+                        }
+                    }
                 }
             }
         }
-
         setScrollTo(offset);
     };
 

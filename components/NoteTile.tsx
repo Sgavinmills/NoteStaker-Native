@@ -67,10 +67,19 @@ const NoteTile: React.FC<TileProps> = ({
     const isSelected = note.isSelected;
     const dispatch = useDispatch<AppDispatch>();
 
+    const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
     const dontForgetMeCalc = () => {
-        const currentTime = new Date();
-        const reminderTime = new Date(note.dontForgetMe);
-        return reminderTime.getTime() < currentTime.getTime();
+        const dontForgetMeRef = dontForgetMeList[note.id];
+
+        if (dontForgetMeRef) {
+            if (dontForgetMeRef.location[0] === categoryID && dontForgetMeRef.location[1] === subCategoryID) {
+                const currentTime = new Date();
+                const reminderTime = new Date(dontForgetMeRef.date);
+                return reminderTime.getTime() < currentTime.getTime();
+            }
+        }
+
+        return false;
     };
 
     const dontForgetMe = dontForgetMeCalc();
@@ -143,6 +152,7 @@ const NoteTile: React.FC<TileProps> = ({
                 subCategoryIndex: subCategoryIndex !== undefined ? subCategoryIndex : null,
                 noteIndex: index,
                 isSearchTile: isSearchTile,
+                subMenu: "",
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
@@ -202,16 +212,6 @@ const NoteTile: React.FC<TileProps> = ({
         // TODO - DONT THINK WE NEED THESE CLEAR OVERLAYS ANYMORE.
         dispatch(updateMenuOverlay(getEmptyOverlay()));
 
-        if (dontForgetMe) {
-            const config: DontForgetMeConfig = {
-                noteID: note.id,
-                subCategoryID: subCategory ? subCategory.id : "",
-                categoryID: category.id,
-                date: "",
-            };
-            dispatch(addDontForgetMe(config));
-            return;
-        }
         setNoteEditMode(true);
     };
 
@@ -237,7 +237,9 @@ const NoteTile: React.FC<TileProps> = ({
     };
 
     const handleLongPress = () => {
-        setMoving(noteID);
+        if (!isSearchTile) {
+            setMoving(noteID);
+        }
     };
 
     const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
@@ -290,6 +292,36 @@ const NoteTile: React.FC<TileProps> = ({
         }
     };
 
+    const handleBellPress = () => {
+        if (dontForgetMe) {
+            const config: DontForgetMeConfig = {
+                noteID: note.id,
+                subCategoryID: subCategory ? subCategory.id : "",
+                categoryID: category.id,
+                date: "",
+            };
+            dispatch(addDontForgetMe(config));
+
+            const newOverlay: MenuOverlay = {
+                isShowing: true,
+                menuType: "note",
+                menuData: {
+                    noteID: note.id,
+                    categoryID: categoryID ? categoryID : "",
+                    subCategoryID: subCategoryID ? subCategoryID : "",
+                    categoryIndex: parentCategoryIndex,
+                    subCategoryIndex: subCategoryIndex !== undefined ? subCategoryIndex : null,
+                    noteIndex: index,
+                    isSearchTile: isSearchTile,
+                    subMenu: "dontForgetMe",
+                },
+            };
+            dispatch(updateMenuOverlay(newOverlay));
+
+            return;
+        }
+    };
+
     return (
         <View onLayout={handleCategoryLayout} style={isLastNote && noteStyles.bottomBorder}>
             <View
@@ -302,7 +334,9 @@ const NoteTile: React.FC<TileProps> = ({
             >
                 {dontForgetMe && (
                     <View style={categoryStyles.dontForgetMeContainer}>
-                        <Ionicons name="notifications-outline" style={categoryStyles.dontForgetMeBell} />
+                        <TouchableOpacity onPress={handleBellPress}>
+                            <Ionicons name="notifications-outline" style={categoryStyles.dontForgetMeBell} />
+                        </TouchableOpacity>
                     </View>
                 )}
                 <View style={noteStyles.noteContainer}>

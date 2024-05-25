@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../redux/store/store";
 import { DontForgetMeConfig } from "../types";
 import { AppDispatch } from "../redux/store/store";
-import { addDontForgetMe } from "../redux/slice";
+import { addDontForgetMe, closeOverlayAndSetSubtleMessage, setSubtleMessage, updateMenuOverlay } from "../redux/slice";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 interface TileProps {
@@ -32,7 +32,12 @@ const DontForgetMeMenu: React.FC<TileProps> = ({ setIsDontForgetMe }) => {
                 date: reminderTime.toISOString(),
             };
             dispatch(addDontForgetMe(config));
-            setIsDontForgetMe(false);
+            dispatch(
+                closeOverlayAndSetSubtleMessage({
+                    message: "Will remind at " + reminderTime.toLocaleString(),
+                    timeOut: 2,
+                })
+            );
             return;
         }
 
@@ -71,7 +76,13 @@ const DontForgetMeMenu: React.FC<TileProps> = ({ setIsDontForgetMe }) => {
                 date: selectedDate.toISOString(),
             };
             dispatch(addDontForgetMe(config));
-            setIsDontForgetMe(false);
+
+            dispatch(
+                closeOverlayAndSetSubtleMessage({
+                    message: "Will remind at " + new Date(selectedDate).toLocaleString(),
+                    timeOut: 2,
+                })
+            );
         }
     };
 

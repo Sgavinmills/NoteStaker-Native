@@ -151,16 +151,18 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         }
     };
 
-    useEffect(() => {
-        handleScrollTo();
-    }, []);
+    // useEffect(() => {
+    //     handleScrollTo();
+    // }, []);
 
     const handleScrollTo = () => {
         let offset = 0;
         const categoryIndex = overlay.menuData.categoryIndex;
         if (categoryIndex != null && categoryIndex >= 0) {
             for (let i = 0; i < categoryIndex; i++) {
-                offset += heightData[i].catHeight;
+                if (heightData[i]) {
+                    offset += heightData[i].catHeight;
+                }
             }
         }
 

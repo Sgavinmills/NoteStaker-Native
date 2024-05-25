@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
         width: "100%",
         backgroundColor: theme.colors.buttonBlue,
         padding: 5,
+        zIndex: 10,
     },
 
     subtleMessageText: {

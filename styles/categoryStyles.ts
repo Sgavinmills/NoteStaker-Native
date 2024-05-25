@@ -145,11 +145,13 @@ const catStyles = StyleSheet.create({
     dontForgetMeBell: {
         color: "gold",
         fontSize: 25,
+        zIndex: 100,
     },
 
     dontForgetMeContainer: {
         position: "absolute",
         top: 0,
+        zIndex: 100,
     },
 });
 

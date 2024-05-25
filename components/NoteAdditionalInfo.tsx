@@ -11,6 +11,7 @@ const NoteAdditionalInfo: React.FC<TileProps> = ({}) => {
     const note = useSelector((state: RootState) => state.memory.notes[overlay.menuData.noteID]);
     const categories = useSelector((state: RootState) => state.memory.categories);
     const subCategories = useSelector((state: RootState) => state.memory.subCategories);
+    const dontForgetMe = useSelector((state: RootState) => state.memory.dontForgetMe[note.id]);
 
     const getNoteLocations = (): string => {
         let locations = "";
@@ -66,7 +67,7 @@ const NoteAdditionalInfo: React.FC<TileProps> = ({}) => {
             <View style={additionalInfo.row}>
                 <Text style={additionalInfo.text}>DontForgetMe: </Text>
                 <Text style={additionalInfo.text}>
-                    {note.dontForgetMe ? new Date(note.dontForgetMe).toLocaleString() : ""}
+                    {dontForgetMe ? new Date(dontForgetMe.date).toLocaleString() : ""}
                 </Text>
             </View>
             {noteLocations.length >= 30 ? (

@@ -12,6 +12,7 @@ export const getEmptyOverlay = () => {
             categoryIndex: null,
             subCategoryIndex: null,
             isSearchTile: false,
+            subMenu: "",
         },
     };
 
@@ -40,8 +41,10 @@ export const printCategories = (categories: { [id: string]: Category }) => {
             console.log(`Category ID: ${category.id}`);
             console.log(`Name: ${category.name}`);
             console.log(`Notes:`);
-            category.notes.forEach((note) => console.log(`- Note ID: ${note.id}`)); // Adjust as per NoteRef structure
+            category.notes.forEach((note) => console.log(`- Note ID: ${note.id}`));
             console.log(`Subcategories: ${category.subCategories.join(", ")}`);
+            console.log(`DOnt forget me: `);
+
             console.log("\n");
         }
     }
@@ -64,12 +67,12 @@ export const printSubCategories = (subCategories: { [id: string]: SubCategory })
 
 export const printNotes = (notes: { [id: string]: Note }) => {
     console.log("--PRINTING Notes--");
-    for (const categoryId in notes) {
-        if (notes.hasOwnProperty(categoryId)) {
-            const category = notes[categoryId];
-            console.log(`Note ID: ${category.id}`);
-            console.log(`Note: ${category.note}`);
-            console.log(`Locations: [${category.locations}]`);
+    for (const noteID in notes) {
+        if (notes.hasOwnProperty(noteID)) {
+            const note = notes[noteID];
+            console.log(`Note ID: ${note.id}`);
+            console.log(`Note: ${note.note}`);
+            console.log(`Locations: [${note.locations}]`);
             console.log("\n");
         }
     }

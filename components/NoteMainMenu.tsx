@@ -26,10 +26,11 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
     const note = useSelector((state: RootState) => state.memory.notes[overlay.menuData.noteID]);
     const subCategory = useSelector((state: RootState) => state.memory.subCategories[overlay.menuData.subCategoryID]);
     const category = useSelector((state: RootState) => state.memory.categories[overlay.menuData.categoryID]);
+    const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
 
     const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
     const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
-    const [isDontForgetMe, setIsDontForgetMe] = useState(false);
+    const [isDontForgetMe, setIsDontForgetMe] = useState(overlay.menuData.subMenu === "dontForgetMe");
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({
         deleteType: "",
@@ -37,8 +38,12 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         additionalMessage: "",
     });
 
+    const hasDontForgetMe = () => {
+        return dontForgetMeList[note.id];
+    };
+
     const handleDontForgetMe = () => {
-        if (note.dontForgetMe) {
+        if (hasDontForgetMe()) {
             const config: DontForgetMeConfig = {
                 noteID: note.id,
                 subCategoryID: subCategory ? subCategory.id : "",
@@ -104,9 +109,9 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         setIsAdditionalInfo(true);
     };
 
-    useEffect(() => {
-        handleScrollToNote();
-    }, []);
+    // useEffect(() => {
+    //     handleScrollToNote();
+    // }, []);
 
     const handleScrollToNote = () => {
         let offset = 0;
@@ -118,20 +123,32 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         const categoryIndex = overlay.menuData.categoryIndex;
         if (categoryIndex != null && categoryIndex >= 0) {
             for (let i = 0; i <= categoryIndex; i++) {
-                offset += heightData[i].catHeight;
+                if (heightData[i]) {
+                    offset += heightData[i].catHeight;
+                }
             }
             const subCategoryIndex = overlay.menuData.subCategoryIndex;
             if (subCategoryIndex != null && subCategoryIndex >= 0) {
                 const numOfSubs = category.subCategories.length;
                 for (let j = subCategoryIndex + 1; j < numOfSubs; j++) {
-                    offset -= heightData[categoryIndex].subHeights[j].subHeight;
+                    if (heightData[categoryIndex]) {
+                        if (heightData[categoryIndex].subHeights[j]) {
+                            offset -= heightData[categoryIndex].subHeights[j].subHeight;
+                        }
+                    }
                 }
 
                 const noteIndex = overlay.menuData.noteIndex;
                 if (noteIndex != null && noteIndex >= 0) {
                     const numOfNotes = subCategory.notes.length;
                     for (let k = noteIndex; k < numOfNotes; k++) {
-                        offset -= heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[k];
+                        if (heightData[categoryIndex]) {
+                            if (heightData[categoryIndex].subHeights[subCategoryIndex]) {
+                                if (heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[k]) {
+                                    offset -= heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[k];
+                                }
+                            }
+                        }
                     }
                 }
             } else {
@@ -139,7 +156,9 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                 if (noteIndex != null && noteIndex >= 0) {
                     const numOfNotes = category.notes.length;
                     for (let k = noteIndex; k < numOfNotes; k++) {
-                        offset -= heightData[categoryIndex].noteHeights[k];
+                        if (heightData[categoryIndex]) {
+                            offset -= heightData[categoryIndex].noteHeights[k];
+                        }
                     }
                 }
             }
@@ -169,7 +188,7 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                         <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDontForgetMe}>
                             <Ionicons name="notifications-outline" style={menuOverlayStyles.icons} />
                             <Text style={menuOverlayStyles.text}>
-                                {note.dontForgetMe ? "Remove dont-forget-me reminder" : "Don't forget me"}
+                                {hasDontForgetMe() ? "Remove dont-forget-me reminder" : "Don't forget me"}
                             </Text>
                         </TouchableOpacity>
                     )}

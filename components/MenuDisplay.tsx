@@ -11,6 +11,7 @@ import HomeScreenMainMenu from "./HomeScreenMainMenu";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import SubCategoryMainMenu from "./SubCategoryMainMenu";
+import SubtleMessage from "./SubtleMessage";
 
 interface TileProps {
     setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
@@ -20,6 +21,8 @@ interface TileProps {
 // TODO - Move menu config componenets into own folder.
 
 const MenuDisplay: React.FC<TileProps> = ({ setScrollTo, setCloseAllCategories }) => {
+    const subtleMessage = useSelector((state: RootState) => state.memory.subtleMessage);
+
     const dispatch = useDispatch<AppDispatch>();
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const menuType = overlay.menuType;
@@ -37,6 +40,7 @@ const MenuDisplay: React.FC<TileProps> = ({ setScrollTo, setCloseAllCategories }
                 subCategoryIndex: null,
                 noteIndex: null,
                 isSearchTile: false,
+                subMenu: "",
             },
         };
 
@@ -69,28 +73,33 @@ const MenuDisplay: React.FC<TileProps> = ({ setScrollTo, setCloseAllCategories }
             <TouchableWithoutFeedback onPress={handleClose}>
                 <View style={menuOverlayStyles.modal}></View>
             </TouchableWithoutFeedback>
-            <>
-                {overlay.isShowing && (
-                    <TouchableWithoutFeedback>
-                        <View style={menuOverlayStyles.container}>
-                            <View style={menuOverlayStyles.contentContainer}>
-                                {menuType === "category" ? (
-                                    <CategoryMainMenu setScrollTo={setScrollTo} />
-                                ) : menuType === "subCategory" ? (
-                                    <SubCategoryMainMenu setScrollTo={setScrollTo} />
-                                ) : menuType === "note" ? (
-                                    <NoteMainMenu setScrollTo={setScrollTo} />
-                                ) : menuType === "homeScreen" ? (
-                                    <HomeScreenMainMenu setCloseAllCategories={setCloseAllCategories} />
-                                ) : (
-                                    <></>
-                                )}
-                            </View>
-                            {overlay.isShowing && <Button title="Close" onPress={handleClose} />}
+            {overlay.isShowing ? (
+                <TouchableWithoutFeedback>
+                    <View style={menuOverlayStyles.container}>
+                        <View style={menuOverlayStyles.contentContainer}>
+                            {menuType === "category" ? (
+                                <CategoryMainMenu setScrollTo={setScrollTo} />
+                            ) : menuType === "subCategory" ? (
+                                <SubCategoryMainMenu setScrollTo={setScrollTo} />
+                            ) : menuType === "note" ? (
+                                <NoteMainMenu setScrollTo={setScrollTo} />
+                            ) : menuType === "homeScreen" ? (
+                                <HomeScreenMainMenu setCloseAllCategories={setCloseAllCategories} />
+                            ) : (
+                                <></>
+                            )}
                         </View>
-                    </TouchableWithoutFeedback>
-                )}
-            </>
+                        {overlay.isShowing && (
+                            <Button
+                                title={subtleMessage.message ? subtleMessage.message : "Close"}
+                                onPress={handleClose}
+                            />
+                        )}
+                    </View>
+                </TouchableWithoutFeedback>
+            ) : (
+                <SubtleMessage />
+            )}
         </Modal>
     );
 };

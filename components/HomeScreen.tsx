@@ -24,6 +24,7 @@ import { getEmptyOverlay, printCategories, printNotes, printSubCategories } from
 import { FontAwesome } from "@expo/vector-icons";
 import { MenuOverlay } from "../types";
 import SearchCategoryTile from "./SearchTile";
+import SubtleMessage from "./SubtleMessage";
 
 const HomeScreen: React.FC = () => {
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
@@ -88,6 +89,7 @@ const HomeScreen: React.FC = () => {
                 subCategoryIndex: null,
                 noteIndex: null,
                 isSearchTile: false,
+                subMenu: "",
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
@@ -153,15 +155,16 @@ const HomeScreen: React.FC = () => {
     return (
         <TouchableWithoutFeedback onPress={handleOutsideMenuPress}>
             <>
+                <StatusBar translucent={true} backgroundColor="transparent" />
+                {newCatModalVisible && (
+                    <CategoryModal
+                        setNewCatModalVisible={setNewCatModalVisible}
+                        newCatModalVisible={newCatModalVisible}
+                        catInfo={{ currentName: "", parentCat: "" }}
+                    ></CategoryModal>
+                )}
                 <View style={styles.mainContainer}>
-                    <StatusBar translucent={true} backgroundColor="transparent" />
-                    {newCatModalVisible && (
-                        <CategoryModal
-                            setNewCatModalVisible={setNewCatModalVisible}
-                            newCatModalVisible={newCatModalVisible}
-                            catInfo={{ currentName: "", parentCat: "" }}
-                        ></CategoryModal>
-                    )}
+                    <SubtleMessage />
                     <View style={styles.homeScreenTopBarContainer}>
                         <TouchableOpacity style={styles.searchContainer} onPress={handleSearchPress}>
                             {!isSearch ? (

@@ -52,11 +52,28 @@ const CategoryTile: React.FC<TileProps> = ({
         }
     });
 
-    const dontForgetMe = category.dontForgetMe?.some((ref) => {
-        const currentTime = new Date();
-        const reminderTime = new Date(ref.date);
-        return reminderTime.getTime() < currentTime.getTime();
-    });
+    const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
+    const checkDontForgetMe = () => {
+        if (category.notes.length > 0) {
+            return category.notes.some((ref) => {
+                const dontForgetMeRef = dontForgetMeList[ref.id];
+                if (dontForgetMeRef) {
+                    if (dontForgetMeRef.location[0] === categoryID) {
+                        const currentTime = new Date();
+                        const reminderTime = new Date(dontForgetMeRef.date);
+                        return reminderTime.getTime() < currentTime.getTime();
+                    }
+                }
+
+                return false;
+            });
+        } else {
+            return Object.values(dontForgetMeList).some((dontForgetMeRef) => {
+                return dontForgetMeRef.location[0] === categoryID;
+            });
+        }
+    };
+    const dontForgetMe = checkDontForgetMe();
 
     useEffect(() => {
         if (category.isSelected) {
@@ -221,6 +238,7 @@ const CategoryTile: React.FC<TileProps> = ({
                 subCategoryIndex: null,
                 noteIndex: null,
                 isSearchTile: false,
+                subMenu: "",
             },
         };
         dispatch(updateMenuOverlay(newOverlay));

@@ -12,6 +12,8 @@ import {
     Memory,
     Ref,
     DontForgetMeConfig,
+    SubtleMessage,
+    dontForgetMeRef,
 } from "../types";
 import { memory } from "../mockMemory";
 import { produce } from "immer";
@@ -29,6 +31,11 @@ interface AppState {
         homeScreen: boolean;
         categories: string[];
     };
+    dontForgetMe: {
+        [id: string]: dontForgetMeRef;
+    };
+
+    subtleMessage: SubtleMessage;
 }
 
 const initialState: AppState = {
@@ -47,6 +54,7 @@ const initialState: AppState = {
             subCategoryIndex: null,
             noteIndex: null,
             isSearchTile: false,
+            subMenu: "",
         },
     },
     heightData: [],
@@ -54,7 +62,15 @@ const initialState: AppState = {
         homeScreen: false,
         categories: [],
     },
+
+    subtleMessage: {
+        message: "",
+        timeOut: -1,
+    },
+
+    dontForgetMe: {},
 };
+
 const notesSlice = createSlice({
     name: "notes",
     initialState,
@@ -220,7 +236,6 @@ const notesSlice = createSlice({
                     isSecureNote: false,
                     isSelected: false,
                     locations: [[categoryID, subCategoryID]],
-                    dontForgetMe: "",
                 };
 
                 draft.notes[noteToAdd.id] = noteToAdd;
@@ -412,9 +427,13 @@ const notesSlice = createSlice({
         // removeNoteFromSubCategory removes a note from a subcategory
         // it removes the noteRef from the subCategory notes
         // and updates the notes locations to remove the subCategory
+        // if the note exists in the dontforgetmestate and the subcategory matches this id then it updates the location
+        // to one of the other categories instead (first one it finds)
         removeNoteFromSubCategory(state, action: PayloadAction<IDs>) {
             return produce(state, (draft) => {
                 const { subCategoryID, noteID } = action.payload;
+                const note = draft.notes[noteID];
+
                 const subCategory = draft.subCategories[subCategoryID];
                 const noteIndex = subCategory.notes.findIndex((noteRef) => noteRef.id === noteID);
                 if (noteIndex > -1) {
@@ -427,25 +446,43 @@ const notesSlice = createSlice({
                         note.locations.splice(locationIndex, 1);
                     }
                 }
+
+                const dontForgetMeRef = draft.dontForgetMe[noteID];
+                if (dontForgetMeRef) {
+                    if (dontForgetMeRef.location[1] === subCategoryID) {
+                        // need to find a new home
+                        dontForgetMeRef.location = note.locations[0];
+                    }
+                }
             });
         },
 
         // removeNoteFromCategory removes a note from a main Category
         // it removes the noteRef from the Category notes
         // and updates the notes locations to remove the Category
+        // if the note exists in the dontforgetmestate and the subcategory matches this id then it updates the location
+        // to one of the other categories instead (first one it finds)
         removeNoteFromCategory(state, action: PayloadAction<IDs>) {
             return produce(state, (draft) => {
                 const { categoryID, noteID } = action.payload;
                 const category = draft.categories[categoryID];
+                const note = draft.notes[noteID];
                 const noteIndex = category.notes.findIndex((noteRef) => noteRef.id === noteID);
                 if (noteIndex > -1) {
                     // will always but still got error protection
                     category.notes.splice(noteIndex, 1);
                     // now update locations
-                    const note = draft.notes[noteID];
                     const locationIndex = note.locations.findIndex((loc) => loc[0] === categoryID);
                     if (locationIndex > -1) {
                         note.locations.splice(locationIndex, 1);
+                    }
+                }
+
+                const dontForgetMeRef = draft.dontForgetMe[noteID];
+                if (dontForgetMeRef) {
+                    if (dontForgetMeRef.location[0] === categoryID) {
+                        // need to find a new home
+                        dontForgetMeRef.location = note.locations[0];
                     }
                 }
             });
@@ -508,13 +545,15 @@ const notesSlice = createSlice({
             return { ...state, subCategories: subCategoriesCopy };
         },
 
+        // TODO - SHOULD DELETENOTE CHECK SECURENOTE STATE?!?!
+
         // deleteNote deletes a note from all categories.
         // It removes the note from notes and removes it's noteRef from any category/subcategory note lists
+        // Also removes its dontforgetme ref from state if it has one
         deleteNote(state, action: PayloadAction<string>) {
             return produce(state, (draft) => {
                 const noteID = action.payload;
                 const note = draft.notes[noteID];
-
                 note.locations.forEach((location) => {
                     if (location[1]) {
                         const subCategory = draft.subCategories[location[1]];
@@ -522,7 +561,6 @@ const notesSlice = createSlice({
                             return noteRef.id === noteID;
                         });
                         subCategory.notes.splice(noteIndex, 1);
-                        delete draft.notes[noteID];
 
                         return;
                     }
@@ -532,8 +570,11 @@ const notesSlice = createSlice({
                         return noteRef.id === noteID;
                     });
                     category.notes.splice(noteIndex, 1);
-                    delete draft.notes[noteID];
                 });
+                if (draft.dontForgetMe[noteID]) {
+                    delete draft.dontForgetMe[noteID];
+                }
+                delete draft.notes[noteID]; // TODO - SHouldnt this delete happen outside the loop?
             });
         },
 
@@ -555,7 +596,6 @@ const notesSlice = createSlice({
                     location: [parentCategoryID, ""],
                     isSecure: false,
                     isSelected: false,
-                    dontForgetMe: [],
                 };
 
                 const parentCategory = draft.categories[parentCategoryID];
@@ -602,7 +642,6 @@ const notesSlice = createSlice({
                     lastUpdatedBy: "",
                     isSecure: false,
                     isSelected: false,
-                    dontForgetMe: [],
                 };
 
                 draft.categories[newCategory.id] = newCategory;
@@ -695,6 +734,16 @@ const notesSlice = createSlice({
             });
         },
 
+        setSubtleMessage(state, action: PayloadAction<SubtleMessage>) {
+            return produce(state, (draft) => {
+                const { message, timeOut } = action.payload;
+                draft.subtleMessage = {
+                    message: message,
+                    timeOut: timeOut,
+                };
+            });
+        },
+
         // updateMemoryFromBackup replaces categories, subcategories, notes and categoryList
         // with data received from an imported json file
         updateMemoryFromBackup(state, action: PayloadAction<Memory>) {
@@ -710,54 +759,83 @@ const notesSlice = createSlice({
             });
         },
 
+        // addDontForgetMe adds a new ref into thge dontForgetMe state
+        // if passed a config with empty date then it removes it from dontForgetMeState
+        // if the note already exists in the state then it will be updated with the new date / config
+        // the location in the config is the location of the note that set the reminder
+        // this is unused for now to avoid complications when moving notes between categories
+        // for now all copies of the note will show the reminder if one is set
         addDontForgetMe(state, action: PayloadAction<DontForgetMeConfig>) {
             return produce(state, (draft) => {
                 const { noteID, categoryID, subCategoryID, date } = action.payload;
-                const note = draft.notes[noteID];
-                note.dontForgetMe = date;
 
-                if (subCategoryID) {
-                    const subCategory = draft.subCategories[subCategoryID];
-                    if (date) {
-                        subCategory.dontForgetMe.push({
-                            noteID: noteID,
-                            date: date,
-                        });
-                    } else {
-                        // find ref in the array with correct noteid and splice out
-                        const index = subCategory.dontForgetMe.findIndex((ref) => ref.noteID === noteID);
-                        subCategory.dontForgetMe.splice(index, 1);
-                    }
-                }
-
-                if (categoryID) {
-                    const category = draft.categories[categoryID];
-                    if (date) {
-                        category.dontForgetMe.push({
-                            noteID: noteID,
-                            date: date,
-                        });
-                    } else {
-                        const index = category.dontForgetMe.findIndex((ref) => ref.noteID === noteID);
-                        category.dontForgetMe.splice(index, 1);
+                if (date) {
+                    draft.dontForgetMe[noteID] = {
+                        location: [categoryID, subCategoryID],
+                        date: date,
+                    };
+                } else {
+                    if (draft.dontForgetMe[noteID]) {
+                        delete draft.dontForgetMe[noteID];
                     }
                 }
             });
         },
 
         migrateData(state, action: PayloadAction) {
-            return produce(state, (draft) => {
-                // add dontForgetMeArray to each category
-                Object.keys(draft.categories).forEach((key) => {
-                    const category = draft.categories[key];
-                    category.dontForgetMe = [];
-                });
+            // return produce(state, (draft) => {
+            //     // add dontForgetMeArray to each category
+            //     Object.keys(draft.categories).forEach((key) => {
+            //         const category = draft.categories[key];
+            //         category.dontForgetMe = [];
+            //     });
+            //     // add dontForgetMeArray to each subCategory
+            //     Object.keys(draft.subCategories).forEach((key) => {
+            //         const subCategory = draft.subCategories[key];
+            //         subCategory.dontForgetMe = [];
+            //     });
+            // });
+        },
 
-                // add dontForgetMeArray to each subCategory
-                Object.keys(draft.subCategories).forEach((key) => {
-                    const subCategory = draft.subCategories[key];
-                    subCategory.dontForgetMe = [];
-                });
+        // TODO - DO WE NEED BOTH SUBLTE MSG DISPATCH METHODS?
+
+        // closeOverlayAndSetSublteMessage sets a new subtle message and checks if the overlay is open
+        // if the overlay is open it removes the selected item property from the relevant item
+        // and sets a new empty overlay to close it
+        closeOverlayAndSetSubtleMessage(state, action: PayloadAction<SubtleMessage>) {
+            return produce(state, (draft) => {
+                if (draft.menuOverlay.isShowing) {
+                    switch (draft.menuOverlay.menuType) {
+                        case "note":
+                            const noteToDeSelect = draft.notes[draft.menuOverlay.menuData.noteID];
+                            if (noteToDeSelect) {
+                                noteToDeSelect.isSelected = false;
+                            }
+                            break;
+
+                        case "subCategory":
+                            const subCategoryToSelect = draft.subCategories[draft.menuOverlay.menuData.subCategoryID];
+                            if (subCategoryToSelect) {
+                                subCategoryToSelect.isSelected = false;
+                            }
+                            break;
+
+                        case "category":
+                            const categoryToSelect = draft.categories[draft.menuOverlay.menuData.categoryID];
+                            if (categoryToSelect) {
+                                categoryToSelect.isSelected = false;
+                            }
+                            break;
+                    }
+
+                    draft.menuOverlay = getEmptyOverlay();
+                }
+
+                const { message, timeOut } = action.payload;
+                draft.subtleMessage = {
+                    message: message,
+                    timeOut: timeOut,
+                };
             });
         },
     },
@@ -795,6 +873,8 @@ export const {
     updateCategorySilently,
     updateNoteSilently,
     updateSubCategorySilently,
+    setSubtleMessage,
+    closeOverlayAndSetSubtleMessage,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;
@@ -803,4 +883,7 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "./store/store";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import { SubHeight } from "../types";
+import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
+import dontForgetMe from "../styles/dontForgetMe";
+import DontForgetMeMenu from "../components/DontForgetMeMenu";
 export const useAppDispatch = () => useDispatch<AppDispatch>();

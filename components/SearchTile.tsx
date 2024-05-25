@@ -56,6 +56,8 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
 
     const searchResults = searchNotes(searchText);
 
+    // just need dummy setState function to pass into NoteTile
+    const [dummy, setDummy] = useState("");
     const renderSearchResult = ({ item, index }: { item: string; index: number }) => (
         <NoteTile
             index={Number(index)}
@@ -68,6 +70,8 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
             key={item}
             subCategoryIndex={10000}
             isSearchTile={true}
+            moving={""}
+            setMoving={setDummy}
         />
     );
 

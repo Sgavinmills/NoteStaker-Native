@@ -56,10 +56,19 @@ const SubCategoryTile: React.FC<TileProps> = ({
         }
     });
 
-    const dontForgetMe = subCategory.dontForgetMe.some((ref) => {
-        const currentTime = new Date();
-        const reminderTime = new Date(ref.date);
-        return reminderTime.getTime() < currentTime.getTime();
+    const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
+    const dontForgetMe = subCategory.notes.some((ref) => {
+        const dontForgetMeRef = dontForgetMeList[ref.id];
+
+        if (dontForgetMeRef) {
+            if (dontForgetMeRef.location[1] === subCategoryID) {
+                const currentTime = new Date();
+                const reminderTime = new Date(dontForgetMeRef.date);
+                return reminderTime.getTime() < currentTime.getTime();
+            }
+        }
+
+        return false;
     });
 
     useEffect(() => {
@@ -143,6 +152,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
                 subCategoryIndex: index,
                 categoryIndex: parentCategoryIndex,
                 isSearchTile: false,
+                subMenu: "",
             },
         };
         dispatch(updateMenuOverlay(newOverlay));
