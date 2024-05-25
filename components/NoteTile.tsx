@@ -10,7 +10,7 @@ import {
     BackHandler,
 } from "react-native";
 import noteStyles from "../styles/noteStyles";
-import { FontAwesome, Entypo, Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import categoryStyles from "../styles/categoryStyles";
 
 import { MenuOverlay, HeightUpdateInfo, NewNoteData, DontForgetMeConfig } from "../types";
@@ -32,7 +32,7 @@ import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import React from "react";
-import { getEmptyOverlay, moveDownList, moveUpList } from "../utilFuncs/utilFuncs";
+import { getEmptyOverlay, moveDownList, moveToEnd, moveToStart, moveUpList } from "../utilFuncs/utilFuncs";
 import * as ImagePicker from "expo-image-picker";
 
 interface TileProps {
@@ -292,6 +292,58 @@ const NoteTile: React.FC<TileProps> = ({
         }
     };
 
+    // TODO - MERGE THESE FUNCTIONS, DONT NEED 4 MASSIVE FUNCS TO DO VERY SIMILAR STUFF.
+    // REPEAT IN CAT AND SUB CAT TILES.
+    // AT LEAST ONLY NEED 1 PER DIRECTION
+
+    const handleUpToTopPress = () => {
+        if (subCategoryID) {
+            const subCategoryCopy = { ...subCategory };
+
+            const newList = [...subCategoryCopy.notes];
+            const currentIndex = newList.findIndex((ref) => ref.id === noteID);
+            if (currentIndex > 0) {
+                subCategoryCopy.notes = moveToStart(newList, currentIndex);
+                dispatch(updateSubCategory(subCategoryCopy));
+            }
+            return;
+        } else {
+            const categoryCopy = { ...category };
+
+            const newList = [...categoryCopy.notes];
+            const currentIndex = newList.findIndex((ref) => ref.id === noteID);
+            if (currentIndex > 0) {
+                categoryCopy.notes = moveToStart(newList, currentIndex);
+                dispatch(updateCategory(categoryCopy));
+            }
+            return;
+        }
+    };
+
+    const handleDownToBottomPress = () => {
+        if (subCategoryID) {
+            const subCategoryCopy = { ...subCategory };
+
+            const newList = [...subCategoryCopy.notes];
+            const currentIndex = newList.findIndex((ref) => ref.id === noteID);
+            if (currentIndex < newList.length - 1) {
+                subCategoryCopy.notes = moveToEnd(newList, currentIndex);
+                dispatch(updateSubCategory(subCategoryCopy));
+            }
+            return;
+        } else {
+            const categoryCopy = { ...category };
+
+            const newList = [...categoryCopy.notes];
+            const currentIndex = newList.findIndex((ref) => ref.id === noteID);
+            if (currentIndex < newList.length - 1) {
+                categoryCopy.notes = moveToEnd(newList, currentIndex);
+                dispatch(updateCategory(categoryCopy));
+            }
+            return;
+        }
+    };
+
     const handleBellPress = () => {
         if (dontForgetMe) {
             const config: DontForgetMeConfig = {
@@ -378,6 +430,12 @@ const NoteTile: React.FC<TileProps> = ({
                     {moving === noteID ? (
                         <>
                             <View style={{ flexDirection: "row" }}>
+                                <TouchableOpacity onPress={handleUpToTopPress}>
+                                    <MaterialIcons
+                                        name="keyboard-double-arrow-up"
+                                        style={[noteStyles.noteText, noteStyles.moveArrowsSmall]}
+                                    />
+                                </TouchableOpacity>
                                 <TouchableOpacity onPress={handleUpPress}>
                                     <Entypo name="arrow-bold-up" style={[noteStyles.noteText, noteStyles.moveArrows]} />
                                 </TouchableOpacity>
@@ -385,6 +443,12 @@ const NoteTile: React.FC<TileProps> = ({
                                     <Entypo
                                         name="arrow-bold-down"
                                         style={[noteStyles.noteText, noteStyles.moveArrows]}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handleDownToBottomPress}>
+                                    <MaterialIcons
+                                        name="keyboard-double-arrow-down"
+                                        style={[noteStyles.noteText, noteStyles.moveArrowsSmall]}
                                     />
                                 </TouchableOpacity>
                             </View>

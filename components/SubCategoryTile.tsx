@@ -1,12 +1,12 @@
 import { GestureResponderEvent, Text, View, TouchableWithoutFeedback, TouchableOpacity, Keyboard } from "react-native";
 import categoryStyles from "../styles/categoryStyles";
-import { FontAwesome, Entypo, Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { RootState } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
 import { MenuOverlay, HeightUpdateInfo, NewNoteData, Ref } from "../types";
-import { getEmptyOverlay, moveDownList, moveUpList } from "../utilFuncs/utilFuncs";
+import { getEmptyOverlay, moveDownList, moveToEnd, moveToStart, moveUpList } from "../utilFuncs/utilFuncs";
 import {
     createNewNote,
     removeFromShowSecureNote,
@@ -247,6 +247,18 @@ const SubCategoryTile: React.FC<TileProps> = ({
         return;
     };
 
+    const handleUpToTopPress = () => {
+        const parentCategoryCopy = { ...parentCategory };
+
+        const newList = [...parentCategoryCopy.subCategories];
+        const currentIndex = newList.findIndex((ref) => ref.id === subCategoryID);
+        if (currentIndex > 0) {
+            parentCategoryCopy.subCategories = moveToStart(newList, currentIndex);
+            dispatch(updateCategory(parentCategoryCopy));
+        }
+        return;
+    };
+
     const handleDownPress = () => {
         const parentCategoryCopy = { ...parentCategory };
 
@@ -254,6 +266,18 @@ const SubCategoryTile: React.FC<TileProps> = ({
         const currentIndex = newList.findIndex((ref) => ref.id === subCategoryID);
         if (currentIndex < newList.length - 1) {
             parentCategoryCopy.subCategories = moveDownList(newList, currentIndex);
+            dispatch(updateCategory(parentCategoryCopy));
+        }
+        return;
+    };
+
+    const handleDownToBottomPress = () => {
+        const parentCategoryCopy = { ...parentCategory };
+
+        const newList = [...parentCategoryCopy.subCategories];
+        const currentIndex = newList.findIndex((ref) => ref.id === subCategoryID);
+        if (currentIndex < newList.length - 1) {
+            parentCategoryCopy.subCategories = moveToEnd(newList, currentIndex);
             dispatch(updateCategory(parentCategoryCopy));
         }
         return;
@@ -309,6 +333,12 @@ const SubCategoryTile: React.FC<TileProps> = ({
                             </>
                         ) : (
                             <View style={{ flexDirection: "row" }}>
+                                <TouchableOpacity onPress={handleUpToTopPress}>
+                                    <MaterialIcons
+                                        name="keyboard-double-arrow-up"
+                                        style={[categoryStyles.categoryText, categoryStyles.moveArrowsSmall]}
+                                    />
+                                </TouchableOpacity>
                                 <TouchableOpacity onPress={handleUpPress}>
                                     <Entypo
                                         name="arrow-bold-up"
@@ -319,6 +349,12 @@ const SubCategoryTile: React.FC<TileProps> = ({
                                     <Entypo
                                         name="arrow-bold-down"
                                         style={[categoryStyles.categoryText, categoryStyles.moveArrows]}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handleDownToBottomPress}>
+                                    <MaterialIcons
+                                        name="keyboard-double-arrow-down"
+                                        style={[categoryStyles.categoryText, categoryStyles.moveArrowsSmall]}
                                     />
                                 </TouchableOpacity>
                             </View>

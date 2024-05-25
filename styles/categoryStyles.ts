@@ -137,9 +137,15 @@ const catStyles = StyleSheet.create({
     },
 
     moveArrows: {
-        paddingLeft: 10,
-        paddingRight: 10,
-        fontSize: 45,
+        paddingLeft: 5,
+        paddingRight: 5,
+        fontSize: 35,
+    },
+
+    moveArrowsSmall: {
+        paddingLeft: 5,
+        paddingRight: 2,
+        fontSize: 20,
     },
 
     dontForgetMeBell: {

@@ -33,6 +33,20 @@ export const moveUpList = (newList: any[], index: number) => {
     return [...newList];
 };
 
+export const moveToStart = (newList: any[], index: number) => {
+    const temp = newList[index];
+    newList.splice(index, 1);
+    newList.unshift(temp);
+    return [...newList];
+};
+
+export const moveToEnd = (newList: any[], index: number) => {
+    const temp = newList[index];
+    newList.splice(index, 1);
+    newList.push(temp);
+    return [...newList];
+};
+
 export const printCategories = (categories: { [id: string]: Category }) => {
     console.log("--PRINTING CATEGORIES--");
     for (const categoryId in categories) {

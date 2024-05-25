@@ -1,7 +1,7 @@
 import { Text, View, TouchableWithoutFeedback, TouchableOpacity, GestureResponderEvent, Keyboard } from "react-native";
 import { useEffect, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
-import { FontAwesome, Entypo, Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
 import { MenuOverlay, HeightUpdateInfo, NewNoteData, Note, IDs } from "../types";
 import { useSelector } from "react-redux";
@@ -17,7 +17,7 @@ import {
     updateCategorySilently,
     updateMenuOverlay,
 } from "../redux/slice";
-import { getEmptyOverlay, moveDownList, moveUpList } from "../utilFuncs/utilFuncs";
+import { getEmptyOverlay, moveDownList, moveToEnd, moveToStart, moveUpList } from "../utilFuncs/utilFuncs";
 import * as ImagePicker from "expo-image-picker";
 interface TileProps {
     categoryID: string;
@@ -261,12 +261,24 @@ const CategoryTile: React.FC<TileProps> = ({
     };
 
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
+
     const handleUpPress = () => {
         const categoryListCopy = [...categoryList];
 
         const currentIndex = categoryListCopy.findIndex((ref) => ref.id === categoryID);
         if (currentIndex > 0) {
             const newList = moveUpList(categoryListCopy, currentIndex);
+            dispatch(updateCategoryList(newList));
+        }
+        return;
+    };
+
+    const handleUpToTopPress = () => {
+        const categoryListCopy = [...categoryList];
+
+        const currentIndex = categoryListCopy.findIndex((ref) => ref.id === categoryID);
+        if (currentIndex > 0) {
+            const newList = moveToStart(categoryListCopy, currentIndex);
             dispatch(updateCategoryList(newList));
         }
         return;
@@ -282,6 +294,18 @@ const CategoryTile: React.FC<TileProps> = ({
         }
         return;
     };
+
+    const handleDownToBottomPress = () => {
+        const categoryListCopy = [...categoryList];
+
+        const currentIndex = categoryListCopy.findIndex((ref) => ref.id === categoryID);
+        if (currentIndex < categoryListCopy.length - 1) {
+            const newList = moveToEnd(categoryListCopy, currentIndex);
+            dispatch(updateCategoryList(categoryListCopy));
+        }
+        return;
+    };
+
     return (
         <View onLayout={handleCategoryLayout} style={isLastCategory && categoryStyles.lastMargin}>
             <TouchableWithoutFeedback onPress={handleTilePress} onLongPress={handleLongPress}>
@@ -312,6 +336,12 @@ const CategoryTile: React.FC<TileProps> = ({
                         {moving === categoryID ? (
                             <>
                                 <View style={{ flexDirection: "row" }}>
+                                    <TouchableOpacity onPress={handleUpToTopPress}>
+                                        <MaterialIcons
+                                            name="keyboard-double-arrow-up"
+                                            style={[categoryStyles.categoryText, categoryStyles.moveArrowsSmall]}
+                                        />
+                                    </TouchableOpacity>
                                     <TouchableOpacity onPress={handleUpPress}>
                                         <Entypo
                                             name="arrow-bold-up"
@@ -322,6 +352,12 @@ const CategoryTile: React.FC<TileProps> = ({
                                         <Entypo
                                             name="arrow-bold-down"
                                             style={[categoryStyles.categoryText, categoryStyles.moveArrows]}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={handleDownToBottomPress}>
+                                        <MaterialIcons
+                                            name="keyboard-double-arrow-down"
+                                            style={[categoryStyles.categoryText, categoryStyles.moveArrowsSmall]}
                                         />
                                     </TouchableOpacity>
                                 </View>
