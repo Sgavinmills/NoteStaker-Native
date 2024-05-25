@@ -69,7 +69,13 @@ const CategoryTile: React.FC<TileProps> = ({
             });
         } else {
             return Object.values(dontForgetMeList).some((dontForgetMeRef) => {
-                return dontForgetMeRef.location[0] === categoryID;
+                if (dontForgetMeRef.location[0] === categoryID) {
+                    const currentTime = new Date();
+                    const reminderTime = new Date(dontForgetMeRef.date);
+                    return reminderTime.getTime() < currentTime.getTime();
+                }
+
+                return false;
             });
         }
     };
