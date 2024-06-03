@@ -108,6 +108,10 @@ const noteStyles = StyleSheet.create({
         backgroundColor: theme.colors.tileBackgroundSelected,
     },
 
+    noteTileExpiredReminder: {
+        backgroundColor: "rgba(139, 0, 0, 0.3)",
+    },
+
     highPriority: {
         color: "gold",
     },

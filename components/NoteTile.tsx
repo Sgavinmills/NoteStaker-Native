@@ -13,7 +13,7 @@ import noteStyles from "../styles/noteStyles";
 import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import categoryStyles from "../styles/categoryStyles";
 
-import { MenuOverlay, HeightUpdateInfo, NewNoteData, DontForgetMeConfig } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData, DontForgetMeConfig, reminderID } from "../types";
 import { useDispatch } from "react-redux";
 import {
     addDontForgetMe,
@@ -34,6 +34,7 @@ import { RootState } from "../redux/store/store";
 import React from "react";
 import { getEmptyOverlay, moveDownList, moveToEnd, moveToStart, moveUpList } from "../utilFuncs/utilFuncs";
 import * as ImagePicker from "expo-image-picker";
+import PickDateTimeModal from "./PickDateTimeModal";
 
 interface TileProps {
     noteID: string;
@@ -67,6 +68,8 @@ const NoteTile: React.FC<TileProps> = ({
     const isSelected = note.isSelected;
     const dispatch = useDispatch<AppDispatch>();
 
+    const [modalType, setModalType] = useState<"dontForgetMe" | "reminder">("dontForgetMe");
+    const [pickDateTimeModalVisible, setPickDateTimeModalVisible] = useState(false);
     const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
     const dontForgetMeCalc = () => {
         const dontForgetMeRef = dontForgetMeList[note.id];
@@ -82,10 +85,24 @@ const NoteTile: React.FC<TileProps> = ({
         return false;
     };
 
+    const expiredReminder = () => {
+        if (categoryID !== reminderID) {
+            return false;
+        }
+
+        if (!note.notificationID || !note.notificationTime) {
+            return true;
+        }
+
+        const currentTime = new Date();
+        const reminderTime = new Date(note.notificationTime);
+        return reminderTime.getTime() < currentTime.getTime();
+    };
+
     const dontForgetMe = dontForgetMeCalc();
     const [noteEditMode, setNoteEditMode] = useState(note.isNewNote);
     const [isShowingImage, setIsShowingImage] = useState(false);
-    console.log("----------re render note: " + note.note);
+    // console.log("----------re render note: " + note.note);
     const handleNoteChange = (text: string) => {
         const noteCopy = { ...note, note: text };
         if (noteCopy.isNewNote) {
@@ -115,6 +132,17 @@ const NoteTile: React.FC<TileProps> = ({
         return () => backHandler.remove(); // Cleanup the event listener
     });
 
+    useEffect(() => {
+        if (!noteEditMode) {
+            if (categoryID === reminderID) {
+                if (!note.notificationID) {
+                    setModalType("reminder");
+                    setPickDateTimeModalVisible(true);
+                }
+            }
+        }
+    }, [noteEditMode]);
+
     const handleNoteBlur = () => {
         setNoteEditMode(false);
 
@@ -130,7 +158,7 @@ const NoteTile: React.FC<TileProps> = ({
         }
     };
 
-    const handleMenuPress = (event: GestureResponderEvent) => {
+    const handleMenuPress = () => {
         if (Keyboard.isVisible()) {
             Keyboard.dismiss();
             return;
@@ -211,6 +239,12 @@ const NoteTile: React.FC<TileProps> = ({
 
         // TODO - DONT THINK WE NEED THESE CLEAR OVERLAYS ANYMORE.
         dispatch(updateMenuOverlay(getEmptyOverlay()));
+
+        // if it has an expired reminder then force open the note menu
+        if (expiredReminder()) {
+            handleMenuPress();
+            return;
+        }
 
         setNoteEditMode(true);
     };
@@ -354,134 +388,146 @@ const NoteTile: React.FC<TileProps> = ({
             };
             dispatch(addDontForgetMe(config));
 
-            const newOverlay: MenuOverlay = {
-                isShowing: true,
-                menuType: "note",
-                menuData: {
-                    noteID: note.id,
-                    categoryID: categoryID ? categoryID : "",
-                    subCategoryID: subCategoryID ? subCategoryID : "",
-                    categoryIndex: parentCategoryIndex,
-                    subCategoryIndex: subCategoryIndex !== undefined ? subCategoryIndex : null,
-                    noteIndex: index,
-                    isSearchTile: isSearchTile,
-                    subMenu: "dontForgetMe",
-                },
-            };
-            dispatch(updateMenuOverlay(newOverlay));
+            setPickDateTimeModalVisible(true);
+            setModalType("dontForgetMe");
 
             return;
         }
     };
 
     return (
-        <View onLayout={handleCategoryLayout} style={isLastNote && noteStyles.bottomBorder}>
-            <View
-                style={[
-                    addBottomRadius() && noteStyles.bottomBorder,
-                    noteStyles.noteTile,
-                    moving === noteID && noteStyles.noteTileSelected,
-                    isSelected && noteStyles.noteTileSelected,
-                ]}
-            >
-                {dontForgetMe && (
-                    <View style={categoryStyles.dontForgetMeContainer}>
-                        <TouchableOpacity onPress={handleBellPress}>
-                            <Ionicons name="notifications-outline" style={categoryStyles.dontForgetMeBell} />
+        <>
+            <PickDateTimeModal
+                setPickDateTimeModalVisible={setPickDateTimeModalVisible}
+                pickDateTimeModalVisible={pickDateTimeModalVisible}
+                modalType={modalType}
+                ids={{
+                    noteID: note.id,
+                    categoryID: categoryID,
+                    subCategoryID: subCategoryID,
+                }}
+            />
+            <View onLayout={handleCategoryLayout} style={isLastNote && noteStyles.bottomBorder}>
+                <View
+                    style={[
+                        addBottomRadius() && noteStyles.bottomBorder,
+                        noteStyles.noteTile,
+                        moving === noteID && noteStyles.noteTileSelected,
+                        isSelected && noteStyles.noteTileSelected,
+                        expiredReminder() && !noteEditMode && noteStyles.noteTileExpiredReminder,
+                    ]}
+                >
+                    {dontForgetMe && (
+                        <View style={categoryStyles.dontForgetMeContainer}>
+                            <TouchableOpacity onPress={handleBellPress}>
+                                <Ionicons name="notifications-outline" style={categoryStyles.dontForgetMeBell} />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    <View style={noteStyles.noteContainer}>
+                        <TouchableOpacity onPress={handleImagePress} onLongPress={handleLongPress}>
+                            {note.imageURI && (
+                                <Image source={{ uri: note.imageURI }} style={{ height: 150, width: 150 }} />
+                            )}
                         </TouchableOpacity>
+                        {noteEditMode && (
+                            <TextInput
+                                multiline
+                                style={[
+                                    noteStyles.noteText,
+                                    noteStyles.noteTextFocused,
+                                    note.priority === "high" && noteStyles.highPriority,
+                                ]}
+                                onChangeText={handleNoteChange}
+                                onBlur={handleNoteBlur}
+                                value={note.note}
+                                autoFocus
+                            />
+                        )}
+                        {!noteEditMode && (
+                            <TouchableWithoutFeedback onPress={handleTouchNote} onLongPress={handleLongPress}>
+                                <Text
+                                    style={[noteStyles.noteText, note.priority === "high" && noteStyles.highPriority]}
+                                >
+                                    {note.isSecureNote && (
+                                        <FontAwesome name="lock" style={noteStyles.padlock}></FontAwesome>
+                                    )}
+                                    {note.isSecureNote && "  "}
+                                    {note.note}
+                                </Text>
+                            </TouchableWithoutFeedback>
+                        )}
                     </View>
+                    <View style={noteStyles.tileIconsContainer}>
+                        {noteEditMode && (
+                            <TouchableOpacity onPress={handleCameraPress}>
+                                <FontAwesome name="camera" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
+                            </TouchableOpacity>
+                        )}
+                        {moving === noteID ? (
+                            <>
+                                <View style={{ flexDirection: "row" }}>
+                                    <TouchableOpacity onPress={handleUpToTopPress}>
+                                        <MaterialIcons
+                                            name="keyboard-double-arrow-up"
+                                            style={[noteStyles.noteText, noteStyles.moveArrowsSmall]}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={handleUpPress}>
+                                        <Entypo
+                                            name="arrow-bold-up"
+                                            style={[noteStyles.noteText, noteStyles.moveArrows]}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={handleDownPress}>
+                                        <Entypo
+                                            name="arrow-bold-down"
+                                            style={[noteStyles.noteText, noteStyles.moveArrows]}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={handleDownToBottomPress}>
+                                        <MaterialIcons
+                                            name="keyboard-double-arrow-down"
+                                            style={[noteStyles.noteText, noteStyles.moveArrowsSmall]}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </>
+                        ) : (
+                            <>
+                                <TouchableOpacity onPress={handleCheckboxPress}>
+                                    {note.completed && (
+                                        <Text style={[noteStyles.icons, noteStyles.completedCheckbox]}>&#x2705;</Text>
+                                    )}
+                                    {!note.completed && (
+                                        <Text style={[noteStyles.icons, noteStyles.notCompletedCheckbox]}>
+                                            &#x26AA;
+                                        </Text>
+                                    )}
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handleMenuPress}>
+                                    <FontAwesome
+                                        name="ellipsis-v"
+                                        style={[noteStyles.icons, noteStyles.noteEllipsis]}
+                                    />
+                                </TouchableOpacity>
+                            </>
+                        )}
+                    </View>
+                    {<InsertNote subCategoryID={subCategoryID} categoryID={categoryID} index={index} />}
+                </View>
+                {isShowingImage && (
+                    <ImageModal
+                        height={100}
+                        width={100}
+                        isShowingImage={isShowingImage}
+                        setIsShowingImage={setIsShowingImage}
+                        imageURI={note.imageURI}
+                        note={note}
+                    />
                 )}
-                <View style={noteStyles.noteContainer}>
-                    <TouchableOpacity onPress={handleImagePress} onLongPress={handleLongPress}>
-                        {note.imageURI && <Image source={{ uri: note.imageURI }} style={{ height: 150, width: 150 }} />}
-                    </TouchableOpacity>
-                    {noteEditMode && (
-                        <TextInput
-                            multiline
-                            style={[
-                                noteStyles.noteText,
-                                noteStyles.noteTextFocused,
-                                note.priority === "high" && noteStyles.highPriority,
-                            ]}
-                            onChangeText={handleNoteChange}
-                            onBlur={handleNoteBlur}
-                            value={note.note}
-                            autoFocus
-                        />
-                    )}
-                    {!noteEditMode && (
-                        <TouchableWithoutFeedback onPress={handleTouchNote} onLongPress={handleLongPress}>
-                            <Text style={[noteStyles.noteText, note.priority === "high" && noteStyles.highPriority]}>
-                                {note.isSecureNote && (
-                                    <FontAwesome name="lock" style={noteStyles.padlock}></FontAwesome>
-                                )}
-                                {note.isSecureNote && "  "}
-                                {note.note}
-                            </Text>
-                        </TouchableWithoutFeedback>
-                    )}
-                </View>
-                <View style={noteStyles.tileIconsContainer}>
-                    {noteEditMode && (
-                        <TouchableOpacity onPress={handleCameraPress}>
-                            <FontAwesome name="camera" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
-                        </TouchableOpacity>
-                    )}
-                    {moving === noteID ? (
-                        <>
-                            <View style={{ flexDirection: "row" }}>
-                                <TouchableOpacity onPress={handleUpToTopPress}>
-                                    <MaterialIcons
-                                        name="keyboard-double-arrow-up"
-                                        style={[noteStyles.noteText, noteStyles.moveArrowsSmall]}
-                                    />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={handleUpPress}>
-                                    <Entypo name="arrow-bold-up" style={[noteStyles.noteText, noteStyles.moveArrows]} />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={handleDownPress}>
-                                    <Entypo
-                                        name="arrow-bold-down"
-                                        style={[noteStyles.noteText, noteStyles.moveArrows]}
-                                    />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={handleDownToBottomPress}>
-                                    <MaterialIcons
-                                        name="keyboard-double-arrow-down"
-                                        style={[noteStyles.noteText, noteStyles.moveArrowsSmall]}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </>
-                    ) : (
-                        <>
-                            <TouchableOpacity onPress={handleCheckboxPress}>
-                                {note.completed && (
-                                    <Text style={[noteStyles.icons, noteStyles.completedCheckbox]}>&#x2705;</Text>
-                                )}
-                                {!note.completed && (
-                                    <Text style={[noteStyles.icons, noteStyles.notCompletedCheckbox]}>&#x26AA;</Text>
-                                )}
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={handleMenuPress}>
-                                <FontAwesome name="ellipsis-v" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
-                            </TouchableOpacity>
-                        </>
-                    )}
-                </View>
-                {<InsertNote subCategoryID={subCategoryID} categoryID={categoryID} index={index} />}
             </View>
-            {isShowingImage && (
-                <ImageModal
-                    height={100}
-                    width={100}
-                    isShowingImage={isShowingImage}
-                    setIsShowingImage={setIsShowingImage}
-                    imageURI={note.imageURI}
-                    note={note}
-                />
-            )}
-        </View>
+        </>
     );
 };
 

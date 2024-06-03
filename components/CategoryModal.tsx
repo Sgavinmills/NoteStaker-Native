@@ -92,7 +92,11 @@ const CategoryModal: React.FC<TileProps> = ({ setNewCatModalVisible, newCatModal
             closeMenuOverlay();
         } else {
             setError(true);
-            setErrorMessage("Category name must be unique");
+            if (newCategoryName === "Reminders") {
+                setErrorMessage("Category name must be unique. Reminders is a protected category name");
+            } else {
+                setErrorMessage("Category name must be unique.");
+            }
         }
     };
 

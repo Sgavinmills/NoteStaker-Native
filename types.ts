@@ -21,6 +21,8 @@ export interface Note {
     isSecureNote: boolean;
     locations: Location[];
     isSelected: boolean;
+    notificationID: string;
+    notificationTime: string;
 }
 
 export interface Category {
@@ -82,13 +84,22 @@ export interface MenuData {
     subCategoryIndex: number | null;
     noteIndex: number | null;
     isSearchTile: boolean;
-    subMenu: "dontForgetMe" | "";
+    subMenu: "nameofmenutoopendirectly - unused atm" | "";
 }
 
 export interface DeleteInfo {
-    deleteType: "removeAll" | "deleteCategory" | "deleteNote" | "deleteImage" | "backupData" | "importData" | "";
+    deleteType:
+        | "removeAll"
+        | "deleteCategory"
+        | "deleteNote"
+        | "deleteImage"
+        | "backupData"
+        | "importData"
+        | "removeFromReminders"
+        | "";
     deleteMessage: string;
     additionalMessage: string;
+    deleteFunction?: () => void;
 }
 
 export interface SubHeight {
@@ -127,6 +138,14 @@ export type dontForgetMeRef = {
     date: string;
 };
 
+export type reminderConfig = {
+    reminderTime: Date;
+    note: Note;
+    reminderText: string;
+};
+
 export interface DontForgetMeConfig extends IDs {
     date: string;
 }
+
+export const reminderID = "reminderCatID";

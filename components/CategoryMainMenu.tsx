@@ -3,7 +3,7 @@ import menuOverlayStyles from "../styles/menuOverlayStyles";
 import { FontAwesome, Entypo, MaterialIcons } from "@expo/vector-icons";
 import { Text, TouchableOpacity } from "react-native";
 import CategoryModal from "./CategoryModal";
-import { DeleteInfo } from "../types";
+import { DeleteInfo, reminderID } from "../types";
 import { AppDispatch } from "../redux/store/store";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
@@ -206,32 +206,51 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                 <CategoryAdditionalInfo />
             ) : (
                 <>
-                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddSubCat}>
-                        <FontAwesome name="plus" style={menuOverlayStyles.icons} />
-                        <Text style={menuOverlayStyles.text}>Add subcategory</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleEditName}>
-                        <FontAwesome name="edit" style={menuOverlayStyles.icons} />
-                        <Text style={menuOverlayStyles.text}>Edit category name</Text>
-                    </TouchableOpacity>
-                    {category.notes.length > 0 && (
-                        <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleRemoveAllNotes}>
-                            <FontAwesome name="trash" style={menuOverlayStyles.icons} />
-                            <Text style={menuOverlayStyles.text}>Remove all notes from category</Text>
-                        </TouchableOpacity>
+                    {category.id !== reminderID && (
+                        <>
+                            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddSubCat}>
+                                <FontAwesome name="plus" style={menuOverlayStyles.icons} />
+                                <Text style={menuOverlayStyles.text}>Add subcategory</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleEditName}>
+                                <FontAwesome name="edit" style={menuOverlayStyles.icons} />
+                                <Text style={menuOverlayStyles.text}>Edit category name</Text>
+                            </TouchableOpacity>
+                            {category.notes.length > 0 && (
+                                <TouchableOpacity
+                                    style={menuOverlayStyles.menuItemContainer}
+                                    onPress={handleRemoveAllNotes}
+                                >
+                                    <FontAwesome name="trash" style={menuOverlayStyles.icons} />
+                                    <Text style={menuOverlayStyles.text}>Remove all notes from category</Text>
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity
+                                style={menuOverlayStyles.menuItemContainer}
+                                onPress={handleShowSecureNote}
+                            >
+                                <FontAwesome name="key" style={menuOverlayStyles.icons} />
+                                <Text style={menuOverlayStyles.text}>{getSecureItemsText()}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={menuOverlayStyles.menuItemContainer}
+                                onPress={handleMakeSecureCategory}
+                            >
+                                <FontAwesome name="lock" style={menuOverlayStyles.icons} />
+                                <Text style={menuOverlayStyles.text}>{makeCategorySecureText}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={menuOverlayStyles.menuItemContainer}
+                                onPress={handleDeleteCategory}
+                            >
+                                <FontAwesome
+                                    name="times"
+                                    style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]}
+                                />
+                                <Text style={menuOverlayStyles.text}>Delete category</Text>
+                            </TouchableOpacity>
+                        </>
                     )}
-                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleShowSecureNote}>
-                        <FontAwesome name="key" style={menuOverlayStyles.icons} />
-                        <Text style={menuOverlayStyles.text}>{getSecureItemsText()}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecureCategory}>
-                        <FontAwesome name="lock" style={menuOverlayStyles.icons} />
-                        <Text style={menuOverlayStyles.text}>{makeCategorySecureText}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDeleteCategory}>
-                        <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
-                        <Text style={menuOverlayStyles.text}>Delete category</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAdditionalInfoPress}>
                         <MaterialIcons name="read-more" style={menuOverlayStyles.icons} />
                         <Text style={menuOverlayStyles.text}>See category details</Text>

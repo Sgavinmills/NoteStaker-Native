@@ -32,7 +32,7 @@ const NoteAdditionalInfo: React.FC<TileProps> = ({}) => {
                 locations += `${catName}->${subCatName}`;
             }
         });
-        console.log(locations);
+        // console.log(locations);
         return locations;
     };
     const noteLocations = getNoteLocations();
@@ -68,6 +68,12 @@ const NoteAdditionalInfo: React.FC<TileProps> = ({}) => {
                 <Text style={additionalInfo.text}>DontForgetMe: </Text>
                 <Text style={additionalInfo.text}>
                     {dontForgetMe ? new Date(dontForgetMe.date).toLocaleString() : ""}
+                </Text>
+            </View>
+            <View style={additionalInfo.row}>
+                <Text style={additionalInfo.text}>Reminder: </Text>
+                <Text style={additionalInfo.text}>
+                    {note.notificationTime ? new Date(note.notificationTime).toLocaleString() : ""}
                 </Text>
             </View>
             {noteLocations.length >= 30 ? (

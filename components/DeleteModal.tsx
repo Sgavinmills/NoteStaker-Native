@@ -30,6 +30,8 @@ interface TileProps {
 // TODO  repurpose this as ConfirmModal ? See if can reuse for 'rmove all notes from categoris' first.
 // Defo, we're even confirming backup data now.
 // BUt also, wanna find way to extract some methods... this modal file shouldnt be responsible for housing all these functions
+
+// TODO - REPURPOSE THIS AND ALSO PASS IN DELETEFUNCTIONS, LIKE HAVE DONE FOR REMPOVING CATEGORY FROM REMINDERS CONFIRMATION.
 const DeleteModal: React.FC<TileProps> = ({
     setDeleteModalVisible,
     deleteModalVisible,
@@ -311,6 +313,12 @@ const DeleteModal: React.FC<TileProps> = ({
             }
             case "importData": {
                 importData();
+                break;
+            }
+            case "removeFromReminders": {
+                if (deleteInfo.deleteFunction) {
+                    deleteInfo.deleteFunction();
+                }
                 break;
             }
         }

@@ -44,7 +44,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
     const isSelected = subCategory.isSelected;
     const dispatch = useDispatch<AppDispatch>();
 
-    console.log("------ re render subcategory: " + subCategory.name);
+    // console.log("------ re render subcategory: " + subCategory.name);
     const showingSecure =
         showSecure.homeScreen ||
         showSecure.categories.includes(subCategoryID) ||

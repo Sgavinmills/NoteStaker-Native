@@ -14,10 +14,12 @@ import {
     DontForgetMeConfig,
     SubtleMessage,
     dontForgetMeRef,
+    reminderID,
 } from "../types";
 import { memory } from "../mockMemory";
 import { produce } from "immer";
 import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 
 interface AppState {
     notes: { [id: string]: Note };
@@ -236,6 +238,8 @@ const notesSlice = createSlice({
                     isSecureNote: false,
                     isSelected: false,
                     locations: [[categoryID, subCategoryID]],
+                    notificationID: "",
+                    notificationTime: "",
                 };
 
                 draft.notes[noteToAdd.id] = noteToAdd;
@@ -462,6 +466,8 @@ const notesSlice = createSlice({
         // and updates the notes locations to remove the Category
         // if the note exists in the dontforgetmestate and the subcategory matches this id then it updates the location
         // to one of the other categories instead (first one it finds)
+        // if the note is being removed from the remindersCategory
+        // then it also cancels the notification and removes the reminder time from the note
         removeNoteFromCategory(state, action: PayloadAction<IDs>) {
             return produce(state, (draft) => {
                 const { categoryID, noteID } = action.payload;
@@ -484,6 +490,12 @@ const notesSlice = createSlice({
                         // need to find a new home
                         dontForgetMeRef.location = note.locations[0];
                     }
+                }
+
+                if (categoryID === reminderID) {
+                    cancelNotification(note.notificationID);
+                    note.notificationID = "";
+                    note.notificationTime = "";
                 }
             });
         },
@@ -550,6 +562,7 @@ const notesSlice = createSlice({
         // deleteNote deletes a note from all categories.
         // It removes the note from notes and removes it's noteRef from any category/subcategory note lists
         // Also removes its dontforgetme ref from state if it has one
+        // also removes push notification if it has one
         deleteNote(state, action: PayloadAction<string>) {
             return produce(state, (draft) => {
                 const noteID = action.payload;
@@ -573,6 +586,10 @@ const notesSlice = createSlice({
                 });
                 if (draft.dontForgetMe[noteID]) {
                     delete draft.dontForgetMe[noteID];
+                }
+
+                if (note.notificationID) {
+                    cancelNotification(note.notificationID);
                 }
                 delete draft.notes[noteID]; // TODO - SHouldnt this delete happen outside the loop?
             });
@@ -631,8 +648,9 @@ const notesSlice = createSlice({
         // addCategory creates a new category and adds its ID to the categoryList
         addCategory(state, action: PayloadAction<string>) {
             return produce(state, (draft) => {
+                const categoryName = action.payload;
                 const newCategory: Category = {
-                    id: getRandomID(),
+                    id: categoryName !== "Reminders" ? getRandomID() : reminderID,
                     name: action.payload,
                     notes: [],
                     subCategories: [],
@@ -713,7 +731,6 @@ const notesSlice = createSlice({
         // updateSubCategorySecureStatus toggles wherer a category is secure or not
         // it will update the catRef in the parent category subCategoryList
         updateSubCategorySecureStatus(state, action: PayloadAction<string>) {
-            console.log("getting rogue called?");
             return produce(state, (draft) => {
                 const subCategoryID = action.payload;
                 const subCategory = draft.subCategories[subCategoryID];
@@ -840,6 +857,11 @@ const notesSlice = createSlice({
         },
     },
 });
+
+const cancelNotification = async (id: string) => {
+    await Notifications.cancelScheduledNotificationAsync(id);
+};
+
 export const {
     addDontForgetMe,
     migrateData,

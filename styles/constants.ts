@@ -8,6 +8,7 @@ const theme = {
         noteText: "#b4b4b4",
         modalTextInputBackgroundColor: "white",
         modalOverlayBackground: "rgba(0, 0, 0, 0.9)",
+        modalOverlayBackgroundLight: "rgba(0, 0, 0, 0.7)",
         noteMenuBorder: "black",
         noteMenuBackground: "grey",
         adjustCategoryMainTab: "rgba(100, 149, 237, 0.5)",

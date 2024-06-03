@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { MenuOverlay, HeightUpdateInfo, NewNoteData, Note, IDs } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import NoteTile from "./NoteTile";
@@ -44,7 +44,7 @@ const CategoryTile: React.FC<TileProps> = ({
     const [securePlaceholderTile, setSecurePlaceholderTile] = useState(false);
     const isSelected = category.isSelected;
     const showingSecure = showSecure.homeScreen || showSecure.categories.includes(categoryID);
-    console.log("--re render category: " + category.name);
+    // console.log("--re render category: " + category.name);
     const notesForCat: string[] = [];
     category.notes.forEach((noteRef) => {
         if (showingSecure || !noteRef.isSecure) {

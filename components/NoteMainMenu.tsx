@@ -8,11 +8,12 @@ import { RootState } from "../redux/store/store";
 import { addDontForgetMe, updateMenuOverlay, updateNote, updateNoteSecureStatus } from "../redux/slice";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import DeleteModal from "./DeleteModal";
-import { DeleteInfo, DontForgetMeConfig } from "../types";
+import { DeleteInfo, DontForgetMeConfig, reminderID } from "../types";
 import * as LocalAuthentication from "expo-local-authentication";
 import AdjustingCategories from "./AdjustingCategories";
 import NoteAdditionalInfo from "./NoteAdditionalInfo";
-import DontForgetMeMenu from "./DontForgetMeMenu";
+import PickDateTimeModal from "./PickDateTimeModal";
+import * as Notifications from "expo-notifications";
 
 interface TileProps {
     setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
@@ -30,7 +31,9 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
 
     const [isAdjustingCategories, setIsAdjustingCategories] = useState(false);
     const [isAdditionalInfo, setIsAdditionalInfo] = useState(false);
-    const [isDontForgetMe, setIsDontForgetMe] = useState(overlay.menuData.subMenu === "dontForgetMe");
+    const [isDontForgetMe, setIsDontForgetMe] = useState(false);
+    const [editReminder, setEditReminder] = useState(false);
+
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({
         deleteType: "",
@@ -96,6 +99,10 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         if (note.locations.length > 1) {
             deleteInfo.deleteMessage =
                 "The note you are about to delete exists in other categories. If you delete, it will be removed from those too. If you only want to remove it from this category then use the move between categories option instead.";
+        }
+
+        if (note.notificationID && category.id !== reminderID) {
+            deleteInfo.deleteMessage = "The note has a reminder set, deleting will also delete the reminder.";
         }
 
         setDeleteInfo(deleteInfo);
@@ -166,14 +173,43 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
         setScrollTo(offset);
     };
 
+    const handleEditReminder = async () => {
+        await Notifications.cancelScheduledNotificationAsync(note.notificationID);
+        const noteCopy = { ...note };
+        noteCopy.notificationID = "";
+        noteCopy.notificationTime = "";
+        dispatch(updateNote(noteCopy));
+        setEditReminder(true);
+    };
+
     return (
         <>
             {isAdjustingCategories ? (
                 <AdjustingCategories />
+            ) : editReminder ? (
+                <PickDateTimeModal
+                    modalType="reminder"
+                    setPickDateTimeModalVisible={setEditReminder}
+                    pickDateTimeModalVisible={editReminder}
+                    ids={{
+                        categoryID: category.id,
+                        noteID: note.id,
+                        subCategoryID: "",
+                    }}
+                />
             ) : isAdditionalInfo ? (
                 <NoteAdditionalInfo />
             ) : isDontForgetMe ? (
-                <DontForgetMeMenu setIsDontForgetMe={setIsDontForgetMe} />
+                <PickDateTimeModal
+                    modalType="dontForgetMe"
+                    setPickDateTimeModalVisible={setIsDontForgetMe}
+                    pickDateTimeModalVisible={isDontForgetMe}
+                    ids={{
+                        categoryID: category.id,
+                        noteID: note.id,
+                        subCategoryID: subCategory ? subCategory.id : "",
+                    }}
+                />
             ) : (
                 <>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAddRemoveCategories}>
@@ -184,23 +220,36 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                         <FontAwesome name="star" style={menuOverlayStyles.icons} />
                         <Text style={menuOverlayStyles.text}>Mark as high priority</Text>
                     </TouchableOpacity>
-                    {!overlay.menuData.isSearchTile && (
-                        <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDontForgetMe}>
-                            <Ionicons name="notifications-outline" style={menuOverlayStyles.icons} />
-                            <Text style={menuOverlayStyles.text}>
-                                {hasDontForgetMe() ? "Remove dont-forget-me reminder" : "Don't forget me"}
-                            </Text>
-                        </TouchableOpacity>
+                    {category.id !== reminderID && (
+                        <>
+                            {!overlay.menuData.isSearchTile && (
+                                <TouchableOpacity
+                                    style={menuOverlayStyles.menuItemContainer}
+                                    onPress={handleDontForgetMe}
+                                >
+                                    <Ionicons name="notifications-outline" style={menuOverlayStyles.icons} />
+                                    <Text style={menuOverlayStyles.text}>
+                                        {hasDontForgetMe() ? "Remove dont-forget-me reminder" : "Don't forget me"}
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecure}>
+                                <FontAwesome name="lock" style={menuOverlayStyles.icons} />
+                                {!note.isSecureNote && <Text style={menuOverlayStyles.text}>Make secure note</Text>}
+                                {note.isSecureNote && <Text style={menuOverlayStyles.text}>Unsecure note</Text>}
+                            </TouchableOpacity>
+                        </>
                     )}
-                    <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleMakeSecure}>
-                        <FontAwesome name="lock" style={menuOverlayStyles.icons} />
-                        {!note.isSecureNote && <Text style={menuOverlayStyles.text}>Make secure note</Text>}
-                        {note.isSecureNote && <Text style={menuOverlayStyles.text}>Unsecure note</Text>}
-                    </TouchableOpacity>
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleDelete}>
                         <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
                         <Text style={menuOverlayStyles.text}>Delete note</Text>
                     </TouchableOpacity>
+                    {category.id === reminderID && (
+                        <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleEditReminder}>
+                            <FontAwesome name="clock-o" style={[menuOverlayStyles.icons]} />
+                            <Text style={menuOverlayStyles.text}>Edit reminder time</Text>
+                        </TouchableOpacity>
+                    )}
                     <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleAdditionalInfoPress}>
                         <MaterialIcons name="read-more" style={menuOverlayStyles.icons} />
                         <Text style={menuOverlayStyles.text}>See note details</Text>
