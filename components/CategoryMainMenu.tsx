@@ -19,12 +19,10 @@ import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import * as LocalAuthentication from "expo-local-authentication";
 import CategoryAdditionalInfo from "./CategoryAdditionalInfo";
 
-interface TileProps {
-    setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
-}
+interface TileProps {}
 
 // CategoryMainMenu provides main menu for parent categories and sub categories
-const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
+const CategoryMainMenu: React.FC<TileProps> = ({}) => {
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
     const showingSecureCategories = useSelector((state: RootState) => state.memory.canShowSecure.categories);
 
@@ -149,24 +147,6 @@ const CategoryMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
                 }
             }
         }
-    };
-
-    // useEffect(() => {
-    //     handleScrollTo();
-    // }, []);
-
-    const handleScrollTo = () => {
-        let offset = 0;
-        const categoryIndex = overlay.menuData.categoryIndex;
-        if (categoryIndex != null && categoryIndex >= 0) {
-            for (let i = 0; i < categoryIndex; i++) {
-                if (heightData[i]) {
-                    offset += heightData[i].catHeight;
-                }
-            }
-        }
-
-        setScrollTo(offset);
     };
 
     // too much for one line, can be made nicer but in a rush.

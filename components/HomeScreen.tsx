@@ -20,10 +20,10 @@ import { useEffect, useRef, useState } from "react";
 import CategoryModal from "./CategoryModal";
 import MenuDisplay from "./MenuDisplay";
 import { AppDispatch } from "../redux/store/store";
-import { updateMenuOverlay, updateNote } from "../redux/slice";
+import { scrollToCategory, updateMenuOverlay, updateNote } from "../redux/slice";
 import { getEmptyOverlay, printCategories, printNotes, printSubCategories } from "../utilFuncs/utilFuncs";
-import { FontAwesome } from "@expo/vector-icons";
-import { MenuOverlay, reminderConfig } from "../types";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { MenuOverlay, reminderConfig, Location } from "../types";
 import SearchCategoryTile from "./SearchTile";
 import SubtleMessage from "./SubtleMessage";
 import * as Notifications from "expo-notifications";
@@ -39,6 +39,10 @@ Notifications.setNotificationHandler({
 });
 
 const HomeScreen: React.FC = () => {
+    const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
+    const categoryList = useSelector((state: RootState) => state.memory.categoryList);
+    const scrollToOffset = useSelector((state: RootState) => state.memory.scrollToOffset);
+
     const [expoPushToken, setExpoPushToken] = useState("");
     const [channels, setChannels] = useState<Notifications.NotificationChannel[]>([]);
     const [notification, setNotification] = useState<Notifications.Notification | undefined>(undefined);
@@ -74,11 +78,11 @@ const HomeScreen: React.FC = () => {
         };
     }, []);
 
-    const categoryList = useSelector((state: RootState) => state.memory.categoryList);
     const dispatch = useDispatch<AppDispatch>();
 
     const [newCatModalVisible, setNewCatModalVisible] = useState(false);
-    const [scrollTo, setScrollTo] = useState<null | number>(null);
+
+    const [scrollTo, setScrollTo] = useState<number>(-1);
     const [searchText, setSearchText] = useState("");
     const [closeAllCategories, setCloseAllCategories] = useState(false);
     const [isSearch, setIsSearch] = useState(false);
@@ -96,6 +100,14 @@ const HomeScreen: React.FC = () => {
         }
     });
 
+    const dontForgetMe = () => {
+        return Object.values(dontForgetMeList).some((dontForgetMeRef) => {
+            const currentTime = new Date();
+            const reminderTime = new Date(dontForgetMeRef.date);
+            return reminderTime.getTime() < currentTime.getTime();
+        });
+    };
+
     // console.log("Homescreen re-render");
     // back button closes overlay rather than normal behaviour
     useEffect(() => {
@@ -105,7 +117,7 @@ const HomeScreen: React.FC = () => {
                 return true;
             }
             setCloseAllCategories(true);
-            setScrollTo(0);
+            setScrollTo(0); // todo, prob do this through dispatch like other scrollto?
             return true;
         };
 
@@ -143,13 +155,23 @@ const HomeScreen: React.FC = () => {
     };
 
     useEffect(() => {
+        if (scrollToOffset > -1) {
+            const screenHeight = Dimensions.get("window").height;
+
+            const offset = scrollToOffset;
+            flatListRef.current?.scrollToOffset({ offset: offset, animated: true });
+            dispatch(scrollToCategory(-1));
+        }
+    }, [scrollToOffset]);
+
+    useEffect(() => {
         if (scrollTo !== null && scrollTo > -1) {
             const screenHeight = Dimensions.get("window").height;
             // const offset = scrollTo - screenHeight / 3;
 
             const offset = scrollTo;
             flatListRef.current?.scrollToOffset({ offset: offset, animated: true });
-            setScrollTo(null);
+            setScrollTo(-1);
         }
     }, [scrollTo]);
 
@@ -198,6 +220,8 @@ const HomeScreen: React.FC = () => {
     };
 
     const handleSearchBlur = () => {};
+
+    const handleDontForgetMePress = () => {};
 
     return (
         <TouchableWithoutFeedback onPress={handleOutsideMenuPress}>
@@ -249,7 +273,7 @@ const HomeScreen: React.FC = () => {
                         />
                     )}
                 </View>
-                <MenuDisplay setScrollTo={setScrollTo} setCloseAllCategories={setCloseAllCategories} />
+                <MenuDisplay setCloseAllCategories={setCloseAllCategories} />
             </>
         </TouchableWithoutFeedback>
     );

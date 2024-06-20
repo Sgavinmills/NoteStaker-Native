@@ -14,7 +14,7 @@ const persistConfig = {
 const memoryPersistConfig = {
     key: "memory",
     storage: AsyncStorage,
-    blacklist: ["heightData", "menuOverlay", "canShowSecure", "subtleMessage"],
+    blacklist: ["heightData", "menuOverlay", "canShowSecure", "subtleMessage", "scrollToOffset"],
     // blacklist: ["heightData", "menuOverlay", "categories", "subCategories", "notes", "categoryList"],
 };
 

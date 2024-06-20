@@ -14,13 +14,12 @@ import SubCategoryMainMenu from "./SubCategoryMainMenu";
 import SubtleMessage from "./SubtleMessage";
 
 interface TileProps {
-    setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
     setCloseAllCategories: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // TODO - Move menu config componenets into own folder.
 
-const MenuDisplay: React.FC<TileProps> = ({ setScrollTo, setCloseAllCategories }) => {
+const MenuDisplay: React.FC<TileProps> = ({ setCloseAllCategories }) => {
     const subtleMessage = useSelector((state: RootState) => state.memory.subtleMessage);
 
     const dispatch = useDispatch<AppDispatch>();
@@ -78,11 +77,11 @@ const MenuDisplay: React.FC<TileProps> = ({ setScrollTo, setCloseAllCategories }
                     <View style={menuOverlayStyles.container}>
                         <View style={menuOverlayStyles.contentContainer}>
                             {menuType === "category" ? (
-                                <CategoryMainMenu setScrollTo={setScrollTo} />
+                                <CategoryMainMenu />
                             ) : menuType === "subCategory" ? (
-                                <SubCategoryMainMenu setScrollTo={setScrollTo} />
+                                <SubCategoryMainMenu />
                             ) : menuType === "note" ? (
-                                <NoteMainMenu setScrollTo={setScrollTo} />
+                                <NoteMainMenu />
                             ) : menuType === "homeScreen" ? (
                                 <HomeScreenMainMenu setCloseAllCategories={setCloseAllCategories} />
                             ) : (

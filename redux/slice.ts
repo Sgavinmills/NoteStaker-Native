@@ -29,6 +29,7 @@ interface AppState {
 
     menuOverlay: MenuOverlay;
     heightData: CatHeight[];
+    scrollToOffset: number;
     canShowSecure: {
         homeScreen: boolean;
         categories: string[];
@@ -60,6 +61,7 @@ const initialState: AppState = {
         },
     },
     heightData: [],
+    scrollToOffset: -1,
     canShowSecure: {
         homeScreen: false,
         categories: [],
@@ -855,6 +857,142 @@ const notesSlice = createSlice({
                 };
             });
         },
+
+        // scrollToCategory calculates and sets the offset value
+        // if the index passed is -1 then set the offset to -1
+        scrollToCategory(state, action: PayloadAction<number>) {
+            return produce(state, (draft) => {
+                const categoryIndex = action.payload;
+                if (categoryIndex === -1) {
+                    draft.scrollToOffset = -1;
+                    return;
+                }
+                let offset = 0;
+                if (categoryIndex != null && categoryIndex >= 0) {
+                    for (let i = 0; i < categoryIndex; i++) {
+                        if (draft.heightData[i]) {
+                            offset += draft.heightData[i].catHeight;
+                        }
+                    }
+                }
+                draft.scrollToOffset = offset;
+            });
+        },
+
+        // NOT TESTED OR USED YET
+        // - tbf pretty sure works as a scroll. Issue was that
+        // opening a category to then scroll to it didnt work as the
+        // heightdata hadnt been populated yet. Leaving in ehre anyway.
+        scrollToSubCategory(
+            state,
+            action: PayloadAction<{
+                subCategoryIndex: number;
+                parentCategoryIndex: number;
+                parentCategoryId: string;
+            }>
+        ) {
+            return produce(state, (draft) => {
+                let offset = 0;
+                const { parentCategoryIndex, subCategoryIndex, parentCategoryId } = action.payload;
+                const category = draft.categories[parentCategoryId];
+
+                if (subCategoryIndex === -1) {
+                    draft.scrollToOffset = -1;
+                    return;
+                }
+                const categoryIndex = parentCategoryIndex;
+                if (categoryIndex != undefined && categoryIndex >= 0) {
+                    for (let i = 0; i <= categoryIndex; i++) {
+                        if (draft.heightData[i]) {
+                            offset += draft.heightData[i].catHeight;
+                        }
+                    }
+                    if (subCategoryIndex != undefined && subCategoryIndex >= 0) {
+                        const numOfSubs = category.subCategories.length;
+                        for (let j = subCategoryIndex; j < numOfSubs; j++) {
+                            if (draft.heightData[categoryIndex]) {
+                                if (draft.heightData[categoryIndex].subHeights[j]) {
+                                    offset -= draft.heightData[categoryIndex].subHeights[j].subHeight;
+                                }
+                            }
+                        }
+                    }
+                }
+                draft.scrollToOffset = offset;
+            });
+        },
+
+        // NOT TESTED OR USED YET, PUTTING HERE FOR POSTERITY
+        scrollToNote(
+            state,
+            action: PayloadAction<{
+                noteIndex: number;
+                subCategoryIndex: number;
+                categoryIndex: number;
+                parentCategoryId: string;
+                subCategoryId: string;
+            }>
+        ) {
+            return produce(state, (draft) => {
+                const { noteIndex, categoryIndex, subCategoryIndex, parentCategoryId, subCategoryId } = action.payload;
+                if (noteIndex === -1) {
+                    draft.scrollToOffset = -1;
+                    return;
+                }
+                let offset = 0;
+                const category = draft.categories[parentCategoryId];
+                const subCategory = draft.subCategories[subCategoryId];
+                // to scroll to offset for all cats up to and inc this one
+                // if there are subcats
+                // then subtract the subcts below and any notes in the sub cat we're in below... (done)
+
+                // if there are not subcats then just subtract the notes below...
+                if (categoryIndex != null && categoryIndex >= 0) {
+                    for (let i = 0; i <= categoryIndex; i++) {
+                        if (draft.heightData[i]) {
+                            offset += draft.heightData[i].catHeight;
+                        }
+                    }
+                    if (subCategoryIndex != null && subCategoryIndex >= 0) {
+                        const numOfSubs = category.subCategories.length;
+                        for (let j = subCategoryIndex + 1; j < numOfSubs; j++) {
+                            if (draft.heightData[categoryIndex]) {
+                                if (draft.heightData[categoryIndex].subHeights[j]) {
+                                    offset -= draft.heightData[categoryIndex].subHeights[j].subHeight;
+                                }
+                            }
+                        }
+
+                        if (noteIndex != null && noteIndex >= 0) {
+                            const numOfNotes = subCategory.notes.length;
+                            for (let k = noteIndex; k < numOfNotes; k++) {
+                                if (draft.heightData[categoryIndex]) {
+                                    if (draft.heightData[categoryIndex].subHeights[subCategoryIndex]) {
+                                        if (
+                                            draft.heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[k]
+                                        ) {
+                                            offset -=
+                                                draft.heightData[categoryIndex].subHeights[subCategoryIndex]
+                                                    .noteHeights[k];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        if (noteIndex != null && noteIndex >= 0) {
+                            const numOfNotes = category.notes.length;
+                            for (let k = noteIndex; k < numOfNotes; k++) {
+                                if (draft.heightData[categoryIndex]) {
+                                    offset -= draft.heightData[categoryIndex].noteHeights[k];
+                                }
+                            }
+                        }
+                    }
+                }
+                draft.scrollToOffset = offset;
+            });
+        },
     },
 });
 
@@ -863,6 +1001,8 @@ const cancelNotification = async (id: string) => {
 };
 
 export const {
+    scrollToSubCategory,
+    scrollToCategory,
     addDontForgetMe,
     migrateData,
     updateCategoryList,
@@ -906,6 +1046,4 @@ import type { AppDispatch } from "./store/store";
 import { getRandomID } from "../memoryfunctions/memoryfunctions";
 import { SubHeight } from "../types";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
-import dontForgetMe from "../styles/dontForgetMe";
-import DontForgetMeMenu from "../components/DontForgetMeMenu";
 export const useAppDispatch = () => useDispatch<AppDispatch>();

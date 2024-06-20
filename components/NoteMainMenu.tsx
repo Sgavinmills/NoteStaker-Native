@@ -15,11 +15,9 @@ import NoteAdditionalInfo from "./NoteAdditionalInfo";
 import PickDateTimeModal from "./PickDateTimeModal";
 import * as Notifications from "expo-notifications";
 
-interface TileProps {
-    setScrollTo: React.Dispatch<React.SetStateAction<number | null>>;
-}
+interface TileProps {}
 
-const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
+const NoteMainMenu: React.FC<TileProps> = ({}) => {
     const dispatch = useDispatch<AppDispatch>();
 
     const overlay = useSelector((state: RootState) => state.memory.menuOverlay);
@@ -114,63 +112,6 @@ const NoteMainMenu: React.FC<TileProps> = ({ setScrollTo }) => {
 
     const handleAdditionalInfoPress = () => {
         setIsAdditionalInfo(true);
-    };
-
-    // useEffect(() => {
-    //     handleScrollToNote();
-    // }, []);
-
-    const handleScrollToNote = () => {
-        let offset = 0;
-        // to scroll to offset for all cats up to and inc this one
-        // if there are subcats
-        // then subtract the subcts below and any notes in the sub cat we're in below... (done)
-
-        // if there are not subcats then just subtract the notes below...
-        const categoryIndex = overlay.menuData.categoryIndex;
-        if (categoryIndex != null && categoryIndex >= 0) {
-            for (let i = 0; i <= categoryIndex; i++) {
-                if (heightData[i]) {
-                    offset += heightData[i].catHeight;
-                }
-            }
-            const subCategoryIndex = overlay.menuData.subCategoryIndex;
-            if (subCategoryIndex != null && subCategoryIndex >= 0) {
-                const numOfSubs = category.subCategories.length;
-                for (let j = subCategoryIndex + 1; j < numOfSubs; j++) {
-                    if (heightData[categoryIndex]) {
-                        if (heightData[categoryIndex].subHeights[j]) {
-                            offset -= heightData[categoryIndex].subHeights[j].subHeight;
-                        }
-                    }
-                }
-
-                const noteIndex = overlay.menuData.noteIndex;
-                if (noteIndex != null && noteIndex >= 0) {
-                    const numOfNotes = subCategory.notes.length;
-                    for (let k = noteIndex; k < numOfNotes; k++) {
-                        if (heightData[categoryIndex]) {
-                            if (heightData[categoryIndex].subHeights[subCategoryIndex]) {
-                                if (heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[k]) {
-                                    offset -= heightData[categoryIndex].subHeights[subCategoryIndex].noteHeights[k];
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                const noteIndex = overlay.menuData.noteIndex;
-                if (noteIndex != null && noteIndex >= 0) {
-                    const numOfNotes = category.notes.length;
-                    for (let k = noteIndex; k < numOfNotes; k++) {
-                        if (heightData[categoryIndex]) {
-                            offset -= heightData[categoryIndex].noteHeights[k];
-                        }
-                    }
-                }
-            }
-        }
-        setScrollTo(offset);
     };
 
     const handleEditReminder = async () => {

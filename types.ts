@@ -80,7 +80,7 @@ export interface MenuData {
     noteID: string;
     categoryID: string;
     subCategoryID: string;
-    categoryIndex: number | null;
+    categoryIndex: number | null; // check if still need these, if it was just for scrollto then maybe not
     subCategoryIndex: number | null;
     noteIndex: number | null;
     isSearchTile: boolean;
