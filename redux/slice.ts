@@ -670,7 +670,7 @@ const notesSlice = createSlice({
         },
 
         // updateNote updates a single note
-        // it takes a Note in it updated from and replaces in memory
+        // it takes a Note in it updated form and replaces in memory
         // also updated lastUpdate metadata
         updateNote(state, action: PayloadAction<Note>) {
             const newNote = action.payload;

@@ -27,7 +27,7 @@ const PickDateTimeOptions: React.FC<TileProps> = ({ modalType, handleOptionPress
         const reminderTime = new Date();
 
         if (days > 0) {
-            reminderTime.setDate(reminderTime.getDate() + 1);
+            reminderTime.setDate(reminderTime.getDate() + days);
         }
 
         reminderTime.setHours(hours, minutes, 0, 0);

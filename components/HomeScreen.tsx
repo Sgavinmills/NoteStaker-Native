@@ -38,6 +38,8 @@ Notifications.setNotificationHandler({
     }),
 });
 
+// TODO  - sort components into folders
+// Extract some of the notification stuff from homescreen... determine what we're actually using?
 const HomeScreen: React.FC = () => {
     const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
