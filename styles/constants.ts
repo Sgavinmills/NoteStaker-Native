@@ -6,6 +6,7 @@ const theme = {
         tileBackgroundSelected: "rgba(55, 55, 55, 1)",
         categoryText: "#c6d6f0",
         noteText: "#b4b4b4",
+        noteLink: "#BFA75A",
         modalTextInputBackgroundColor: "white",
         modalOverlayBackground: "rgba(0, 0, 0, 0.9)",
         modalOverlayBackgroundLight: "rgba(0, 0, 0, 0.7)",

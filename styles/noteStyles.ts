@@ -34,6 +34,11 @@ const noteStyles = StyleSheet.create({
         paddingTop: 8,
     },
 
+    noteLink: {
+        textDecorationLine: "underline",
+        color: theme.colors.noteLink,
+    },
+
     noteTextFocused: {
         borderBottomWidth: 1,
         borderStyle: "dashed",

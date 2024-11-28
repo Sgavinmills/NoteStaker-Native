@@ -7,6 +7,7 @@ import {
     GestureResponderEvent,
     TouchableWithoutFeedback,
     Keyboard,
+    Linking,
     BackHandler,
 } from "react-native";
 import noteStyles from "../styles/noteStyles";
@@ -395,6 +396,22 @@ const NoteTile: React.FC<TileProps> = ({
         }
     };
 
+    const detectLinks = (text: string) => {
+        const linkRegex = /(https?:\/\/[^\s]+)/g;
+        const parts = text.split(linkRegex);
+
+        return parts.map((part, index) => {
+            if (linkRegex.test(part)) {
+                return (
+                    <Text key={index} style={noteStyles.noteLink} onPress={() => Linking.openURL(part)}>
+                        {part}
+                    </Text>
+                );
+            }
+            return part;
+        });
+    };
+
     return (
         <>
             <PickDateTimeModal
@@ -453,7 +470,7 @@ const NoteTile: React.FC<TileProps> = ({
                                         <FontAwesome name="lock" style={noteStyles.padlock}></FontAwesome>
                                     )}
                                     {note.isSecureNote && "  "}
-                                    {note.note}
+                                    {detectLinks(note.note)}
                                 </Text>
                             </TouchableWithoutFeedback>
                         )}
