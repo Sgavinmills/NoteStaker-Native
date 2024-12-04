@@ -74,25 +74,34 @@ const PickDateTimeModal: React.FC<TileProps> = ({
     };
 
     const scheduleNotification = async (reminder: reminderConfig) => {
-        const notificationID = await schedulePushNotification(reminder);
+        // if there is already a reminder then cancel it first
+        if (reminder.note.notificationID) {
+            await Notifications.cancelScheduledNotificationAsync(reminder.note.notificationID);
+            // const noteCopy = { ...note };
+            // noteCopy.notificationID = "";
+            // noteCopy.notificationTime = "";
+            // dispatch(updateNote(noteCopy));
+        }
+        const notificationID = await scheduleLocalNotification(reminder);
         const noteCopy = { ...reminder.note };
-        noteCopy.notificationID = notificationID;
+        noteCopy.notificationID = notificationID ? notificationID : "";
         noteCopy.notificationTime = reminder.reminderTime.toISOString();
         dispatch(updateNote(noteCopy));
     };
 
-    async function schedulePushNotification(reminder: reminderConfig) {
-        const now = new Date();
-        const interval = reminder.reminderTime.getTime() - now.getTime();
+    async function scheduleLocalNotification(reminder: reminderConfig) {
         const notificationID = await Notifications.scheduleNotificationAsync({
             content: {
                 title: "NoteStaker",
-                body: reminder.reminderText, // prob wanna restrict length of this
+                body: reminder.reminderText,
                 data: { noteID: reminder.note.id },
             },
-            trigger: { seconds: interval / 1000 },
+            trigger: {
+                date: reminder.reminderTime,
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+            },
         });
-
+        console.log("Notification scheduled!");
         return notificationID;
     }
 

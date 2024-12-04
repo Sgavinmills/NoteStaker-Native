@@ -27,58 +27,21 @@ import { MenuOverlay, reminderConfig, Location } from "../types";
 import SearchCategoryTile from "./SearchTile";
 import SubtleMessage from "./SubtleMessage";
 import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import Constants from "expo-constants";
 
+// Configure notification behavior
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldShowAlert: true,
-        shouldPlaySound: true,
+        shouldPlaySound: false,
         shouldSetBadge: false,
     }),
 });
 
 // TODO  - sort components into folders
-// Extract some of the notification stuff from homescreen... determine what we're actually using?
 const HomeScreen: React.FC = () => {
     const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
     const scrollToOffset = useSelector((state: RootState) => state.memory.scrollToOffset);
-
-    const [expoPushToken, setExpoPushToken] = useState("");
-    const [channels, setChannels] = useState<Notifications.NotificationChannel[]>([]);
-    const [notification, setNotification] = useState<Notifications.Notification | undefined>(undefined);
-    const notificationListener = useRef<Notifications.Subscription>();
-    const responseListener = useRef<Notifications.Subscription>();
-
-    useEffect(() => {
-        // so when app loads this is the first thing that happens, useEffect registers for push notifications which does the following:
-        // -- it checks if were android and if so sets up a notificationchannel with id "default"
-        // -- then checks were a physucal device and gets permissions for notifications
-        // -- then gets the expo push token based on our projects id
-        // -- once complete it sets the expo push token into the expoPushTOken state
-        registerForPushNotificationsAsync().then((token) => token && setExpoPushToken(token));
-
-        if (Platform.OS === "android") {
-            // a promise which resolves to an array of channels.
-            // which appears to be 2 built in expo channels and then the third one that we made in the register function
-            Notifications.getNotificationChannelsAsync().then((value) => setChannels(value ?? []));
-        }
-        notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
-            // listners registered by this method will be called whenever a notification is receivded while the app is running
-            setNotification(notification);
-        });
-
-        responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-            // listners regisrted by this method will be called wheneber a user interacts with a notifcation (eg taps on it)
-            console.log("tapped on");
-        });
-
-        return () => {
-            notificationListener.current && Notifications.removeNotificationSubscription(notificationListener.current);
-            responseListener.current && Notifications.removeNotificationSubscription(responseListener.current);
-        };
-    }, []);
 
     const dispatch = useDispatch<AppDispatch>();
 
@@ -280,50 +243,5 @@ const HomeScreen: React.FC = () => {
         </TouchableWithoutFeedback>
     );
 };
-
-async function registerForPushNotificationsAsync() {
-    let token;
-
-    if (Platform.OS === "android") {
-        await Notifications.setNotificationChannelAsync("default", {
-            name: "default",
-            importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 250, 250, 250],
-            lightColor: "#FF231F7C",
-        });
-    }
-
-    if (Device.isDevice) {
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== "granted") {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
-        }
-        if (finalStatus !== "granted") {
-            alert("Failed to get push token for push notification!");
-            return;
-        }
-
-        try {
-            const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-            if (!projectId) {
-                throw new Error("Project ID not found");
-            }
-            token = (
-                await Notifications.getExpoPushTokenAsync({
-                    projectId: Constants?.expoConfig?.extra?.eas.projectId,
-                })
-            ).data;
-            console.log(token);
-        } catch (e) {
-            token = `${e}`;
-        }
-    } else {
-        alert("Must use physical device for Push Notifications");
-    }
-
-    return token;
-}
 
 export default HomeScreen;

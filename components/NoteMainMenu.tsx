@@ -115,11 +115,13 @@ const NoteMainMenu: React.FC<TileProps> = ({}) => {
     };
 
     const handleEditReminder = async () => {
-        await Notifications.cancelScheduledNotificationAsync(note.notificationID);
-        const noteCopy = { ...note };
-        noteCopy.notificationID = "";
-        noteCopy.notificationTime = "";
-        dispatch(updateNote(noteCopy));
+        // moving most of this to the bit where we add the notification and it just deletes any existing ones if there are any
+
+        // await Notifications.cancelScheduledNotificationAsync(note.notificationID); // bit sloppy, prob shoildnt cancel current one until new time is chosen
+        // const noteCopy = { ...note };
+        // noteCopy.notificationID = "";
+        // noteCopy.notificationTime = "";
+        // dispatch(updateNote(noteCopy));
         setEditReminder(true);
     };
 
