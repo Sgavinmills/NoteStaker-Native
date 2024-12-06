@@ -14,7 +14,7 @@ import noteStyles from "../styles/noteStyles";
 import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import categoryStyles from "../styles/categoryStyles";
 
-import { MenuOverlay, HeightUpdateInfo, NewNoteData, DontForgetMeConfig, reminderID } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData, DontForgetMeConfig, reminderID, reminderConfig } from "../types";
 import { useDispatch } from "react-redux";
 import {
     addDontForgetMe,
@@ -36,6 +36,7 @@ import React from "react";
 import { getEmptyOverlay, moveDownList, moveToEnd, moveToStart, moveUpList } from "../utilFuncs/utilFuncs";
 import * as ImagePicker from "expo-image-picker";
 import PickDateTimeModal from "./PickDateTimeModal";
+import * as Notifications from "expo-notifications";
 
 interface TileProps {
     noteID: string;
@@ -144,6 +145,37 @@ const NoteTile: React.FC<TileProps> = ({
         }
     }, [noteEditMode]);
 
+    // cancelNotificationAndSetNew is used when updating a note in the reminders category. It cancels the existing notification and adds a new one so the notification will include the updated note data.
+    const cancelNotificationAndSetNew = async () => {
+        await Notifications.cancelScheduledNotificationAsync(note.notificationID);
+        const newReminder: reminderConfig = {
+            reminderTime: new Date(note.notificationTime),
+            note: note,
+            reminderText: note.note,
+        };
+
+        const notificationID = await scheduleLocalNotification(newReminder);
+        const noteCopy = { ...newReminder.note };
+        noteCopy.notificationID = notificationID ? notificationID : "";
+        dispatch(updateNote(noteCopy));
+    };
+
+    async function scheduleLocalNotification(reminder: reminderConfig) {
+        const notificationID = await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "NoteStaker",
+                body: reminder.reminderText,
+                data: { noteID: reminder.note.id },
+            },
+            trigger: {
+                date: reminder.reminderTime,
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+            },
+        });
+        console.log("Notification scheduled!! - " + notificationID);
+        return notificationID;
+    }
+
     const handleNoteBlur = () => {
         setNoteEditMode(false);
 
@@ -156,6 +188,12 @@ const NoteTile: React.FC<TileProps> = ({
         if (note.isNewNote) {
             const noteCopy = { ...note, isNewNote: false };
             dispatch(updateNote(noteCopy));
+            return;
+        }
+
+        if (categoryID === reminderID) {
+            // cancel existing notification and add new one with the same time and updated note
+            cancelNotificationAndSetNew();
         }
     };
 

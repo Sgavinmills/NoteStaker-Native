@@ -82,26 +82,30 @@ const PickDateTimeModal: React.FC<TileProps> = ({
             // noteCopy.notificationTime = "";
             // dispatch(updateNote(noteCopy));
         }
+
         const notificationID = await scheduleLocalNotification(reminder);
         const noteCopy = { ...reminder.note };
         noteCopy.notificationID = notificationID ? notificationID : "";
         noteCopy.notificationTime = reminder.reminderTime.toISOString();
+
         dispatch(updateNote(noteCopy));
     };
 
     async function scheduleLocalNotification(reminder: reminderConfig) {
+        const reminderData = { ...reminder.note };
+        reminderData.notificationTime = reminder.reminderTime.toISOString();
         const notificationID = await Notifications.scheduleNotificationAsync({
             content: {
                 title: "NoteStaker",
                 body: reminder.reminderText,
-                data: { noteID: reminder.note.id },
+                data: { reminderData },
+                categoryIdentifier: "reminderCategory",
             },
             trigger: {
                 date: reminder.reminderTime,
                 type: Notifications.SchedulableTriggerInputTypes.DATE,
             },
         });
-        console.log("Notification scheduled!");
         return notificationID;
     }
 
