@@ -21,9 +21,9 @@ import CategoryModal from "./CategoryModal";
 import MenuDisplay from "./MenuDisplay";
 import { AppDispatch } from "../redux/store/store";
 import { scrollToCategory, updateMenuOverlay, updateNote } from "../redux/slice";
-import { getEmptyOverlay, printCategories, printNotes, printSubCategories } from "../utilFuncs/utilFuncs";
+import { getEmptyLongPressedConfig, getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import { MenuOverlay, reminderConfig, Location } from "../types";
+import { MenuOverlay, LongPressedConfig } from "../types";
 import SearchCategoryTile from "./SearchTile";
 import SubtleMessage from "./SubtleMessage";
 import * as Notifications from "expo-notifications";
@@ -42,6 +42,8 @@ const HomeScreen: React.FC = () => {
     const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
     const scrollToOffset = useSelector((state: RootState) => state.memory.scrollToOffset);
+    const notes = useSelector((state: RootState) => state.memory.notes);
+    const categories = useSelector((state: RootState) => state.memory.categories);
 
     const dispatch = useDispatch<AppDispatch>();
 
@@ -55,7 +57,7 @@ const HomeScreen: React.FC = () => {
     const flatListRef = useRef<FlatList>(null);
     const searchInputRef = useRef<TextInput>(null);
 
-    const [moving, setMoving] = useState<string>("");
+    const [longPressActive, setLongPressActive] = useState<LongPressedConfig>(getEmptyLongPressedConfig());
 
     const showingSecureCategories = useSelector((state: RootState) => state.memory.canShowSecure.homeScreen);
     const catsForHomeScreen: string[] = [];
@@ -77,8 +79,8 @@ const HomeScreen: React.FC = () => {
     // back button closes overlay rather than normal behaviour
     useEffect(() => {
         const backAction = () => {
-            if (moving) {
-                setMoving("");
+            if (longPressActive.isActive) {
+                setLongPressActive(getEmptyLongPressedConfig());
                 return true;
             }
             setCloseAllCategories(true);
@@ -89,7 +91,7 @@ const HomeScreen: React.FC = () => {
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
         return () => backHandler.remove(); // Cleanup the event listener
-    }, [moving]);
+    }, [longPressActive]);
 
     const handleOpenMenuPress = () => {
         if (Keyboard.isVisible()) {
@@ -97,8 +99,8 @@ const HomeScreen: React.FC = () => {
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -147,8 +149,8 @@ const HomeScreen: React.FC = () => {
             isLastCategory={index === catsForHomeScreen.length - 1 ? true : false}
             closeAllCategories={closeAllCategories}
             setCloseAllCategories={setCloseAllCategories}
-            moving={moving}
-            setMoving={setMoving}
+            longPressActive={longPressActive}
+            setLongPressActive={setLongPressActive}
         />
     );
 
@@ -159,7 +161,7 @@ const HomeScreen: React.FC = () => {
     };
 
     const handleOutsideMenuPress = () => {
-        console.log("-------------------------------");
+        // console.log("-------------------------------");
         // printCategories(categories);
         // printSubCategories(subCategories);
         // printNotes(notes);
@@ -171,8 +173,8 @@ const HomeScreen: React.FC = () => {
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 

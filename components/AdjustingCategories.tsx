@@ -121,7 +121,6 @@ const AdjustingCategories: React.FC<TileProps> = ({}) => {
                             setDeleteInfo({
                                 deleteMessage: "Removing from Reminders will delete any scheduled notification",
                                 additionalMessage: "",
-                                deleteType: "removeFromReminders",
                                 deleteFunction: removeFromReminders,
                             });
                             return;

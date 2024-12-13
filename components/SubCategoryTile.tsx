@@ -5,8 +5,15 @@ import { useEffect, useState } from "react";
 import { RootState } from "../redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import NoteTile from "./NoteTile";
-import { MenuOverlay, HeightUpdateInfo, NewNoteData, Ref } from "../types";
-import { getEmptyOverlay, moveDownList, moveToEnd, moveToStart, moveUpList } from "../utilFuncs/utilFuncs";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData, Ref, LongPressedConfig } from "../types";
+import {
+    getEmptyLongPressedConfig,
+    getEmptyOverlay,
+    moveDownList,
+    moveToEnd,
+    moveToStart,
+    moveUpList,
+} from "../utilFuncs/utilFuncs";
 import {
     createNewNote,
     removeFromShowSecureNote,
@@ -25,8 +32,8 @@ interface TileProps {
     parentCategoryID: string;
     index: number;
     parentCategoryIndex: number;
-    moving: string;
-    setMoving: React.Dispatch<React.SetStateAction<string>>;
+    longPressActive: LongPressedConfig;
+    setLongPressActive: React.Dispatch<React.SetStateAction<LongPressedConfig>>;
 }
 
 const SubCategoryTile: React.FC<TileProps> = ({
@@ -36,8 +43,8 @@ const SubCategoryTile: React.FC<TileProps> = ({
     parentCategoryID,
     parentCategoryIndex,
     index: index,
-    moving,
-    setMoving,
+    longPressActive,
+    setLongPressActive,
 }) => {
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
     const subCategory = useSelector((state: RootState) => state.memory.subCategories[subCategoryID]);
@@ -55,7 +62,6 @@ const SubCategoryTile: React.FC<TileProps> = ({
             notesForSubCat.push(noteRef.id);
         }
     });
-
     const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
     const dontForgetMe = subCategory.notes.some((ref) => {
         const dontForgetMeRef = dontForgetMeList[ref.id];
@@ -104,8 +110,8 @@ const SubCategoryTile: React.FC<TileProps> = ({
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig);
             return true;
         }
 
@@ -136,8 +142,8 @@ const SubCategoryTile: React.FC<TileProps> = ({
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -176,8 +182,8 @@ const SubCategoryTile: React.FC<TileProps> = ({
             Keyboard.dismiss();
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -193,8 +199,8 @@ const SubCategoryTile: React.FC<TileProps> = ({
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -284,7 +290,13 @@ const SubCategoryTile: React.FC<TileProps> = ({
     };
 
     const handleLongPress = () => {
-        setMoving(subCategoryID);
+        setLongPressActive({
+            isActive: true,
+            categoryID: parentCategoryID,
+            subCategoryID: subCategoryID,
+            noteID: "",
+            multiSelectedNotes: [],
+        });
     };
 
     return (
@@ -294,7 +306,9 @@ const SubCategoryTile: React.FC<TileProps> = ({
                     style={[
                         categoryStyles.subCategoryTile,
                         !isExpanded && isLastSubCategory && categoryStyles.bottomRadius,
-                        moving === subCategoryID && categoryStyles.categoryTileSelected,
+                        longPressActive.subCategoryID === subCategoryID &&
+                            !longPressActive.noteID &&
+                            categoryStyles.categoryTileSelected,
                         isSelected && categoryStyles.categoryTileSelected,
                     ]}
                 >
@@ -312,26 +326,7 @@ const SubCategoryTile: React.FC<TileProps> = ({
                         </Text>
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
-                        {moving !== subCategoryID ? (
-                            <>
-                                <TouchableOpacity onPress={handleAddNotePress} onLongPress={handleLongPressAddNote}>
-                                    <FontAwesome
-                                        name="plus"
-                                        style={[categoryStyles.categoryText, categoryStyles.icons]}
-                                    />
-                                </TouchableOpacity>
-                                <FontAwesome
-                                    name={isExpanded ? "caret-up" : "caret-down"}
-                                    style={[categoryStyles.categoryText, categoryStyles.icons]}
-                                />
-                                <TouchableOpacity onPress={handleMenuPress}>
-                                    <FontAwesome
-                                        name="ellipsis-v"
-                                        style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
-                                    />
-                                </TouchableOpacity>
-                            </>
-                        ) : (
+                        {longPressActive.subCategoryID === subCategoryID && !longPressActive.noteID ? (
                             <View style={{ flexDirection: "row" }}>
                                 <TouchableOpacity onPress={handleUpToTopPress}>
                                     <MaterialIcons
@@ -358,6 +353,25 @@ const SubCategoryTile: React.FC<TileProps> = ({
                                     />
                                 </TouchableOpacity>
                             </View>
+                        ) : (
+                            <>
+                                <TouchableOpacity onPress={handleAddNotePress} onLongPress={handleLongPressAddNote}>
+                                    <FontAwesome
+                                        name="plus"
+                                        style={[categoryStyles.categoryText, categoryStyles.icons]}
+                                    />
+                                </TouchableOpacity>
+                                <FontAwesome
+                                    name={isExpanded ? "caret-up" : "caret-down"}
+                                    style={[categoryStyles.categoryText, categoryStyles.icons]}
+                                />
+                                <TouchableOpacity onPress={handleMenuPress}>
+                                    <FontAwesome
+                                        name="ellipsis-v"
+                                        style={[categoryStyles.ellipsisIconText, categoryStyles.icons]}
+                                    />
+                                </TouchableOpacity>
+                            </>
                         )}
                     </View>
                 </View>
@@ -377,8 +391,8 @@ const SubCategoryTile: React.FC<TileProps> = ({
                             isLastSubCategory={isLastSubCategory}
                             key={noteID}
                             isSearchTile={false}
-                            moving={moving}
-                            setMoving={setMoving}
+                            longPressActive={longPressActive}
+                            setLongPressActive={setLongPressActive}
                         />
                     );
                 })}

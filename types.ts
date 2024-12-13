@@ -88,15 +88,7 @@ export interface MenuData {
 }
 
 export interface DeleteInfo {
-    deleteType:
-        | "removeAll"
-        | "deleteCategory"
-        | "deleteNote"
-        | "deleteImage"
-        | "backupData"
-        | "importData"
-        | "removeFromReminders"
-        | "";
+    deleteType?: "removeAll" | "deleteCategory" | "deleteNote" | "deleteImage" | "backupData" | "importData" | "";
     deleteMessage: string;
     additionalMessage: string;
     deleteFunction?: () => void;
@@ -146,6 +138,11 @@ export type reminderConfig = {
 
 export interface DontForgetMeConfig extends IDs {
     date: string;
+}
+
+export interface LongPressedConfig extends IDs {
+    isActive: boolean;
+    multiSelectedNotes: string[];
 }
 
 export const reminderID = "reminderCatID";

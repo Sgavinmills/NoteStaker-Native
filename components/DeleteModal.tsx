@@ -315,7 +315,9 @@ const DeleteModal: React.FC<TileProps> = ({
                 importData();
                 break;
             }
-            case "removeFromReminders": {
+
+            default: {
+                console.log("into default");
                 if (deleteInfo.deleteFunction) {
                     deleteInfo.deleteFunction();
                 }

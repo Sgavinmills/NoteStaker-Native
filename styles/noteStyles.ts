@@ -66,6 +66,15 @@ const noteStyles = StyleSheet.create({
         fontSize: 14,
     },
 
+    multipleSelectCheckbox: {
+        fontSize: 16,
+    },
+
+    multipleSelectCheckboxSelected: {
+        fontSize: 16,
+        color: "red",
+    },
+
     notCompletedCheckbox: {
         fontSize: 14,
         opacity: 0.4,

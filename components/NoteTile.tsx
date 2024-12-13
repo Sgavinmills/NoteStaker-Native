@@ -9,17 +9,29 @@ import {
     Keyboard,
     Linking,
     BackHandler,
+    Button,
 } from "react-native";
 import noteStyles from "../styles/noteStyles";
 import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import categoryStyles from "../styles/categoryStyles";
 
-import { MenuOverlay, HeightUpdateInfo, NewNoteData, DontForgetMeConfig, reminderID, reminderConfig } from "../types";
+import {
+    MenuOverlay,
+    HeightUpdateInfo,
+    NewNoteData,
+    DontForgetMeConfig,
+    reminderID,
+    reminderConfig,
+    LongPressedConfig,
+    DeleteInfo,
+} from "../types";
 import { useDispatch } from "react-redux";
 import {
     addDontForgetMe,
     createNewNote,
     deleteNote,
+    removeMultiNotesFromCategory,
+    removeMultiNotesFromSubCategory,
     updateCategory,
     updateMenuOverlay,
     updateNote,
@@ -33,10 +45,18 @@ import { AppDispatch } from "../redux/store/store";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import React from "react";
-import { getEmptyOverlay, moveDownList, moveToEnd, moveToStart, moveUpList } from "../utilFuncs/utilFuncs";
+import {
+    getEmptyLongPressedConfig,
+    getEmptyOverlay,
+    moveDownList,
+    moveToEnd,
+    moveToStart,
+    moveUpList,
+} from "../utilFuncs/utilFuncs";
 import * as ImagePicker from "expo-image-picker";
 import PickDateTimeModal from "./PickDateTimeModal";
 import * as Notifications from "expo-notifications";
+import DeleteModal from "./DeleteModal";
 
 interface TileProps {
     noteID: string;
@@ -49,8 +69,8 @@ interface TileProps {
     subCategoryIndex: number;
     parentCategoryIndex: number;
     isSearchTile: boolean;
-    moving: string;
-    setMoving: React.Dispatch<React.SetStateAction<string>>;
+    longPressActive: LongPressedConfig;
+    setLongPressActive: React.Dispatch<React.SetStateAction<LongPressedConfig>>;
 }
 
 const NoteTile: React.FC<TileProps> = ({
@@ -63,16 +83,22 @@ const NoteTile: React.FC<TileProps> = ({
     subCategoryIndex,
     parentCategoryIndex,
     isSearchTile,
-    moving,
-    setMoving,
+    longPressActive,
+    setLongPressActive,
 }) => {
     const note = useSelector((state: RootState) => state.memory.notes[noteID]);
     const isSelected = note.isSelected;
     const dispatch = useDispatch<AppDispatch>();
-
     const [modalType, setModalType] = useState<"dontForgetMe" | "reminder">("dontForgetMe");
     const [pickDateTimeModalVisible, setPickDateTimeModalVisible] = useState(false);
     const dontForgetMeList = useSelector((state: RootState) => state.memory.dontForgetMe);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [deleteInfo, setDeleteInfo] = useState<DeleteInfo>({
+        deleteMessage: "",
+        deleteType: "",
+        additionalMessage: "",
+        deleteFunction: () => {},
+    });
     const dontForgetMeCalc = () => {
         const dontForgetMeRef = dontForgetMeList[note.id];
 
@@ -203,8 +229,8 @@ const NoteTile: React.FC<TileProps> = ({
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -231,8 +257,8 @@ const NoteTile: React.FC<TileProps> = ({
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -271,8 +297,8 @@ const NoteTile: React.FC<TileProps> = ({
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -311,7 +337,13 @@ const NoteTile: React.FC<TileProps> = ({
 
     const handleLongPress = () => {
         if (!isSearchTile) {
-            setMoving(noteID);
+            setLongPressActive({
+                isActive: true,
+                noteID: noteID,
+                categoryID: categoryID,
+                subCategoryID: subCategoryID,
+                multiSelectedNotes: [],
+            });
         }
     };
 
@@ -450,8 +482,64 @@ const NoteTile: React.FC<TileProps> = ({
         });
     };
 
+    const isMultiSelected = () => {
+        return longPressActive.multiSelectedNotes.some((s) => {
+            return s === note.id;
+        });
+    };
+
+    const handleMultipleSelect = (action: "remove" | "add") => {
+        if (action === "remove") {
+            setLongPressActive((prevState) => ({
+                ...prevState,
+                multiSelectedNotes: prevState.multiSelectedNotes.filter((noteId) => noteId !== noteID),
+            }));
+        } else if (action === "add") {
+            setLongPressActive((prevState) => ({
+                ...prevState,
+                multiSelectedNotes: [...prevState.multiSelectedNotes, noteID],
+            }));
+        }
+    };
+
+    // noteIcons returns a string to indicate whether to show the normal icons after a note (ie the completed box and the menu elipses, or the multi checkboxes )
+    const noteIcons = (): "multi" | "normal" => {
+        if (longPressActive.isActive && longPressActive.categoryID === categoryID && longPressActive.noteID) {
+            return "multi";
+        }
+
+        return "normal";
+    };
+
+    const handleDeleteMulti = () => {
+        setDeleteModalVisible(true);
+        setDeleteInfo({
+            deleteMessage: "Removing all selected notes from category",
+            additionalMessage: "",
+            deleteFunction: subCategoryID ? deleteMultiNotesFromSubCat : deleteMultiNotesFromCat,
+        });
+        setLongPressActive(getEmptyLongPressedConfig());
+    };
+
+    const deleteMultiNotesFromSubCat = () => {
+        dispatch(removeMultiNotesFromSubCategory({ subCategoryID, noteIDs: longPressActive.multiSelectedNotes }));
+        setLongPressActive(getEmptyLongPressedConfig());
+    };
+
+    const deleteMultiNotesFromCat = () => {
+        dispatch(removeMultiNotesFromCategory({ categoryID, noteIDs: longPressActive.multiSelectedNotes }));
+        setLongPressActive(getEmptyLongPressedConfig());
+    };
+
     return (
         <>
+            {deleteModalVisible && (
+                <DeleteModal
+                    deleteInfo={deleteInfo}
+                    deleteModalVisible={deleteModalVisible}
+                    setDeleteModalVisible={setDeleteModalVisible}
+                />
+            )}
             <PickDateTimeModal
                 setPickDateTimeModalVisible={setPickDateTimeModalVisible}
                 pickDateTimeModalVisible={pickDateTimeModalVisible}
@@ -467,7 +555,7 @@ const NoteTile: React.FC<TileProps> = ({
                     style={[
                         addBottomRadius() && noteStyles.bottomBorder,
                         noteStyles.noteTile,
-                        moving === noteID && noteStyles.noteTileSelected,
+                        longPressActive.noteID === noteID && noteStyles.noteTileSelected,
                         isSelected && noteStyles.noteTileSelected,
                         expiredReminder() && !noteEditMode && noteStyles.noteTileExpiredReminder,
                     ]}
@@ -519,7 +607,7 @@ const NoteTile: React.FC<TileProps> = ({
                                 <FontAwesome name="camera" style={[noteStyles.icons, noteStyles.noteEllipsis]} />
                             </TouchableOpacity>
                         )}
-                        {moving === noteID ? (
+                        {longPressActive.noteID === noteID ? (
                             <>
                                 <View style={{ flexDirection: "row" }}>
                                     <TouchableOpacity onPress={handleUpToTopPress}>
@@ -546,26 +634,89 @@ const NoteTile: React.FC<TileProps> = ({
                                             style={[noteStyles.noteText, noteStyles.moveArrowsSmall]}
                                         />
                                     </TouchableOpacity>
+                                    {/* todo */}
+                                    {/* // dont need to call this function twice just use : to do the alternative if false... */}
+                                    {/* // dont need to call this function twice just use : to do the alternative if false... */}
+                                    {/* // dont need to call this function twice just use : to do the alternative if false... */}
+                                    {!isMultiSelected() && (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                handleMultipleSelect("add");
+                                            }}
+                                        >
+                                            <Text style={[noteStyles.icons, noteStyles.multipleSelectCheckbox]}>
+                                                &#9744;
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )}
+                                    {isMultiSelected() && (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                handleMultipleSelect("remove");
+                                            }}
+                                        >
+                                            <Text style={[noteStyles.icons, noteStyles.multipleSelectCheckboxSelected]}>
+                                                &#9745;
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )}
                                 </View>
                             </>
                         ) : (
                             <>
-                                <TouchableOpacity onPress={handleCheckboxPress}>
-                                    {note.completed && (
-                                        <Text style={[noteStyles.icons, noteStyles.completedCheckbox]}>&#x2705;</Text>
-                                    )}
-                                    {!note.completed && (
-                                        <Text style={[noteStyles.icons, noteStyles.notCompletedCheckbox]}>
-                                            &#x26AA;
-                                        </Text>
-                                    )}
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={handleMenuPress}>
-                                    <FontAwesome
-                                        name="ellipsis-v"
-                                        style={[noteStyles.icons, noteStyles.noteEllipsis]}
-                                    />
-                                </TouchableOpacity>
+                                {noteIcons() === "normal" && (
+                                    <>
+                                        <TouchableOpacity onPress={handleCheckboxPress}>
+                                            {note.completed && (
+                                                <Text style={[noteStyles.icons, noteStyles.completedCheckbox]}>
+                                                    &#x2705;
+                                                </Text>
+                                            )}
+                                            {!note.completed && (
+                                                <Text style={[noteStyles.icons, noteStyles.notCompletedCheckbox]}>
+                                                    &#x26AA;
+                                                </Text>
+                                            )}
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={handleMenuPress}>
+                                            <FontAwesome
+                                                name="ellipsis-v"
+                                                style={[noteStyles.icons, noteStyles.noteEllipsis]}
+                                            />
+                                        </TouchableOpacity>
+                                    </>
+                                )}
+                                {noteIcons() === "multi" && (
+                                    <>
+                                        {!isMultiSelected() && (
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    handleMultipleSelect("add");
+                                                }}
+                                            >
+                                                <Text style={[noteStyles.icons, noteStyles.multipleSelectCheckbox]}>
+                                                    &#9744;
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
+                                        {isMultiSelected() && (
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    handleMultipleSelect("remove");
+                                                }}
+                                            >
+                                                <Text
+                                                    style={[
+                                                        noteStyles.icons,
+                                                        noteStyles.multipleSelectCheckboxSelected,
+                                                    ]}
+                                                >
+                                                    &#9745;
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </>
+                                )}
                             </>
                         )}
                     </View>
@@ -581,6 +732,12 @@ const NoteTile: React.FC<TileProps> = ({
                         note={note}
                     />
                 )}
+                {isLastNote &&
+                    longPressActive.isActive &&
+                    noteIcons() === "multi" &&
+                    longPressActive.multiSelectedNotes.length > 0 && (
+                        <Button title="Delete Selected" onPress={handleDeleteMulti} />
+                    )}
             </View>
         </>
     );

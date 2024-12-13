@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import categoryStyles from "../styles/categoryStyles";
 import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import SubCategoryTile from "./SubCategoryTile";
-import { MenuOverlay, HeightUpdateInfo, NewNoteData } from "../types";
+import { MenuOverlay, HeightUpdateInfo, NewNoteData, LongPressedConfig } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/store";
 import NoteTile from "./NoteTile";
@@ -17,7 +17,14 @@ import {
     updateCategorySilently,
     updateMenuOverlay,
 } from "../redux/slice";
-import { getEmptyOverlay, moveDownList, moveToEnd, moveToStart, moveUpList } from "../utilFuncs/utilFuncs";
+import {
+    getEmptyLongPressedConfig,
+    getEmptyOverlay,
+    moveDownList,
+    moveToEnd,
+    moveToStart,
+    moveUpList,
+} from "../utilFuncs/utilFuncs";
 import * as ImagePicker from "expo-image-picker";
 interface TileProps {
     categoryID: string;
@@ -25,8 +32,8 @@ interface TileProps {
     isLastCategory: boolean;
     setCloseAllCategories: React.Dispatch<React.SetStateAction<boolean>>;
     closeAllCategories: boolean;
-    moving: string;
-    setMoving: React.Dispatch<React.SetStateAction<string>>;
+    longPressActive: LongPressedConfig;
+    setLongPressActive: React.Dispatch<React.SetStateAction<LongPressedConfig>>;
 }
 
 const CategoryTile: React.FC<TileProps> = ({
@@ -35,8 +42,8 @@ const CategoryTile: React.FC<TileProps> = ({
     isLastCategory,
     closeAllCategories,
     setCloseAllCategories,
-    moving,
-    setMoving,
+    longPressActive,
+    setLongPressActive,
 }) => {
     const category = useSelector((state: RootState) => state.memory.categories[categoryID]);
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure);
@@ -131,8 +138,8 @@ const CategoryTile: React.FC<TileProps> = ({
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -156,6 +163,7 @@ const CategoryTile: React.FC<TileProps> = ({
                 setSecurePlaceholderTile(false);
             }, 500);
         }
+
         toggleExpansion();
     };
     const addNewNote = () => {
@@ -175,8 +183,8 @@ const CategoryTile: React.FC<TileProps> = ({
             Keyboard.dismiss();
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -192,8 +200,8 @@ const CategoryTile: React.FC<TileProps> = ({
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -228,8 +236,8 @@ const CategoryTile: React.FC<TileProps> = ({
             return;
         }
 
-        if (moving) {
-            setMoving("");
+        if (longPressActive.isActive) {
+            setLongPressActive(getEmptyLongPressedConfig());
             return true;
         }
 
@@ -263,7 +271,14 @@ const CategoryTile: React.FC<TileProps> = ({
 
     const handleLongPress = () => {
         setCloseAllCategories(true);
-        setMoving(categoryID);
+
+        setLongPressActive({
+            isActive: true,
+            categoryID: categoryID,
+            subCategoryID: "",
+            noteID: "",
+            multiSelectedNotes: [],
+        });
     };
 
     const categoryList = useSelector((state: RootState) => state.memory.categoryList);
@@ -321,7 +336,10 @@ const CategoryTile: React.FC<TileProps> = ({
                         index === 0 && categoryStyles.categoryTileFirst,
                         categoryStyles.topRadius,
                         !isExpanded && categoryStyles.bottomRadius,
-                        moving === categoryID && categoryStyles.categoryTileSelected,
+                        longPressActive.categoryID === categoryID &&
+                            !longPressActive.subCategoryID &&
+                            !longPressActive.noteID &&
+                            categoryStyles.categoryTileSelected,
                         isSelected && categoryStyles.categoryTileSelected,
                     ]}
                 >
@@ -339,7 +357,9 @@ const CategoryTile: React.FC<TileProps> = ({
                         </Text>
                     </View>
                     <View style={categoryStyles.tileIconsContainer}>
-                        {moving === categoryID ? (
+                        {longPressActive.categoryID === categoryID &&
+                        !longPressActive.subCategoryID &&
+                        !longPressActive.noteID ? (
                             <>
                                 <View style={{ flexDirection: "row" }}>
                                     <TouchableOpacity onPress={handleUpToTopPress}>
@@ -406,8 +426,8 @@ const CategoryTile: React.FC<TileProps> = ({
                             key={subCatID}
                             index={subCatIndex}
                             parentCategoryIndex={index}
-                            moving={moving}
-                            setMoving={setMoving}
+                            longPressActive={longPressActive}
+                            setLongPressActive={setLongPressActive}
                         />
                     );
                 })}
@@ -426,8 +446,8 @@ const CategoryTile: React.FC<TileProps> = ({
                             key={noteID}
                             subCategoryIndex={-1}
                             isSearchTile={false}
-                            moving={moving}
-                            setMoving={setMoving}
+                            longPressActive={longPressActive}
+                            setLongPressActive={setLongPressActive}
                         />
                     );
                 })}

@@ -1,4 +1,4 @@
-import { MenuOverlay, Category, SubCategory, Note } from "../types";
+import { MenuOverlay, Category, SubCategory, Note, LongPressedConfig } from "../types";
 
 export const getEmptyOverlay = () => {
     const overlay: MenuOverlay = {
@@ -17,6 +17,18 @@ export const getEmptyOverlay = () => {
     };
 
     return overlay;
+};
+
+export const getEmptyLongPressedConfig = () => {
+    const isMoving: LongPressedConfig = {
+        isActive: false,
+        noteID: "",
+        subCategoryID: "",
+        categoryID: "",
+        multiSelectedNotes: [],
+    };
+
+    return isMoving;
 };
 
 export const moveDownList = (newList: any[], index: number) => {

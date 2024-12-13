@@ -310,6 +310,66 @@ const notesSlice = createSlice({
             });
         },
 
+        // removeMultiNotesFromCategory deletes all selected notes from a category
+        // If a note exists elsewhere it will have its location updated
+        // If it does not exist elsewhere it will be deleted
+        // The note refs are also removed from the category notes list
+        removeMultiNotesFromCategory(state, action: PayloadAction<{ categoryID: string; noteIDs: string[] }>) {
+            return produce(state, (draft) => {
+                const categoryID = action.payload.categoryID;
+
+                const notesToDelete = action.payload.noteIDs;
+                notesToDelete.forEach((noteID) => {
+                    const note = draft.notes[noteID];
+                    if (note.locations.length > 1) {
+                        const locationIndex = note.locations.findIndex((loc) => loc[0] === categoryID);
+                        if (locationIndex > -1) {
+                            note.locations.splice(locationIndex, 1);
+                        }
+                    } else {
+                        delete draft.notes[noteID];
+                    }
+
+                    // remove noteRef from category
+                    const category = draft.categories[categoryID];
+                    const refIndex = category.notes.findIndex((ref) => ref.id === noteID);
+                    if (refIndex > -1) {
+                        category.notes.splice(refIndex, 1);
+                    }
+                });
+            });
+        },
+
+        // removeMultiNotesFromSubCategory deletes all the notes from a subCategory
+        // If a note exists elsewhere it will have its location updated
+        // If it does not exist elsewhere it will be deleted
+        // The note refs are also removed from the subcategory notes list
+        removeMultiNotesFromSubCategory(state, action: PayloadAction<{ subCategoryID: string; noteIDs: string[] }>) {
+            return produce(state, (draft) => {
+                const subCategoryID = action.payload.subCategoryID;
+
+                const notesToDelete = action.payload.noteIDs;
+                notesToDelete.forEach((noteID) => {
+                    const note = draft.notes[noteID];
+                    if (note.locations.length > 1) {
+                        const locationIndex = note.locations.findIndex((loc) => loc[1] === subCategoryID);
+                        if (locationIndex > -1) {
+                            note.locations.splice(locationIndex, 1);
+                        }
+                    } else {
+                        delete draft.notes[noteID];
+                    }
+
+                    // remove noteRef from subcategory
+                    const subCategory = draft.subCategories[subCategoryID];
+                    const refIndex = subCategory.notes.findIndex((ref) => ref.id === noteID);
+                    if (refIndex > -1) {
+                        subCategory.notes.splice(refIndex, 1);
+                    }
+                });
+            });
+        },
+
         // deleteCategory completely removes a category.
         // Any notes in the category or its sub categories will be deleted unless they exist in other categories
         // If the notes do exist then their location is updated accordingly
@@ -1037,6 +1097,8 @@ export const {
     updateSubCategorySilently,
     setSubtleMessage,
     closeOverlayAndSetSubtleMessage,
+    removeMultiNotesFromCategory,
+    removeMultiNotesFromSubCategory,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;
