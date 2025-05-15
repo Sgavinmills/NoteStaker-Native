@@ -9,14 +9,23 @@ import NoteTile from "./NoteTile";
 import { AppDispatch } from "../redux/store/store";
 import { getEmptyOverlay } from "../utilFuncs/utilFuncs";
 import { updateMenuOverlay } from "../redux/slice";
+import { LongPressedConfig } from "../types";
 
 interface TileProps {
     setIsSearch: React.Dispatch<React.SetStateAction<boolean>>;
     searchText: string;
     focusInput: () => void;
+    longPressActive: LongPressedConfig;
+    setLongPressActive: React.Dispatch<React.SetStateAction<LongPressedConfig>>;
 }
 
-const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focusInput }) => {
+const SearchCategoryTile: React.FC<TileProps> = ({
+    searchText,
+    setIsSearch,
+    focusInput,
+    longPressActive,
+    setLongPressActive,
+}) => {
     const notes = useSelector((state: RootState) => state.memory.notes);
     const showSecure = useSelector((state: RootState) => state.memory.canShowSecure.homeScreen);
     const dispatch = useDispatch<AppDispatch>();
@@ -70,8 +79,8 @@ const SearchCategoryTile: React.FC<TileProps> = ({ searchText, setIsSearch, focu
             key={item}
             subCategoryIndex={10000}
             isSearchTile={true}
-            moving={""}
-            setMoving={setDummy}
+            longPressActive={longPressActive}
+            setLongPressActive={setLongPressActive}
         />
     );
 

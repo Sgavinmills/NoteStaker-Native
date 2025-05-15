@@ -314,6 +314,7 @@ const notesSlice = createSlice({
         // If a note exists elsewhere it will have its location updated
         // If it does not exist elsewhere it will be deleted
         // The note refs are also removed from the category notes list
+        // if category is reminders then notifications will be cancelled too
         removeMultiNotesFromCategory(state, action: PayloadAction<{ categoryID: string; noteIDs: string[] }>) {
             return produce(state, (draft) => {
                 const categoryID = action.payload.categoryID;
@@ -321,6 +322,13 @@ const notesSlice = createSlice({
                 const notesToDelete = action.payload.noteIDs;
                 notesToDelete.forEach((noteID) => {
                     const note = draft.notes[noteID];
+
+                    if (categoryID === reminderID) {
+                        cancelNotification(note.notificationID);
+                        note.notificationID = "";
+                        note.notificationTime = "";
+                    }
+
                     if (note.locations.length > 1) {
                         const locationIndex = note.locations.findIndex((loc) => loc[0] === categoryID);
                         if (locationIndex > -1) {

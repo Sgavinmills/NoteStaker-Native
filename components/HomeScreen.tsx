@@ -227,7 +227,13 @@ const HomeScreen: React.FC = () => {
                         </TouchableOpacity>
                     </View>
                     {isSearch ? (
-                        <SearchCategoryTile searchText={searchText} setIsSearch={setIsSearch} focusInput={focusInput} />
+                        <SearchCategoryTile
+                            searchText={searchText}
+                            setIsSearch={setIsSearch}
+                            focusInput={focusInput}
+                            longPressActive={longPressActive}
+                            setLongPressActive={setLongPressActive}
+                        />
                     ) : (
                         <FlatList
                             keyboardShouldPersistTaps={"handled"}
