@@ -524,11 +524,13 @@ const NoteTile: React.FC<TileProps> = ({
     const deleteMultiNotesFromSubCat = () => {
         dispatch(removeMultiNotesFromSubCategory({ subCategoryID, noteIDs: longPressActive.multiSelectedNotes }));
         setLongPressActive(getEmptyLongPressedConfig());
+        setDeleteModalVisible(false);
     };
 
     const deleteMultiNotesFromCat = () => {
         dispatch(removeMultiNotesFromCategory({ categoryID, noteIDs: longPressActive.multiSelectedNotes }));
         setLongPressActive(getEmptyLongPressedConfig());
+        setDeleteModalVisible(false);
     };
 
     return (

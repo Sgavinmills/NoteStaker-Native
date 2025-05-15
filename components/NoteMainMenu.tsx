@@ -163,7 +163,7 @@ const NoteMainMenu: React.FC<TileProps> = ({}) => {
                         <FontAwesome name="star" style={menuOverlayStyles.icons} />
                         <Text style={menuOverlayStyles.text}>Mark as high priority</Text>
                     </TouchableOpacity>
-                    {category.id !== reminderID && (
+                    {category?.id !== reminderID && (
                         <>
                             {!overlay.menuData.isSearchTile && (
                                 <TouchableOpacity
@@ -187,7 +187,7 @@ const NoteMainMenu: React.FC<TileProps> = ({}) => {
                         <FontAwesome name="times" style={[menuOverlayStyles.icons, menuOverlayStyles.crossIcon]} />
                         <Text style={menuOverlayStyles.text}>Delete note</Text>
                     </TouchableOpacity>
-                    {category.id === reminderID && (
+                    {category?.id === reminderID && (
                         <TouchableOpacity style={menuOverlayStyles.menuItemContainer} onPress={handleEditReminder}>
                             <FontAwesome name="clock-o" style={[menuOverlayStyles.icons]} />
                             <Text style={menuOverlayStyles.text}>Edit reminder time</Text>

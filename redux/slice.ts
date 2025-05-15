@@ -578,7 +578,8 @@ const notesSlice = createSlice({
                 const { subCategoryID, categoryID, noteID } = action.payload;
                 const subCategory = draft.subCategories[subCategoryID];
                 const note = draft.notes[noteID];
-                subCategory.notes.push({ id: noteID, isSecure: note.isSecureNote });
+                // subCategory.notes.push({ id: noteID, isSecure: note.isSecureNote });
+                subCategory.notes.splice(0, 0, { id: noteID, isSecure: note.isSecureNote });
                 note.locations.push([categoryID, subCategoryID]);
             });
         },
@@ -591,7 +592,8 @@ const notesSlice = createSlice({
                 const { categoryID, noteID } = action.payload;
                 const category = draft.categories[categoryID];
                 const note = draft.notes[noteID];
-                category.notes.push({ id: noteID, isSecure: note.isSecureNote });
+                // category.notes.push({ id: noteID, isSecure: note.isSecureNote });
+                category.notes.splice(0, 0, { id: noteID, isSecure: note.isSecureNote });
                 note.locations.push([categoryID, ""]);
             });
         },
